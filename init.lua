@@ -109,82 +109,86 @@ function LoadSettings()
 	end
 end
 
+local resetWindow = false
+
 function DrawButtons()
     if not cetopen or settings.Current.mywindowhidden == true then
         return
     end
-    ImGui.SetNextWindowPos(10, 250, ImGuiCond.FirstUseEver)
-    ImGui.SetNextWindowSize(308, 898, ImGuiCond.FirstUseEver)
+    if resetWindow then
+        ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(312, 1100, ImGuiCond.Always)
+        resetWindow = false
+    end
     if ImGui.Begin('Nova City', true) then
+        --[[ if ImGui.Button('Reset GUI', 290, 30) then
+            resetWindow = true
+        end ]]
         if ImGui.BeginTabBar("Nova Tabs") then
             if ImGui.BeginTabItem("Weather") then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
 				for i, category in ipairs(categories) do
 					ImGui.Text(category)
-					local count = 0
-					for _, state in ipairs(weatherStates) do
-						local weatherState = state[1]
-						local localization = state[2]
-						local category = state[3]
-						if category == i then
-							count = count + 1
-						end
-					end
+					local buttonWidth = 140
+					local windowWidth = ImGui.GetWindowWidth()
+					local buttonsPerRow = math.floor(windowWidth / buttonWidth)
 					local buttonCount = 0
 					for _, state in ipairs(weatherStates) do
 						local weatherState = state[1]
 						local localization = state[2]
 						local category = state[3]
 						if category == i then
-							if ImGui.Button(localization, 140, 30) then
+							if ImGui.Button(localization, buttonWidth, 30) then
 								Game.GetWeatherSystem():SetWeather(weatherState, 10, 0)
 								settings.Current.weatherState = weatherState
 								Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 							end
-							
 							buttonCount = buttonCount + 1
-							if buttonCount % 2 == 1 and buttonCount ~= count then
+							if buttonCount % buttonsPerRow ~= 0 then
 								ImGui.SameLine()
 							end
 						end
 					end
+					if buttonCount % buttonsPerRow ~= 0 then
+						ImGui.NewLine()  -- Force a new line only if the last button is not on a new line
+					end
 				end
 				
 				ImGui.Dummy(0, 10)
-				ImGui.Separator()
-				ImGui.Text("Weather Control:")
+                ImGui.Separator()
+                ImGui.Text("Weather Control:")
 
-				if ImGui.Button('Reset Weather', 290, 30) then
-					Game.GetWeatherSystem():ResetWeather(true)
-					settings.Current.weatherState = 'None'
-					settings.Current.nativeWeather = 1
-					Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
-				end
-				
-				ui.tooltip("Reset any manually selected states and returns \nthe weather to its default weather cycles, \n\nWeather will continue to advance naturally.")
+                if ImGui.Button('Reset Weather', 290, 30) then
+                    Game.GetWeatherSystem():ResetWeather(true)
+                    settings.Current.weatherState = 'None'
+                    settings.Current.nativeWeather = 1
+                    Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+                end
+                
+                ui.tooltip("Reset any manually selected states and returns \nthe weather to its default weather cycles, \n\nWeather will continue to advance naturally.")
 
-				local selectedWeatherState = settings.Current.weatherState
-				if selectedWeatherState == 'None' then
-					selectedWeatherState = 'Default Cycles'
-				else
-					selectedWeatherState = 'Locked State'
-				end
-				ImGui.Text('Mode:  ' .. selectedWeatherState)
-				ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
+                local selectedWeatherState = settings.Current.weatherState
+                if selectedWeatherState == 'None' then
+                    selectedWeatherState = 'Default Cycles'
+                else
+                    selectedWeatherState = 'Locked State'
+                end
+                ImGui.Text('Mode:  ' .. selectedWeatherState)
+                ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
 
-				ImGui.Text('State:')
-				ImGui.SameLine()
+                ImGui.Text('State:')
+                ImGui.SameLine()
 
-				local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-				for _, state in ipairs(weatherStates) do
-					if state[1] == currentWeatherState then
-						currentWeatherState = state[2]
-						break
-					end
-				end
-				ImGui.Text(currentWeatherState)
+                local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+                for _, state in ipairs(weatherStates) do
+                    if state[1] == currentWeatherState then
+                        currentWeatherState = state[2]
+                        break
+                    end
+                end
+                ImGui.Text(currentWeatherState)
 
-				ImGui.EndTabItem()
+                ImGui.EndTabItem()
 			end
 
 			if ImGui.BeginTabItem("Toggles") then
@@ -432,6 +436,13 @@ function DrawButtons()
 
 
 				ImGui.EndTabItem()
+			end
+
+			if ImGui.BeginTabItem("Misc") then
+				if ImGui.Button('Reset GUI', 290, 30) then
+					resetWindow = true
+				end
+				ui.tooltip("Reset GUI to default position and size.")
 			end
 
 			ImGui.EndTabBar()
