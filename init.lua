@@ -115,6 +115,46 @@ end
 -- Flag to indicate if the window position and size should be reset
 local resetWindow = false
 
+local currentWeatherState = nil
+
+-- Create a mapping from weather state IDs to localized names
+local weatherStateNames = {}
+for _, weatherState in ipairs(weatherStates) do
+    local id, localization = table.unpack(weatherState)
+    weatherStateNames[id] = localization
+end
+
+function ShowWarningMessage(message)
+    local text = SimpleScreenMessage.new()
+    text.duration = 1.0
+    text.message = message
+    text.isInstant = true
+    text.isShown = true
+    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(text), true)
+end
+
+function ShowNotificationMessage(message)
+    local text = SimpleScreenMessage.new()
+    text.duration = 4.0
+    text.message = message
+    text.isInstant = true
+    text.isShown = true
+    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
+end
+
+registerForEvent("onUpdate", function()
+    if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+    local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+    if newWeatherState ~= currentWeatherState then
+        currentWeatherState = newWeatherState
+        -- Use the mapping to get the localized name
+        local localizedState = weatherStateNames[currentWeatherState]
+        local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+        ShowWarningMessage(messageText)
+        ShowNotificationMessage(messageText)
+    end
+end)
+
 function DrawButtons()
     if not cetopen or settings.Current.mywindowhidden == true then
         return
