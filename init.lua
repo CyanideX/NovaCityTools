@@ -48,46 +48,47 @@ local ui = {
 }
 
 local weatherStates = {
-    {'24h_weather_sunny', 'Sunny', 1},
-    {'24h_weather_light_clouds', 'Light Clouds', 1},
-    {'24h_weather_cloudy', 'Clouds', 1},
-    {'24h_weather_heavy_clouds', 'Heavy Clouds', 1},
-    {'24h_weather_fog', 'Fog', 1},
-    {'24h_weather_rain', 'Rain', 1},
-    {'24h_weather_toxic_rain', 'Toxic Rain', 1},
-    {'24h_weather_pollution', 'Pollution', 1},
-    {'24h_weather_sandstorm', 'Sandstorm', 1},
-    {'q302_light_rain', 'Rain (Quest)', 1},
-    {'24h_weather_fog_dense', 'Dense Fog', 2},
-    {'24h_weather_dew', 'Dew', 2},
-    {'24h_weather_haze', 'Haze', 2},
-    {'24h_weather_haze_heavy', 'Heavy Haze', 2},
-    {'24h_weather_haze_pollution', 'Haze Pollution', 2},
-    {'24h_weather_smog', 'Smog', 2},
-    {'24h_weather_clear', 'Sunny (Clear)', 2},
-    {'24h_weather_drizzle', 'Drizzle', 2},
-    {'24h_weather_windy', 'Windy', 2},
-    {'24h_weather_sunny_windy', 'Sunny Windy', 2},
-    {'24h_weather_storm', 'Rain (Storm)', 2},
-    {'24h_weather_overcast', 'Overcast', 2},
-    {'24h_weather_drought', 'Drought', 2},
-    {'24h_weather_humid', 'Drought (Humid)', 2},
-    {'24h_weather_fog_wet', 'Wet Fog', 3},
-    {'24h_weather_fog_heavy', 'Heavy Fog', 3},
-    {'24h_weather_sunny_sunset', 'Sunset', 3},
-    {'24h_weather_drizzle_light', 'Light Drizzle', 3},
-    {'24h_weather_light_rain', 'Light Rain', 3},
-    {'24h_weather_rain_alt_1', 'Rain (Alt 1)', 3},
-    {'24h_weather_rain_alt_2', 'Rain (Alt 2)', 3},
-    {'24h_weather_mist', 'Fog (Mist)', 3},
-    {'24h_weather_courier_clouds', 'Dense Clouds', 3},
-    {'24h_weather_downpour', 'Rain (Downpour)', 4},
-    {'24h_weather_drizzle_heavy', 'Heavy Drizzle', 4},
-    {'24h_weather_distant_rain', 'Rain (Distant)', 4},
-    {'24h_weather_sky_softbox', 'Softbox', 5},
-    {'24h_weather_blackout', 'Blackout', 5},
-    {'24h_weather_showroom', 'Showroom', 5}
+    {'24h_weather_sunny', 'Sunny', 1, false},
+    {'24h_weather_light_clouds', 'Light Clouds', 1, false},
+    {'24h_weather_cloudy', 'Clouds', 1, false},
+    {'24h_weather_heavy_clouds', 'Heavy Clouds', 1, false},
+    {'24h_weather_fog', 'Fog', 1, false},
+    {'24h_weather_rain', 'Rain', 1, true},
+    {'24h_weather_toxic_rain', 'Toxic Rain', 1, true},
+    {'24h_weather_pollution', 'Pollution', 1, false},
+    {'24h_weather_sandstorm', 'Sandstorm', 1, true},
+    {'q302_light_rain', 'Rain (Quest)', 1, true},
+    {'24h_weather_fog_dense', 'Dense Fog', 2, false},
+    {'24h_weather_dew', 'Dew', 2, true},
+    {'24h_weather_haze', 'Haze', 2, false},
+    {'24h_weather_haze_heavy', 'Heavy Haze', 2, false},
+    {'24h_weather_haze_pollution', 'Haze Pollution', 2, false},
+    {'24h_weather_smog', 'Smog', 2, false},
+    {'24h_weather_clear', 'Sunny (Clear)', 2, true},
+    {'24h_weather_drizzle', 'Drizzle', 2, true},
+    {'24h_weather_windy', 'Windy', 2, true},
+    {'24h_weather_sunny_windy', 'Sunny Windy', 2, true},
+    {'24h_weather_storm', 'Rain (Storm)', 2, true},
+    {'24h_weather_overcast', 'Overcast', 2, false},
+    {'24h_weather_drought', 'Drought', 2, false},
+    {'24h_weather_humid', 'Drought (Humid)', 2, false},
+    {'24h_weather_fog_wet', 'Wet Fog', 3, true},
+    {'24h_weather_fog_heavy', 'Heavy Fog', 3, false},
+    {'24h_weather_sunny_sunset', 'Sunset', 3, false},
+    {'24h_weather_drizzle_light', 'Light Drizzle', 3, true},
+    {'24h_weather_light_rain', 'Light Rain', 3, true},
+    {'24h_weather_rain_alt_1', 'Rain (Alt 1)', 3, true},
+    {'24h_weather_rain_alt_2', 'Rain (Alt 2)', 3, true},
+    {'24h_weather_mist', 'Fog (Mist)', 3, true},
+    {'24h_weather_courier_clouds', 'Dense Clouds', 3, false},
+    {'24h_weather_downpour', 'Rain (Downpour)', 4, true},
+    {'24h_weather_drizzle_heavy', 'Heavy Drizzle', 4, true},
+    {'24h_weather_distant_rain', 'Rain (Distant)', 4, true},
+    {'24h_weather_sky_softbox', 'Softbox', 5, false},
+    {'24h_weather_blackout', 'Blackout', 5, false},
+    {'24h_weather_showroom', 'Showroom', 5, false}
 }
+
 
 
 function SaveSettings()
@@ -137,18 +138,26 @@ function DrawButtons()
 						local weatherState = state[1]
 						local localization = state[2]
 						local category = state[3]
+						local enableDLSSDPT = state[4]  -- Get the DLSSDSeparateParticleColor flag
 						if category == i then
-							if ImGui.Button(localization, buttonWidth, 30) then
-								Game.GetWeatherSystem():SetWeather(weatherState, 10, 0)
+							if ImGui.Button(localization, 140, 30) then
+								Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 								settings.Current.weatherState = weatherState
 								Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+					
+								-- Set the DLSSDSeparateParticleColor option based on the flag
+								GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
+								toggleDLSSDPT = enableDLSSDPT  -- Update the checkbox status
+								SaveSettings()
 							end
+							
 							buttonCount = buttonCount + 1
 							if buttonCount % buttonsPerRow ~= 0 then
 								ImGui.SameLine()
 							end
 						end
 					end
+					
 					if buttonCount % buttonsPerRow ~= 0 then
 						ImGui.NewLine()  -- Force a new line only if the last button is not on a new line
 					end
@@ -159,11 +168,16 @@ function DrawButtons()
                 ImGui.Text("Weather Control:")
 
                 if ImGui.Button('Reset Weather', 290, 30) then
-                    Game.GetWeatherSystem():ResetWeather(true)
-                    settings.Current.weatherState = 'None'
-                    settings.Current.nativeWeather = 1
-                    Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
-                end
+					Game.GetWeatherSystem():ResetWeather(true)
+					settings.Current.weatherState = 'None'
+					settings.Current.nativeWeather = 1
+					Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+					-- Enable DLSSDSeparateParticleColor
+					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+					toggleDLSSDPT = true  -- Update the checkbox status
+					SaveSettings()
+				end
+				
                 
                 ui.tooltip("Reset any manually selected states and returns \nthe weather to its default weather cycles, \n\nWeather will continue to advance naturally.")
 
@@ -443,6 +457,18 @@ function DrawButtons()
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
+
+				--[[ if ImGui.Button('Font Size -', 140, 30) then
+					local io = ImGui.GetIO()
+					io.FontGlobalScale = io.FontGlobalScale / 1.1  -- Decrease font size by 10%
+				end
+				ui.tooltip("Currently not working.")
+				ImGui.SameLine()
+				if ImGui.Button('Font Size +', 140, 30) then
+					local io = ImGui.GetIO()
+					io.FontGlobalScale = io.FontGlobalScale * 1.1  -- Increase font size by 10%
+				end
+				ui.tooltip("Currently not working.") ]]
 			end
 
 			ImGui.EndTabBar()
