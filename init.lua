@@ -497,9 +497,10 @@ function DrawButtons()
 				
 			
 				-- Add a new section for weather transition duration presets
-				ImGui.Dummy(0, 10)
-				ImGui.Text("Weather Transition Duration")
+				ImGui.Dummy(0, 2)
+				ImGui.Text("Weather Transition Duration:         "  .. tostring(settings.Current.transitionDuration) .. "s")
 				ImGui.Separator()
+				ImGui.Dummy(0, 1)
 			
 				-- Define the preset durations
 				local durations = {0, 5, 10, 15, 30}
@@ -515,17 +516,52 @@ function DrawButtons()
 				end
 
 				-- Display the currently selected transition duration
-				ImGui.NewLine()
-				ImGui.Text("Current Duration: " .. tostring(settings.Current.transitionDuration) .. "s")
+				-- ImGui.Dummy(0, 2)
+				-- ImGui.Text("Current Duration: " .. tostring(settings.Current.transitionDuration) .. "s")
 
-				ImGui.Dummy(0, 10)
+				
+				
+
+				-- Convert the current game time to minutes past midnight
+				local currentTime = Game.GetTimeSystem():GetGameTime()
+				local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
+				-- Convert the total minutes to a 12-hour format
+				local hours12 = math.floor(totalMinutes / 60) % 12
+				if hours12 == 0 then hours12 = 12 end  -- Convert 0 to 12
+				local mins = totalMinutes % 60
+				local amPm = math.floor(totalMinutes / 60) < 12 and 'AM' or 'PM'
+				local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
+
+				ImGui.PushItemWidth(185)
+				ImGui.Dummy(0, 50)
+				ImGui.Text('Adjust Game Time:                ' .. timeLabel)
+				ImGui.Separator()
+				ImGui.Dummy(0, 1)
+
+				-- Set the width of the slider to the width of the window minus the padding
+				local windowWidth = ImGui.GetWindowWidth()
+				local padding = 22  -- Adjust this value as needed
+				ImGui.PushItemWidth(windowWidth - padding)
+
+				-- Create a slider for the total minutes
+				totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
+				if changed then
+					-- Convert the total minutes back to hours and minutes
+					local hours = math.floor(totalMinutes / 60)
+					local mins = totalMinutes % 60
+
+					-- Set the game time
+					Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+				end
+
+				ImGui.Dummy(0, 50)
+				ImGui.Separator()
+				ImGui.Dummy(0, 1)
 				if ImGui.Button('Reset GUI', 290, 30) then
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
 			end
-			
-
 			ImGui.EndTabBar()
 		end
 		ImGui.End()
