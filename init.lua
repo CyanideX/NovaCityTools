@@ -25,6 +25,10 @@ local stopVehicleSpawning = true
 local vehicleSpawning = true
 local crowdSpawning = true
 
+local timeSliderWindowOpen = false
+local timeSliderWindowPos = {x = 100, y = 100}
+local timeSliderWindowSize = {width = 300, height = 200}
+
 local settings =
 {
 	Current = {
@@ -504,7 +508,7 @@ function DrawButtons()
 			
 				-- Define the preset durations
 				local durations = {0, 5, 10, 15, 30}
-			
+
 				-- Create a button for each preset duration
 				for _, duration in ipairs(durations) do
 					if ImGui.Button(tostring(duration) .. 's', 49, 30) then
@@ -518,9 +522,6 @@ function DrawButtons()
 				-- Display the currently selected transition duration
 				-- ImGui.Dummy(0, 2)
 				-- ImGui.Text("Current Duration: " .. tostring(settings.Current.transitionDuration) .. "s")
-
-				
-				
 
 				-- Convert the current game time to minutes past midnight
 				local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -553,6 +554,9 @@ function DrawButtons()
 					-- Set the game time
 					Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
 				end
+				if ImGui.Button('Toggle Time Slider Window', 290, 30) then
+					timeSliderWindowOpen = not timeSliderWindowOpen
+				end
 
 				ImGui.Dummy(0, 50)
 				ImGui.Separator()
@@ -561,6 +565,7 @@ function DrawButtons()
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
+
 			end
 			ImGui.EndTabBar()
 		end
@@ -589,19 +594,52 @@ function DrawWindowHider()
 	end
 end
 
+function DrawTimeSliderWindow()
+    if not cetopen or not timeSliderWindowOpen then
+        return
+    end
+    ImGui.SetNextWindowPos(timeSliderWindowPos.x, timeSliderWindowPos.y, ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(timeSliderWindowSize.width, timeSliderWindowSize.height, ImGuiCond.FirstUseEver)
+    if ImGui.Begin('Time Slider', true, ImGuiWindowFlags.Resizable) then
+        local currentTime = Game.GetTimeSystem():GetGameTime()
+        local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
+        local hours12 = math.floor(totalMinutes / 60) % 12
+        if hours12 == 0 then hours12 = 12 end
+        local mins = totalMinutes % 60
+        local amPm = math.floor(totalMinutes / 60) < 12 and 'AM' or 'PM'
+        local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
+
+        ImGui.Text('Adjust Game Time:')
+        ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
+        ImGui.Text(timeLabel)
+        ImGui.Separator()
+        ImGui.PushItemWidth(-1)
+        totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
+        if changed then
+            local hours = math.floor(totalMinutes / 60)
+            local mins = totalMinutes % 60
+            Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+        end
+        ImGui.PopItemWidth()
+        ImGui.End()
+    end
+end
+
+
 registerForEvent("onInit", function()
 	LoadSettings()
 end)
 
 registerForEvent('onDraw', function()
-	DrawButtons()
-	local WindowHiderTool = GetMod("WindowHiderTool")
-	if WindowHiderTool and cetopen then
-		DrawWindowHider()
-	elseif not WindowHiderTool then
-		settings.Current.mywindowhidden = false
-		SaveSettings()
-	end
+    DrawButtons()
+    DrawTimeSliderWindow()
+    local WindowHiderTool = GetMod("WindowHiderTool")
+    if WindowHiderTool and cetopen then
+        DrawWindowHider()
+    elseif not WindowHiderTool then
+        settings.Current.mywindowhidden = false
+        SaveSettings()
+    end
 end)
 
 registerForEvent('onOverlayOpen', function()
