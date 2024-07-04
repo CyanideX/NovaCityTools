@@ -30,10 +30,12 @@ local settings =
 	Current = {
 		weatherState = 'None',
 		mywindowhidden = false,
+		transitionDuration = 0,  -- Default value
 	},
 	Default = {
 		weatherState = 'None',
 		mywindowhidden = false,
+		transitionDuration = 0,  -- Default value
 	}
 }
 
@@ -88,8 +90,6 @@ local weatherStates = {
     {'24h_weather_blackout', 'Blackout', 5, false},
     {'24h_weather_showroom', 'Showroom', 5, false}
 }
-
-
 
 function SaveSettings()
 	local file = io.open('settings.json', 'w')
@@ -453,23 +453,37 @@ function DrawButtons()
 			end
 
 			if ImGui.BeginTabItem("Misc") then
+				
+			
+				-- Add a new section for weather transition duration presets
+				ImGui.Dummy(0, 10)
+				ImGui.Text("Weather Transition Duration")
+				ImGui.Separator()
+			
+				-- Define the preset durations
+				local durations = {0, 5, 10, 15, 30}
+			
+				-- Create a button for each preset duration
+				for _, duration in ipairs(durations) do
+					if ImGui.Button(tostring(duration) .. 's', 49, 30) then
+						settings.Current.transitionDuration = duration
+						settings.transitionTime = duration  -- Update transitionTime
+						SaveSettings()
+					end
+					ImGui.SameLine()
+				end
+
+				-- Display the currently selected transition duration
+				ImGui.NewLine()
+				ImGui.Text("Current Duration: " .. tostring(settings.Current.transitionDuration) .. "s")
+
+				ImGui.Dummy(0, 10)
 				if ImGui.Button('Reset GUI', 290, 30) then
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
-
-				--[[ if ImGui.Button('Font Size -', 140, 30) then
-					local io = ImGui.GetIO()
-					io.FontGlobalScale = io.FontGlobalScale / 1.1  -- Decrease font size by 10%
-				end
-				ui.tooltip("Currently not working.")
-				ImGui.SameLine()
-				if ImGui.Button('Font Size +', 140, 30) then
-					local io = ImGui.GetIO()
-					io.FontGlobalScale = io.FontGlobalScale * 1.1  -- Increase font size by 10%
-				end
-				ui.tooltip("Currently not working.") ]]
 			end
+			
 
 			ImGui.EndTabBar()
 		end
