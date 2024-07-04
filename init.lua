@@ -49,7 +49,9 @@ local ui = {
     end
 }
 
+-- Define the weather states
 local weatherStates = {
+	-- Each state is defined by a list containing the state's ID, name, category, and a flag indicating if it enables DLSSDSeparateParticleColor
     {'24h_weather_sunny', 'Sunny', 1, false},
     {'24h_weather_light_clouds', 'Light Clouds', 1, false},
     {'24h_weather_cloudy', 'Clouds', 1, false},
@@ -110,21 +112,20 @@ function LoadSettings()
 	end
 end
 
+-- Flag to indicate if the window position and size should be reset
 local resetWindow = false
 
 function DrawButtons()
     if not cetopen or settings.Current.mywindowhidden == true then
         return
     end
+	-- If the reset flag is set, reset the window position and size
     if resetWindow then
         ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
         ImGui.SetNextWindowSize(312, 1100, ImGuiCond.Always)
         resetWindow = false
     end
     if ImGui.Begin('Nova City', true) then
-        --[[ if ImGui.Button('Reset GUI', 290, 30) then
-            resetWindow = true
-        end ]]
         if ImGui.BeginTabBar("Nova Tabs") then
             if ImGui.BeginTabItem("Weather") then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
@@ -316,7 +317,7 @@ function DrawButtons()
 					GameOptions.SetBool("Rendering","DLSSDSeparateParticleColor", toggleDLSSDPT)
 					SaveSettings()
 				end
-				ui.tooltip("DLSSD Separate Particle Color - Disabling will reduce \n distant shimmering but also makes other paricles invisible \n like rain and debris particles. Disabling is not recommended.")
+				ui.tooltip("DLSSD Separate Particle Color - Disabling will reduce \ndistant shimmering but also makes other paricles invisible \nlike rain and debris particles. Disabling is not recommended. \nManually selecting a weather state will enable or disable \nthis as needed.")
 
 				bloom, changed = ImGui.Checkbox('Bloom', bloom)
 				if changed then
