@@ -47,133 +47,48 @@ local ui = {
     end
 }
 
-local stateSelections = {
-	'None',
-	'24h_weather_sunny',
-    '24h_weather_light_clouds',
-    '24h_weather_cloudy',
-    '24h_weather_heavy_clouds',
-    '24h_weather_fog',
-    '24h_weather_rain',
-    '24h_weather_toxic_rain',
-    '24h_weather_pollution',
-    '24h_weather_sandstorm',
-    'q302_light_rain',
-    '24h_weather_fog_dense',
-    '24h_weather_dew',
-    '24h_weather_haze',
-    '24h_weather_haze_heavy',
-    '24h_weather_haze_pollution',
-    '24h_weather_smog',
-    '24h_weather_clear',
-    '24h_weather_drizzle',
-    '24h_weather_windy',
-    '24h_weather_sunny_windy',
-    '24h_weather_storm',
-    '24h_weather_overcast',
-    '24h_weather_drought',
-    '24h_weather_humid',
-    '24h_weather_fog_wet',
-    '24h_weather_fog_heavy',
-    '24h_weather_sunny_sunset',
-    '24h_weather_drizzle_light',
-    '24h_weather_light_rain',
-    '24h_weather_rain_alt_1',
-    '24h_weather_rain_alt_2',
-    '24h_weather_mist',
-    '24h_weather_sky_softbox',
-    '24h_weather_blackout',
-    '24h_weather_downpour',
-    '24h_weather_drizzle_heavy',
-	'24h_weather_distant_rain',
-	'24h_weather_courier_clouds',
-	'24h_weather_showroom'
+local weatherStates = {
+    {'24h_weather_sunny', 'Sunny', 1},
+    {'24h_weather_light_clouds', 'Light Clouds', 1},
+    {'24h_weather_cloudy', 'Clouds', 1},
+    {'24h_weather_heavy_clouds', 'Heavy Clouds', 1},
+    {'24h_weather_fog', 'Fog', 1},
+    {'24h_weather_rain', 'Rain', 1},
+    {'24h_weather_toxic_rain', 'Toxic Rain', 1},
+    {'24h_weather_pollution', 'Pollution', 1},
+    {'24h_weather_sandstorm', 'Sandstorm', 1},
+    {'q302_light_rain', 'Rain (Quest)', 1},
+    {'24h_weather_fog_dense', 'Dense Fog', 2},
+    {'24h_weather_dew', 'Dew', 2},
+    {'24h_weather_haze', 'Haze', 2},
+    {'24h_weather_haze_heavy', 'Heavy Haze', 2},
+    {'24h_weather_haze_pollution', 'Haze Pollution', 2},
+    {'24h_weather_smog', 'Smog', 2},
+    {'24h_weather_clear', 'Sunny (Clear)', 2},
+    {'24h_weather_drizzle', 'Drizzle', 2},
+    {'24h_weather_windy', 'Windy', 2},
+    {'24h_weather_sunny_windy', 'Sunny Windy', 2},
+    {'24h_weather_storm', 'Rain (Storm)', 2},
+    {'24h_weather_overcast', 'Overcast', 2},
+    {'24h_weather_drought', 'Drought', 2},
+    {'24h_weather_humid', 'Drought (Humid)', 2},
+    {'24h_weather_fog_wet', 'Wet Fog', 3},
+    {'24h_weather_fog_heavy', 'Heavy Fog', 3},
+    {'24h_weather_sunny_sunset', 'Sunset', 3},
+    {'24h_weather_drizzle_light', 'Light Drizzle', 3},
+    {'24h_weather_light_rain', 'Light Rain', 3},
+    {'24h_weather_rain_alt_1', 'Rain (Alt 1)', 3},
+    {'24h_weather_rain_alt_2', 'Rain (Alt 2)', 3},
+    {'24h_weather_mist', 'Fog (Mist)', 3},
+    {'24h_weather_courier_clouds', 'Dense Clouds', 3},
+    {'24h_weather_downpour', 'Rain (Downpour)', 4},
+    {'24h_weather_drizzle_heavy', 'Heavy Drizzle', 4},
+    {'24h_weather_distant_rain', 'Rain (Distant)', 4},
+    {'24h_weather_sky_softbox', 'Softbox', 5},
+    {'24h_weather_blackout', 'Blackout', 5},
+    {'24h_weather_showroom', 'Showroom', 5}
 }
 
-local weatherStateLocalization = {
-    ['None'] = 'Default Cycles', 
-    ['24h_weather_sunny'] = 'Sunny', 
-    ['24h_weather_light_clouds'] = 'Light Clouds', 
-    ['24h_weather_cloudy'] = 'Cloudy', 
-    ['24h_weather_heavy_clouds'] = 'Heavy Clouds', 
-    ['24h_weather_fog'] = 'Fog', 
-    ['24h_weather_rain'] = 'Rain', 
-    ['24h_weather_toxic_rain'] = 'Toxic Rain', 
-    ['24h_weather_pollution'] = 'Pollution', 
-    ['24h_weather_sandstorm'] = 'Sandstorm', 
-    ['q302_light_rain'] = 'Light Rain', 
-    ['24h_weather_fog_dense'] = 'Dense Fog', 
-    ['24h_weather_dew'] = 'Dew', 
-    ['24h_weather_haze'] = 'Haze', 
-    ['24h_weather_haze_heavy'] = 'Heavy Haze', 
-    ['24h_weather_haze_pollution'] = 'Haze Pollution', 
-    ['24h_weather_smog'] = 'Smog', 
-    ['24h_weather_clear'] = 'Clear', 
-    ['24h_weather_drizzle'] = 'Drizzle', 
-    ['24h_weather_windy'] = 'Windy', 
-    ['24h_weather_sunny_windy'] = 'Sunny Windy', 
-    ['24h_weather_storm'] = 'Storm', 
-    ['24h_weather_overcast'] = 'Overcast', 
-    ['24h_weather_drought'] = 'Drought', 
-    ['24h_weather_humid'] = 'Humid', 
-    ['24h_weather_fog_wet'] = 'Wet Fog', 
-    ['24h_weather_fog_heavy'] = 'Heavy Fog', 
-    ['24h_weather_sunny_sunset'] = 'Sunset', 
-    ['24h_weather_drizzle_light'] = 'Light Drizzle', 
-    ['24h_weather_light_rain'] = 'Light Rain', 
-    ['24h_weather_rain_alt_1'] = 'Rain (Alt 1)', 
-    ['24h_weather_rain_alt_2'] = 'Rain (Alt 2)', 
-    ['24h_weather_mist'] = 'Mist', 
-    ['24h_weather_sky_softbox'] = 'Sky Softbox', 
-    ['24h_weather_blackout'] = 'Blackout', 
-    ['24h_weather_downpour'] = 'Downpour', 
-    ['24h_weather_drizzle_heavy'] = 'Heavy Drizzle', 
-    ['24h_weather_distant_rain'] = 'Distant Storm',
-    ['24h_weather_courier_clouds'] = 'Dense Clouds',
-    ['24h_weather_showroom'] = 'Showroom'
-}
-
-local buttonLocalization = {
-    ['24h_weather_sunny'] = 'Sunny', 
-    ['24h_weather_light_clouds'] = 'Clouds (Light)', 
-    ['24h_weather_cloudy'] = 'Clouds', 
-    ['24h_weather_heavy_clouds'] = 'Clouds (Heavy)', 
-    ['24h_weather_fog'] = 'Fog', 
-    ['24h_weather_rain'] = 'Rain', 
-    ['24h_weather_toxic_rain'] = 'Rain (Toxic)', 
-    ['24h_weather_pollution'] = 'Pollution', 
-    ['24h_weather_sandstorm'] = 'Sandstorm', 
-    ['q302_light_rain'] = 'Rain (Quest)', 
-    ['24h_weather_fog_dense'] = 'Fog (Dense)', 
-    ['24h_weather_dew'] = 'Dew', 
-    ['24h_weather_haze'] = 'Haze', 
-    ['24h_weather_haze_heavy'] = 'Haze (Heavy)', 
-    ['24h_weather_haze_pollution'] = 'Haze (Pollution)', 
-    ['24h_weather_smog'] = 'Smog', 
-    ['24h_weather_clear'] = 'Sunny (Clear)', 
-    ['24h_weather_drizzle'] = 'Drizzle', 
-    ['24h_weather_windy'] = 'Windy', 
-    ['24h_weather_sunny_windy'] = 'Sunny (Windy)', 
-    ['24h_weather_storm'] = 'Rain (Storm)', 
-    ['24h_weather_overcast'] = 'Clouds (Overcast)', 
-    ['24h_weather_drought'] = 'Drought', 
-    ['24h_weather_humid'] = 'Drought (Humid)', 
-    ['24h_weather_fog_wet'] = 'Fog (Wet)', 
-    ['24h_weather_fog_heavy'] = 'Fog (Heav)', 
-    ['24h_weather_sunny_sunset'] = 'Sunny (Sunset)', 
-    ['24h_weather_drizzle_light'] = 'Drizzle (Light)', 
-    ['24h_weather_light_rain'] = 'Rain (Light)', 
-    ['24h_weather_rain_alt_1'] = 'Rain (Alt 1)', 
-    ['24h_weather_rain_alt_2'] = 'Rain (Alt 2)', 
-    ['24h_weather_mist'] = 'Fog (Mist)', 
-    ['24h_weather_sky_softbox'] = 'Creative (Softbox)', 
-    ['24h_weather_blackout'] = 'Creative (Blackout)', 
-    ['24h_weather_downpour'] = 'Rain (Downpour)', 
-    ['24h_weather_drizzle_heavy'] = 'Drizzle (Heavy)', 
-    ['24h_weather_distant_rain'] = 'Rain (Distant)',
-    ['24h_weather_courier_clouds'] = 'Clouds (Desnse)',
-    ['24h_weather_showroom'] = 'Creative (Showroom)'
-}
 
 function SaveSettings()
 	local file = io.open('settings.json', 'w')
@@ -195,210 +110,57 @@ function LoadSettings()
 end
 
 function DrawButtons()
-	if not cetopen or settings.Current.mywindowhidden == true then
-		return
-	end
-	ImGui.SetNextWindowPos(10, 250, ImGuiCond.FirstUseEver)
-	ImGui.SetNextWindowSize(308, 898, ImGuiCond.FirstUseEver)
-	if ImGui.Begin('Nova City Tools', true) then
-		if ImGui.BeginTabBar("Nova Tabs") then
-			if ImGui.BeginTabItem("Weather") then
-				ImGui.Text('Vanilla States')
-				if ImGui.Button('Sunny', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_sunny', 10, 0)
-					settings.Current.weatherState = '24h_weather_sunny'
-					Game.GetPlayer():SetWarningMessage('SUNNY!')
+    if not cetopen or settings.Current.mywindowhidden == true then
+        return
+    end
+    ImGui.SetNextWindowPos(10, 250, ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(308, 898, ImGuiCond.FirstUseEver)
+    if ImGui.Begin('Nova City', true) then
+        if ImGui.BeginTabBar("Nova Tabs") then
+            if ImGui.BeginTabItem("Weather") then
+                local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
+				for i, category in ipairs(categories) do
+					ImGui.Text(category)
+					local count = 0
+					for _, state in ipairs(weatherStates) do
+						local weatherState = state[1]
+						local localization = state[2]
+						local category = state[3]
+						if category == i then
+							count = count + 1
+						end
+					end
+					local buttonCount = 0
+					for _, state in ipairs(weatherStates) do
+						local weatherState = state[1]
+						local localization = state[2]
+						local category = state[3]
+						if category == i then
+							if ImGui.Button(localization, 140, 30) then
+								Game.GetWeatherSystem():SetWeather(weatherState, 10, 0)
+								settings.Current.weatherState = weatherState
+								Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+							end
+							
+							buttonCount = buttonCount + 1
+							if buttonCount % 2 == 1 and buttonCount ~= count then
+								ImGui.SameLine()
+							end
+						end
+					end
 				end
-				ImGui.SameLine()
-				if ImGui.Button('Light Clouds', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_light_clouds', 10, 0)
-					settings.Current.weatherState = '24h_weather_light_clouds'
-				end
-				if ImGui.Button('Cloudy', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_cloudy', 10, 0)
-					settings.Current.weatherState = '24h_weather_cloudy'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Heavy Clouds', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_heavy_clouds', 10, 0)
-					settings.Current.weatherState = '24h_weather_heavy_clouds'
-				end
-				if ImGui.Button('Fog', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_fog', 10, 0)
-					settings.Current.weatherState = '24h_weather_fog'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Rain', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_rain', 10, 0)
-					settings.Current.weatherState = '24h_weather_rain'
-				end
-				if ImGui.Button('Toxic Rain', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_toxic_rain', 10, 0)
-					settings.Current.weatherState = '24h_weather_toxic_rain'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Pollution', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_pollution', 10, 0)
-					settings.Current.weatherState = '24h_weather_pollution'
-				end
-				if ImGui.Button('Sandstorm', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_sandstorm', 10, 0)
-					settings.Current.weatherState = '24h_weather_sandstorm'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Quest Rain', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('q302_light_rain', 10, 0)
-					settings.Current.weatherState = 'q302_light_rain'
-				end
-				ImGui.Text('Nova Beta States')
-				if ImGui.Button('Dense Fog', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_fog_dense', 10, 0)
-					settings.Current.weatherState = '24h_weather_fog_dense'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Dew', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_dew', 10, 0)
-					settings.Current.weatherState = '24h_weather_dew'
-				end
-				if ImGui.Button('Haze', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_haze', 10, 0)
-					settings.Current.weatherState = '24h_weather_haze'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Heavy Haze', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_haze_heavy', 10, 0)
-					settings.Current.weatherState = '24h_weather_haze_heavy'
-				end
-				if ImGui.Button('Haze Poll.', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_haze_pollution', 10, 0)
-					settings.Current.weatherState = '24h_weather_haze_pollution'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Smog', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_smog', 10, 0)
-					settings.Current.weatherState = '24h_weather_smog'
-				end
-				if ImGui.Button('Clear', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_clear', 10, 0)
-					settings.Current.weatherState = '24h_weather_clear'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Drizzle', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_drizzle', 10, 0)
-					settings.Current.weatherState = '24h_weather_drizzle'
-				end
-				if ImGui.Button('Windy', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_windy', 10, 0)
-					settings.Current.weatherState = '24h_weather_windy'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Sunny Windy', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_sunny_windy', 10, 0)
-					settings.Current.weatherState = '24h_weather_sunny_windy'
-				end
-				if ImGui.Button('Storm', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_storm', 10, 0)
-					settings.Current.weatherState = '24h_weather_storm'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Overcast', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_overcast', 10, 0)
-					settings.Current.weatherState = '24h_weather_overcast'
-				end
-				if ImGui.Button('Drought', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_drought', 10, 0)
-					settings.Current.weatherState = '24h_weather_drought'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Humid', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_humid', 10, 0)
-					settings.Current.weatherState = '24h_weather_humid'
-				end
-				ImGui.Text('Nova Alpha States')
-				if ImGui.Button('Fog Wet', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_fog_wet', 10, 0)
-					settings.Current.weatherState = '24h_weather_fog_wet'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Heavy Fog', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_fog_heavy', 10, 0)
-					settings.Current.weatherState = '24h_weather_fog_heavy'
-				end
-				if ImGui.Button('Sunny Wind', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_sunny_windy', 10, 0)
-					settings.Current.weatherState = '24h_weather_sunny_windy'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Sunset', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_sunny_sunset', 10, 0)
-					settings.Current.weatherState = '24h_weather_sunny_sunset'
-				end
-				if ImGui.Button('Drizzle Light', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_drizzle_light', 10, 0)
-					settings.Current.weatherState = '24h_weather_drizzle_light'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Light Rain', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_light_rain', 10, 0)
-					settings.Current.weatherState = '24h_weather_light_rain'
-				end
-				if ImGui.Button('Rain Alt 1', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_rain_alt_1', 10, 0)
-					settings.Current.weatherState = '24h_weather_rain_alt_1'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Rain Alt 2', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_rain_alt_2', 10, 0)
-					settings.Current.weatherState = '24h_weather_rain_alt_2'
-				end
-				if ImGui.Button('Mist', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_mist', 10, 0)
-					settings.Current.weatherState = '24h_weather_mist'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Dense Clouds', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_courier_clouds', 10, 0)
-					settings.Current.weatherState = '24h_weather_courier_clouds'
-				end
-				ImGui.Text('Nova Concept States')
-				if ImGui.Button('Distant Storm', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_distant_rain', 10, 0)
-					settings.Current.weatherState = '24h_weather_distant_rain'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Drizzle Heavy', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_drizzle_heavy', 10, 0)
-					settings.Current.weatherState = '24h_weather_drizzle_heavy'
-				end
-				if ImGui.Button('Downpour', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_downpour', 10, 0)
-					settings.Current.weatherState = '24h_weather_downpour'
-				end
-				ImGui.Text('Creative')
-				if ImGui.Button('Sky Softbox', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_sky_softbox', 10, 0)
-					settings.Current.weatherState = '24h_weather_sky_softbox'
-				end
-				ImGui.SameLine()
-				if ImGui.Button('Blackout', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_blackout', 10, 0)
-					settings.Current.weatherState = '24h_weather_blackout'
-				end
-
-				if ImGui.Button('Showroom', 140, 30) then
-					Game.GetWeatherSystem():SetWeather('24h_weather_showroom', 10, 0)
-					settings.Current.weatherState = '24h_weather_showroom'
-				end
-
+				
 				ImGui.Dummy(0, 10)
 				ImGui.Separator()
-				ImGui.Text("Weather Control:")				
+				ImGui.Text("Weather Control:")
 
 				if ImGui.Button('Reset Weather', 290, 30) then
 					Game.GetWeatherSystem():ResetWeather(true)
 					settings.Current.weatherState = 'None'
 					settings.Current.nativeWeather = 1
+					Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
 				end
+				
 				ui.tooltip("Reset any manually selected states and returns \nthe weather to its default weather cycles, \n\nWeather will continue to advance naturally.")
 
 				local selectedWeatherState = settings.Current.weatherState
@@ -412,10 +174,15 @@ function DrawButtons()
 
 				ImGui.Text('State:')
 				ImGui.SameLine()
-				
+
 				local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-				local localizedCurrentWeatherState = weatherStateLocalization[currentWeatherState] or currentWeatherState
-				ImGui.Text(localizedCurrentWeatherState)
+				for _, state in ipairs(weatherStates) do
+					if state[1] == currentWeatherState then
+						currentWeatherState = state[2]
+						break
+					end
+				end
+				ImGui.Text(currentWeatherState)
 
 				ImGui.EndTabItem()
 			end
