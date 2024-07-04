@@ -25,8 +25,6 @@ local stopVehicleSpawning = true
 local vehicleSpawning = true
 local crowdSpawning = true
 
-local hasResetOrForced = false
-
 local settings =
 {
 	Current = {
@@ -152,12 +150,8 @@ registerForEvent("onUpdate", function()
         -- Use the mapping to get the localized name
         local localizedState = weatherStateNames[currentWeatherState]
         local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-        if not hasResetOrForced then
-            ShowWarningMessage(messageText)
-            ShowNotificationMessage(messageText)
-	else
-	    hasResetOrForced = false
-	end
+        ShowWarningMessage(messageText)
+        ShowNotificationMessage(messageText)
     end
 end)
 
@@ -196,7 +190,6 @@ function DrawButtons()
 								GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 								toggleDLSSDPT = enableDLSSDPT  -- Update the checkbox status
 								SaveSettings()
-							        hasResetOrForced = true
 							end
 							
 							buttonCount = buttonCount + 1
@@ -224,7 +217,6 @@ function DrawButtons()
 					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 					toggleDLSSDPT = true  -- Update the checkbox status
 					SaveSettings()
-					hasResetOrForced = true
 				end
 				
                 
