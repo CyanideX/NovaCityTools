@@ -26,8 +26,6 @@ local vehicleSpawning = true
 local crowdSpawning = true
 
 local timeSliderWindowOpen = false
-local timeSliderWindowPos = {x = 100, y = 100}
-local timeSliderWindowSize = {width = 300, height = 200}
 
 local settings =
 {
@@ -598,9 +596,9 @@ function DrawTimeSliderWindow()
     if not cetopen or not timeSliderWindowOpen then
         return
     end
-    ImGui.SetNextWindowPos(timeSliderWindowPos.x, timeSliderWindowPos.y, ImGuiCond.FirstUseEver)
-    ImGui.SetNextWindowSize(timeSliderWindowSize.width, timeSliderWindowSize.height, ImGuiCond.FirstUseEver)
-    if ImGui.Begin('Time Slider', true, ImGuiWindowFlags.Resizable) then
+    ImGui.SetNextWindowPos(100, 100, ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSize(320, 120, ImGuiCond.FirstUseEver)
+    if ImGui.Begin('Time Slider') then
         local currentTime = Game.GetTimeSystem():GetGameTime()
         local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
         local hours12 = math.floor(totalMinutes / 60) % 12
@@ -613,26 +611,26 @@ function DrawTimeSliderWindow()
         ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
         ImGui.Text(timeLabel)
         ImGui.Separator()
-        ImGui.PushItemWidth(-1)
+        ImGui.SetNextItemWidth(-1)
         totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
         if changed then
             local hours = math.floor(totalMinutes / 60)
             local mins = totalMinutes % 60
             Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
         end
-        ImGui.PopItemWidth()
         ImGui.End()
     end
 end
-
 
 registerForEvent("onInit", function()
 	LoadSettings()
 end)
 
 registerForEvent('onDraw', function()
+    if timeSliderWindowOpen == true then
+        DrawTimeSliderWindow()
+    end
     DrawButtons()
-    DrawTimeSliderWindow()
     local WindowHiderTool = GetMod("WindowHiderTool")
     if WindowHiderTool and cetopen then
         DrawWindowHider()
