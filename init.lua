@@ -1,4 +1,5 @@
 local Cron = require("Cron")
+local version = "1.7.0"
 local cetopen = false
 local toggleNRD = false
 local toggleDLSSDPT = true
@@ -24,7 +25,6 @@ local graphics = true
 local stopVehicleSpawning = true
 local vehicleSpawning = true
 local crowdSpawning = true
-
 local timeSliderWindowOpen = false
 
 local settings =
@@ -161,13 +161,13 @@ function DrawButtons()
     if not cetopen or settings.Current.mywindowhidden == true then
         return
     end
-	-- If the reset flag is set, reset the window position and size
+    -- If the reset flag is set, reset the window position and size
     if resetWindow then
         ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
         ImGui.SetNextWindowSize(312, 1100, ImGuiCond.Always)
         resetWindow = false
     end
-    if ImGui.Begin('Nova City', true) then
+    if ImGui.Begin('Nova City Tools - v' .. version, true) then
         if ImGui.BeginTabBar("Nova Tabs") then
             if ImGui.BeginTabItem("Weather") then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
