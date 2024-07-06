@@ -26,6 +26,7 @@ local stopVehicleSpawning = true
 local vehicleSpawning = true
 local crowdSpawning = true
 local timeSliderWindowOpen = false
+local hasResetOrForced = false
 
 local settings =
 {
@@ -38,6 +39,18 @@ local settings =
 		weatherState = 'None',
 		mywindowhidden = false,
 		transitionDuration = 0,  -- Default value
+	}
+}
+
+local settings2 =
+{
+	Current = {
+		warningMessages = true,
+		notificationMessages = true,
+	},
+	Default = {
+		warningMessages = true,
+		notificationMessages = true,
 	}
 }
 
@@ -114,6 +127,25 @@ function LoadSettings()
 	end
 end
 
+function SaveSettings2()
+	local file = io.open('settings2.json', 'w')
+	if file then
+		file:write(json.encode(settings2.Current))
+		file:close()
+	end
+end
+
+function LoadSettings2()
+	local file = io.open('settings2.json', 'r')
+	if file then
+		local content = file:read('*all')
+		file:close()
+		settings2.Current = json.decode(content)
+	elseif not file then
+		return
+	end
+end
+
 -- Flag to indicate if the window position and size should be reset
 local resetWindow = false
 
@@ -127,6 +159,7 @@ for _, weatherState in ipairs(weatherStates) do
 end
 
 function ShowWarningMessage(message)
+    if settings2.Current.warningMessages == false then return end
     local text = SimpleScreenMessage.new()
     text.duration = 1.0
     text.message = message
@@ -136,6 +169,7 @@ function ShowWarningMessage(message)
 end
 
 function ShowNotificationMessage(message)
+    if settings2.Current.warningMessages == false then return end
     local text = SimpleScreenMessage.new()
     text.duration = 4.0
     text.message = message
@@ -145,6 +179,12 @@ function ShowNotificationMessage(message)
 end
 
 registerForEvent("onUpdate", function()
+    Cron.Update(delta)
+    if hasResetOrForced == true then
+        local resetorforcedtimer = Cron.After(0.5, function()
+            hasResetOrForced = false
+        end)
+    end
     if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
     local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
     if newWeatherState ~= currentWeatherState then
@@ -152,8 +192,14 @@ registerForEvent("onUpdate", function()
         -- Use the mapping to get the localized name
         local localizedState = weatherStateNames[currentWeatherState]
         local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-        ShowWarningMessage(messageText)
-        ShowNotificationMessage(messageText)
+        if hasResetOrForced == false then
+            if resetorforcedtimer then
+                Cron.Halt(resetorforcedtimer)
+                resetorforcedtimer = nil
+            end
+            ShowWarningMessage(messageText)
+            ShowNotificationMessage(messageText)
+        end
     end
 end)
 
@@ -545,12 +591,15 @@ function DrawButtons()
 				-- Create a slider for the total minutes
 				totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
 				if changed then
-					-- Convert the total minutes back to hours and minutes
-					local hours = math.floor(totalMinutes / 60)
-					local mins = totalMinutes % 60
-
-					-- Set the game time
-					Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+                                    if totalMinutes < 1439 then
+                                        local hours = math.floor(totalMinutes / 60)
+                                        local mins = totalMinutes % 60
+                                        Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+                                    else
+                                        local hours = math.floor(totalMinutes / 60)
+                                        local mins = totalMinutes % 60 + 1
+                                        Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+                                    end
 				end
 				if ImGui.Button('Toggle Time Slider Window', 290, 30) then
 					timeSliderWindowOpen = not timeSliderWindowOpen
@@ -559,6 +608,20 @@ function DrawButtons()
 				ImGui.Dummy(0, 50)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
+
+                                settings2.Current.warningMessages, changed = ImGui.Checkbox('Show warning messages for weather changes', settings2.Current.warningMessages)
+                                if changed then
+                                    SaveSettings2()
+                                end
+                                settings2.Current.notificationMessages, changed = ImGui.Checkbox('Show notification messages for weather changes', settings2.Current.notificationMessages)
+                                if changed then
+                                    SaveSettings2()
+                                end
+
+				ImGui.Dummy(0, 50)
+				ImGui.Separator()
+				ImGui.Dummy(0, 1)
+
 				if ImGui.Button('Reset GUI', 290, 30) then
 					resetWindow = true
 				end
@@ -614,9 +677,15 @@ function DrawTimeSliderWindow()
         ImGui.SetNextItemWidth(-1)
         totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
         if changed then
-            local hours = math.floor(totalMinutes / 60)
-            local mins = totalMinutes % 60
-            Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+            if totalMinutes < 1439 then
+                local hours = math.floor(totalMinutes / 60)
+                local mins = totalMinutes % 60
+                Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+            else
+                local hours = math.floor(totalMinutes / 60)
+                local mins = totalMinutes % 60 + 1
+                Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+            end
         end
         ImGui.End()
     end
@@ -624,6 +693,7 @@ end
 
 registerForEvent("onInit", function()
 	LoadSettings()
+	LoadSettings2()
 end)
 
 registerForEvent('onDraw', function()
@@ -642,6 +712,7 @@ end)
 
 registerForEvent('onOverlayOpen', function()
 	LoadSettings()
+	LoadSettings2()
 	cetopen = true
 end)
 
