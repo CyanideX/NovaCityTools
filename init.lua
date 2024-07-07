@@ -27,6 +27,7 @@ local vehicleSpawning = true
 local crowdSpawning = true
 local timeSliderWindowOpen = false
 local hasResetOrForced = false
+local weatherReset = false
 
 local settings =
 {
@@ -169,7 +170,7 @@ function ShowWarningMessage(message)
 end
 
 function ShowNotificationMessage(message)
-    if settings2.Current.warningMessages == false then return end
+    if settings2.Current.notificationMessages == false then return end
     local text = SimpleScreenMessage.new()
     text.duration = 4.0
     text.message = message
@@ -179,28 +180,34 @@ function ShowNotificationMessage(message)
 end
 
 registerForEvent("onUpdate", function()
-    Cron.Update(delta)
-    if hasResetOrForced == true then
-        local resetorforcedtimer = Cron.After(0.5, function()
-            hasResetOrForced = false
-        end)
-    end
-    if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-    local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-    if newWeatherState ~= currentWeatherState then
-        currentWeatherState = newWeatherState
-        -- Use the mapping to get the localized name
-        local localizedState = weatherStateNames[currentWeatherState]
-        local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-        if hasResetOrForced == false then
-            if resetorforcedtimer then
-                Cron.Halt(resetorforcedtimer)
-                resetorforcedtimer = nil
-            end
-            ShowWarningMessage(messageText)
-            ShowNotificationMessage(messageText)
-        end
-    end
+	Cron.Update(delta)
+	if hasResetOrForced == true then
+		local resetorforcedtimer = Cron.After(0.5, function()
+			hasResetOrForced = false
+		end)
+	end
+	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+	if newWeatherState ~= currentWeatherState then
+		currentWeatherState = newWeatherState
+		local localizedState = weatherStateNames[currentWeatherState]
+		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+		-- Only send weather change notifications if the weather has not been reset
+		if hasResetOrForced == false and not weatherReset then
+			if resetorforcedtimer then
+				Cron.Halt(resetorforcedtimer)
+				resetorforcedtimer = nil
+			end
+			if settings2.Current.warningMessages then
+				ShowWarningMessage(messageText)
+			end
+			if settings2.Current.notificationMessages then
+				ShowNotificationMessage(messageText)
+			end
+		end
+		-- Reset the weather reset flag after the weather change notification has been skipped
+		weatherReset = false
+	end
 end)
 
 function DrawButtons()
@@ -261,14 +268,15 @@ function DrawButtons()
 					settings.Current.weatherState = 'None'
 					settings.Current.nativeWeather = 1
 					Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
-					-- Enable DLSSDSeparateParticleColor
 					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-					toggleDLSSDPT = true  -- Update the checkbox status
+					toggleDLSSDPT = true
 					SaveSettings()
+					-- Set the weather reset flag to true when weather is reset
+					weatherReset = true
 				end
 				
                 
-                ui.tooltip("Reset any manually selected states and returns \nthe weather to its default weather cycles, \n\nWeather will continue to advance naturally.")
+                ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
 
                 local selectedWeatherState = settings.Current.weatherState
                 if selectedWeatherState == 'None' then
@@ -605,18 +613,21 @@ function DrawButtons()
 					timeSliderWindowOpen = not timeSliderWindowOpen
 				end
 
-				ImGui.Dummy(0, 50)
+				ImGui.Dummy(0, 15)
+				ImGui.Text('Weather state notifications:')
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-                                settings2.Current.warningMessages, changed = ImGui.Checkbox('Show warning messages for weather changes', settings2.Current.warningMessages)
+                                settings2.Current.warningMessages, changed = ImGui.Checkbox('Warning Message', settings2.Current.warningMessages)
                                 if changed then
                                     SaveSettings2()
                                 end
-                                settings2.Current.notificationMessages, changed = ImGui.Checkbox('Show notification messages for weather changes', settings2.Current.notificationMessages)
+								ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
+                                settings2.Current.notificationMessages, changed = ImGui.Checkbox('Notification', settings2.Current.notificationMessages)
                                 if changed then
                                     SaveSettings2()
                                 end
+								ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
 				ImGui.Dummy(0, 50)
 				ImGui.Separator()
