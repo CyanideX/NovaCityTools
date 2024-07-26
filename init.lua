@@ -34,12 +34,14 @@ local settings =
 	Current = {
 		weatherState = 'None',
 		mywindowhidden = false,
-		transitionDuration = 0,  -- Default value
+		transitionDuration = 0,
+		timeSliderWindowOpen = false,
 	},
 	Default = {
 		weatherState = 'None',
 		mywindowhidden = false,
-		transitionDuration = 0,  -- Default value
+		transitionDuration = 0,
+		timeSliderWindowOpen = false,
 	}
 }
 
@@ -123,6 +125,7 @@ function LoadSettings()
 		local content = file:read('*all')
 		file:close()
 		settings.Current = json.decode(content)
+		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen  -- Load the saved state
 	elseif not file then
 		return
 	end
@@ -611,6 +614,8 @@ function DrawButtons()
 				end
 				if ImGui.Button('Toggle Time Slider Window', 290, 30) then
 					timeSliderWindowOpen = not timeSliderWindowOpen
+					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+					SaveSettings()
 				end
 
 				ImGui.Dummy(0, 15)
