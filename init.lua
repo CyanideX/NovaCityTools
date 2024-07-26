@@ -150,6 +150,46 @@ function LoadSettings2()
 	end
 end
 
+function DrawWeatherControl()
+    ImGui.Dummy(0, 10)
+    ImGui.Separator()
+    ImGui.Text("Weather Control:")
+
+    if ImGui.Button('Reset Weather', 290, 30) then
+        Game.GetWeatherSystem():ResetWeather(true)
+        settings.Current.weatherState = 'None'
+        settings.Current.nativeWeather = 1
+        Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+        GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+        toggleDLSSDPT = true
+        SaveSettings()
+        weatherReset = true
+    end
+
+    ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
+
+    local selectedWeatherState = settings.Current.weatherState
+    if selectedWeatherState == 'None' then
+        selectedWeatherState = 'Default Cycles'
+    else
+        selectedWeatherState = 'Locked State'
+    end
+    ImGui.Text('Mode:  ' .. selectedWeatherState)
+    ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
+
+    ImGui.Text('State:')
+    ImGui.SameLine()
+
+    local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+    for _, state in ipairs(weatherStates) do
+        if state[1] == currentWeatherState then
+            currentWeatherState = state[2]
+            break
+        end
+    end
+    ImGui.Text(currentWeatherState)
+end
+
 -- Flag to indicate if the window position and size should be reset
 local resetWindow = false
 
@@ -217,7 +257,6 @@ function DrawButtons()
     if not cetopen or settings.Current.mywindowhidden == true then
         return
     end
-    -- If the reset flag is set, reset the window position and size
     if resetWindow then
         ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
         ImGui.SetNextWindowSize(312, 1100, ImGuiCond.Always)
@@ -225,6 +264,11 @@ function DrawButtons()
     end
     if ImGui.Begin('Nova City Tools - v' .. version, true) then
         if ImGui.BeginTabBar("Nova Tabs") then
+            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
+            if ImGui.Button(">", 30, 29) then
+				timeSliderWindowOpen = not timeSliderWindowOpen
+			end
+			ui.tooltip("Toggles the time slider window. \nWill get a fancy clock icon in here eventually.")
             if ImGui.BeginTabItem("Weather") then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
 				for i, category in ipairs(categories) do
@@ -262,47 +306,8 @@ function DrawButtons()
 					end
 				end
 				
-				ImGui.Dummy(0, 10)
-                ImGui.Separator()
-                ImGui.Text("Weather Control:")
-
-                if ImGui.Button('Reset Weather', 290, 30) then
-					Game.GetWeatherSystem():ResetWeather(true)
-					settings.Current.weatherState = 'None'
-					settings.Current.nativeWeather = 1
-					Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
-					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-					toggleDLSSDPT = true
-					SaveSettings()
-					-- Set the weather reset flag to true when weather is reset
-					weatherReset = true
-				end
-				
-                
-                ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
-
-                local selectedWeatherState = settings.Current.weatherState
-                if selectedWeatherState == 'None' then
-                    selectedWeatherState = 'Default Cycles'
-                else
-                    selectedWeatherState = 'Locked State'
-                end
-                ImGui.Text('Mode:  ' .. selectedWeatherState)
-                ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
-
-                ImGui.Text('State:')
-                ImGui.SameLine()
-
-                local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-                for _, state in ipairs(weatherStates) do
-                    if state[1] == currentWeatherState then
-                        currentWeatherState = state[2]
-                        break
-                    end
-                end
-                ImGui.Text(currentWeatherState)
-
-                ImGui.EndTabItem()
+				DrawWeatherControl()
+				ImGui.EndTabItem()
 			end
 
 			if ImGui.BeginTabItem("Toggles") then
@@ -501,7 +506,6 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles Resampled Importance Sampling.")
 
-
 				ImGui.Dummy(0, 10)
 				ImGui.Text("Utility:")
 				ImGui.Separator()
@@ -547,20 +551,18 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Coming soon.")
-
-
+				--DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
 
 			if ImGui.BeginTabItem("Misc") then
 				
-			
 				-- Add a new section for weather transition duration presets
 				ImGui.Dummy(0, 2)
 				ImGui.Text("Weather Transition Duration:         "  .. tostring(settings.Current.transitionDuration) .. "s")
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
-			
+				
 				-- Define the preset durations
 				local durations = {0, 5, 10, 15, 30}
 
@@ -573,10 +575,6 @@ function DrawButtons()
 					end
 					ImGui.SameLine()
 				end
-
-				-- Display the currently selected transition duration
-				-- ImGui.Dummy(0, 2)
-				-- ImGui.Text("Current Duration: " .. tostring(settings.Current.transitionDuration) .. "s")
 
 				-- Convert the current game time to minutes past midnight
 				local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -642,7 +640,8 @@ function DrawButtons()
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
-
+				--DrawWeatherControl()
+				ImGui.EndTabItem()
 			end
 			ImGui.EndTabBar()
 		end
