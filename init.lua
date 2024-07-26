@@ -267,6 +267,8 @@ function DrawButtons()
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
             if ImGui.Button(">", 30, 29) then
 				timeSliderWindowOpen = not timeSliderWindowOpen
+				settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+				SaveSettings()
 			end
 			ui.tooltip("Toggles the time slider window. \nWill get a fancy clock icon in here eventually.")
             if ImGui.BeginTabItem("Weather") then
