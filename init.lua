@@ -704,9 +704,27 @@ function DrawTimeSliderWindow()
                 Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
             end
         end
+
+        -- Add hour buttons
+        ImGui.Separator()
+        ImGui.Text('Set Hour:')
+        local buttonWidth = ImGui.GetWindowContentRegionWidth() / 12 - 9.5
+        for i = 1, 24 do
+            if ImGui.Button(tostring(i), buttonWidth, 30) then
+                local hours = i
+                local mins = 0
+                Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+            end
+            if i % 12 ~= 0 then
+                ImGui.SameLine()
+            end
+        end
+
         ImGui.End()
     end
 end
+
+
 
 registerForEvent("onInit", function()
 	LoadSettings()
