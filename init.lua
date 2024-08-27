@@ -1,6 +1,6 @@
 local Cron = require("Cron")
 local version = "1.7.0"
-local cetopen = false
+local cetOpen = false
 local toggleNRD = false
 local toggleDLSSDPT = true
 local toggleFog = true
@@ -28,18 +28,20 @@ local crowdSpawning = true
 local timeSliderWindowOpen = false
 local hasResetOrForced = false
 local weatherReset = false
+local resetWindow = false
+local currentWeatherState = nil
+
+local weatherStateNames = {}
 
 local settings =
 {
 	Current = {
 		weatherState = 'None',
-		mywindowhidden = false,
 		transitionDuration = 0,
 		timeSliderWindowOpen = false,
 	},
 	Default = {
 		weatherState = 'None',
-		mywindowhidden = false,
 		transitionDuration = 0,
 		timeSliderWindowOpen = false,
 	}
@@ -93,7 +95,7 @@ local weatherStates = {
     {'24h_weather_storm', 'Rain (Storm)', 2, true},
     {'24h_weather_overcast', 'Overcast', 2, false},
     {'24h_weather_drought', 'Drought', 2, false},
-    {'24h_weather_humid', 'Drought (Humid)', 2, false},
+    {'24h_weather_humid', 'Humid', 2, false},
     {'24h_weather_fog_wet', 'Wet Fog', 3, true},
     {'24h_weather_fog_heavy', 'Heavy Fog', 3, false},
     {'24h_weather_sunny_sunset', 'Sunset', 3, false},
@@ -103,52 +105,13 @@ local weatherStates = {
     {'24h_weather_rain_alt_2', 'Rain (Alt 2)', 3, true},
     {'24h_weather_mist', 'Fog (Mist)', 3, true},
     {'24h_weather_courier_clouds', 'Dense Clouds', 3, false},
-    {'24h_weather_downpour', 'Rain (Downpour)', 4, true},
+    {'24h_weather_downpour', 'Downpour', 4, true},
     {'24h_weather_drizzle_heavy', 'Heavy Drizzle', 4, true},
     {'24h_weather_distant_rain', 'Rain (Distant)', 4, true},
     {'24h_weather_sky_softbox', 'Softbox', 5, false},
     {'24h_weather_blackout', 'Blackout', 5, false},
     {'24h_weather_showroom', 'Showroom', 5, false}
 }
-
-function SaveSettings()
-	local file = io.open('settings.json', 'w')
-	if file then
-		file:write(json.encode(settings.Current))
-		file:close()
-	end
-end
-
-function LoadSettings()
-	local file = io.open('settings.json', 'r')
-	if file then
-		local content = file:read('*all')
-		file:close()
-		settings.Current = json.decode(content)
-		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen  -- Load the saved state
-	elseif not file then
-		return
-	end
-end
-
-function SaveSettings2()
-	local file = io.open('settings2.json', 'w')
-	if file then
-		file:write(json.encode(settings2.Current))
-		file:close()
-	end
-end
-
-function LoadSettings2()
-	local file = io.open('settings2.json', 'r')
-	if file then
-		local content = file:read('*all')
-		file:close()
-		settings2.Current = json.decode(content)
-	elseif not file then
-		return
-	end
-end
 
 function DrawWeatherControl()
     ImGui.Dummy(0, 10)
@@ -190,37 +153,7 @@ function DrawWeatherControl()
     ImGui.Text(currentWeatherState)
 end
 
--- Flag to indicate if the window position and size should be reset
-local resetWindow = false
 
-local currentWeatherState = nil
-
--- Create a mapping from weather state IDs to localized names
-local weatherStateNames = {}
-for _, weatherState in ipairs(weatherStates) do
-    local id, localization = table.unpack(weatherState)
-    weatherStateNames[id] = localization
-end
-
-function ShowWarningMessage(message)
-    if settings2.Current.warningMessages == false then return end
-    local text = SimpleScreenMessage.new()
-    text.duration = 1.0
-    text.message = message
-    text.isInstant = true
-    text.isShown = true
-    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(text), true)
-end
-
-function ShowNotificationMessage(message)
-    if settings2.Current.notificationMessages == false then return end
-    local text = SimpleScreenMessage.new()
-    text.duration = 4.0
-    text.message = message
-    text.isInstant = true
-    text.isShown = true
-    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
-end
 
 registerForEvent("onUpdate", function()
 	Cron.Update(delta)
@@ -254,24 +187,27 @@ registerForEvent("onUpdate", function()
 end)
 
 function DrawButtons()
-    if not cetopen or settings.Current.mywindowhidden == true then
+    if not cetOpen then
         return
     end
     if resetWindow then
         ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
-        ImGui.SetNextWindowSize(312, 1100, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(312, 1110, ImGuiCond.Always)
         resetWindow = false
     end
     if ImGui.Begin('Nova City Tools - v' .. version, true) then
         if ImGui.BeginTabBar("Nova Tabs") then
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
-            if ImGui.Button(">", 30, 29) then
+            --if ImGui.Button(">", 30, 29) then
+			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
+            if ImGui.Button(IconGlyphs.ClockOutline, 32, 28) then
 				timeSliderWindowOpen = not timeSliderWindowOpen
 				settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 				SaveSettings()
 			end
 			ui.tooltip("Toggles the time slider window. \nWill get a fancy clock icon in here eventually.")
             if ImGui.BeginTabItem("Weather") then
+			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
 				for i, category in ipairs(categories) do
 					ImGui.Text(category)
@@ -449,7 +385,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles lens flare effect.")
 
-				rain, changed = ImGui.Checkbox('SS Rain', rain)
+				local rain, changed = ImGui.Checkbox('SS Rain', rain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles","ScreenSpaceRain", rain)
 					SaveSettings()
@@ -651,29 +587,8 @@ function DrawButtons()
 	end
 end
 
-function DrawWindowHider()
-	if not cetopen then
-		return
-	end
-	if ImGui.Begin("Window Hider Tool") then
-		if ImGui.BeginMenu("TheCyanideX Mods") then
-			if ImGui.Button("Toggle Nova Weather Mod") then
-				if settings.Current.mywindowhidden == true then
-					settings.Current.mywindowhidden = false
-					SaveSettings()
-				elseif settings.Current.mywindowhidden == false then
-					settings.Current.mywindowhidden = true
-					SaveSettings()
-				end
-			end
-			ImGui.EndMenu()
-		end
-		ImGui.End()
-	end
-end
-
 function DrawTimeSliderWindow()
-    if not cetopen or not timeSliderWindowOpen then
+    if not cetOpen or not timeSliderWindowOpen then
         return
     end
     ImGui.SetNextWindowPos(100, 100, ImGuiCond.FirstUseEver)
@@ -724,11 +639,35 @@ function DrawTimeSliderWindow()
     end
 end
 
+function ShowWarningMessage(message)
+    if settings2.Current.warningMessages == false then return end
+    local text = SimpleScreenMessage.new()
+    text.duration = 1.0
+    text.message = message
+    text.isInstant = true
+    text.isShown = true
+    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(text), true)
+end
 
+function ShowNotificationMessage(message)
+    if settings2.Current.notificationMessages == false then return end
+    local text = SimpleScreenMessage.new()
+    text.duration = 4.0
+    text.message = message
+    text.isInstant = true
+    text.isShown = true
+    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
+end
 
 registerForEvent("onInit", function()
 	LoadSettings()
 	LoadSettings2()
+
+	-- Create a mapping from weather state IDs to localized names
+	for _, weatherState in ipairs(weatherStates) do
+		local id, localization = table.unpack(weatherState)
+		weatherStateNames[id] = localization
+	end
 end)
 
 registerForEvent('onDraw', function()
@@ -736,22 +675,54 @@ registerForEvent('onDraw', function()
         DrawTimeSliderWindow()
     end
     DrawButtons()
-    local WindowHiderTool = GetMod("WindowHiderTool")
-    if WindowHiderTool and cetopen then
-        DrawWindowHider()
-    elseif not WindowHiderTool then
-        settings.Current.mywindowhidden = false
-        SaveSettings()
-    end
 end)
 
 registerForEvent('onOverlayOpen', function()
 	LoadSettings()
 	LoadSettings2()
-	cetopen = true
+	cetOpen = true
 end)
 
 registerForEvent('onOverlayClose', function()
-	cetopen = false
+	cetOpen = false
 	SaveSettings()
 end)
+
+function SaveSettings()
+	local file = io.open('settings.json', 'w')
+	if file then
+		file:write(json.encode(settings.Current))
+		file:close()
+	end
+end
+
+function LoadSettings()
+	local file = io.open('settings.json', 'r')
+	if file then
+		local content = file:read('*all')
+		file:close()
+		settings.Current = json.decode(content)
+		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen  -- Load the saved state
+	elseif not file then
+		return
+	end
+end
+
+function SaveSettings2()
+	local file = io.open('settings2.json', 'w')
+	if file then
+		file:write(json.encode(settings2.Current))
+		file:close()
+	end
+end
+
+function LoadSettings2()
+	local file = io.open('settings2.json', 'r')
+	if file then
+		local content = file:read('*all')
+		file:close()
+		settings2.Current = json.decode(content)
+	elseif not file then
+		return
+	end
+end
