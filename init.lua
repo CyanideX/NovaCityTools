@@ -255,13 +255,20 @@ function DrawButtons()
 								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 							end
 							if ImGui.Button(localization, 140, 30) then
-								Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
-								settings.Current.weatherState = weatherState
-								Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
-					
-								-- Set the DLSSDSeparateParticleColor option based on the flag
-								GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
-								toggleDLSSDPT = enableDLSSDPT  -- Update the checkbox status
+								if isActive then
+									Game.GetWeatherSystem():ResetWeather(true)
+									settings.Current.weatherState = 'None'
+									Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+									toggleDLSSDPT = true
+									weatherReset = true
+								else
+									Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
+									settings.Current.weatherState = weatherState
+									Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
+									toggleDLSSDPT = enableDLSSDPT
+								end
 								SaveSettings()
 							end
 							if isActive then
@@ -713,11 +720,22 @@ registerForEvent('onDraw', function()
 end)
 
 registerForEvent('onOverlayOpen', function()
-	LoadSettings()
-	cetOpen = true
+    LoadSettings()
+    cetOpen = true
     width, height = GetDisplayResolution()
     setResolutionPresets(width, height)
+    
+    -- Check the current weather state in game and update the active button
+    local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+    settings.Current.weatherState = currentWeatherState
+    for _, state in ipairs(weatherStates) do
+        if state[1] == currentWeatherState then
+            settings.Current.weatherState = state[1]
+            break
+        end
+    end
 end)
+
 
 registerForEvent('onOverlayClose', function()
 	cetOpen = false
