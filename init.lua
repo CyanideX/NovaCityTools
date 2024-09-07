@@ -39,21 +39,13 @@ local settings =
 		weatherState = 'None',
 		transitionDuration = 0,
 		timeSliderWindowOpen = false,
+		warningMessages = true,
+		notificationMessages = true,
 	},
 	Default = {
 		weatherState = 'None',
 		transitionDuration = 0,
 		timeSliderWindowOpen = false,
-	}
-}
-
-local settings2 =
-{
-	Current = {
-		warningMessages = true,
-		notificationMessages = true,
-	},
-	Default = {
 		warningMessages = true,
 		notificationMessages = true,
 	}
@@ -113,6 +105,40 @@ local weatherStates = {
     {'24h_weather_showroom', 'Showroom', 5, false}
 }
 
+function setResolutionPresets(width, height)
+    local presets = {
+        {3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1, 0.7, 24, 36, 36, 0.7, 1, 6, 300, 33, 12, 6},
+        {2560, 1440, 8, 1, 1, 2, 1, 1, 1, 1, 0.45, 20, 32, 28, 0.85, 1, 8, 310, 29, 10, 4},
+        {1920, 1080, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4},
+        {0, 0, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4},
+    }
+
+    for _, preset in ipairs(presets) do
+        if width >= preset[1] and height >= preset[2] then
+            itemSpacingXValue = preset[3]
+            itemSpacingYValue = preset[4]
+            framePaddingXValue = preset[5]
+            framePaddingYValue = preset[6]
+            glyphFramePaddingXValue = preset[7]
+            glyphFramePaddingYValue = preset[8]
+            glyphItemSpacingXValue = preset[9]
+            glyphItemSpacingYValue = preset[10]
+            glyphAlignYValue = preset[11]
+            invisibleButtonWidth = preset[12]
+            invisibleButtonHeight = preset[13]
+            buttonHeight = preset[14]
+            customFontScale = preset[15]
+            defaultFontScale = preset[16]
+            dummySpacingYValue = preset[17]
+            uiMinWidth = preset[18]
+            buttonPaddingRight = preset[19]
+            searchPaddingXValue = preset[20]
+            searchPaddingYValue = preset[21]
+            break
+        end
+    end
+end
+
 function DrawWeatherControl()
     ImGui.Dummy(0, 10)
     ImGui.Separator()
@@ -153,8 +179,6 @@ function DrawWeatherControl()
     ImGui.Text(currentWeatherState)
 end
 
-
-
 registerForEvent("onUpdate", function()
 	Cron.Update(delta)
 	if hasResetOrForced == true then
@@ -174,10 +198,10 @@ registerForEvent("onUpdate", function()
 				Cron.Halt(resetorforcedtimer)
 				resetorforcedtimer = nil
 			end
-			if settings2.Current.warningMessages then
+			if settings.Current.warningMessages then
 				ShowWarningMessage(messageText)
 			end
-			if settings2.Current.notificationMessages then
+			if settings.Current.notificationMessages then
 				ShowNotificationMessage(messageText)
 			end
 		end
@@ -187,15 +211,19 @@ registerForEvent("onUpdate", function()
 end)
 
 function DrawButtons()
+    -- Check if the CET window is open
     if not cetOpen then
         return
     end
+
+    -- Set window size constraints
+    ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
     if resetWindow then
         ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
         ImGui.SetNextWindowSize(312, 1110, ImGuiCond.Always)
         resetWindow = false
     end
-    if ImGui.Begin('Nova City Tools - v' .. version, true) then
+    if ImGui.Begin('Nova City Tools - v' .. version, true, ImGuiWindowFlags.NoScrollbar) then
         if ImGui.BeginTabBar("Nova Tabs") then
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
             --if ImGui.Button(">", 30, 29) then
@@ -559,14 +587,14 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-                                settings2.Current.warningMessages, changed = ImGui.Checkbox('Warning Message', settings2.Current.warningMessages)
+                                settings.Current.warningMessages, changed = ImGui.Checkbox('Warning Message', settings.Current.warningMessages)
                                 if changed then
-                                    SaveSettings2()
+                                    SaveSettings()
                                 end
 								ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
-                                settings2.Current.notificationMessages, changed = ImGui.Checkbox('Notification', settings2.Current.notificationMessages)
+                                settings.Current.notificationMessages, changed = ImGui.Checkbox('Notification', settings.Current.notificationMessages)
                                 if changed then
-                                    SaveSettings2()
+                                    SaveSettings()
                                 end
 								ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
@@ -640,7 +668,7 @@ function DrawTimeSliderWindow()
 end
 
 function ShowWarningMessage(message)
-    if settings2.Current.warningMessages == false then return end
+    if settings.Current.warningMessages == false then return end
     local text = SimpleScreenMessage.new()
     text.duration = 1.0
     text.message = message
@@ -650,7 +678,7 @@ function ShowWarningMessage(message)
 end
 
 function ShowNotificationMessage(message)
-    if settings2.Current.notificationMessages == false then return end
+    if settings.Current.notificationMessages == false then return end
     local text = SimpleScreenMessage.new()
     text.duration = 4.0
     text.message = message
@@ -661,7 +689,6 @@ end
 
 registerForEvent("onInit", function()
 	LoadSettings()
-	LoadSettings2()
 
 	-- Create a mapping from weather state IDs to localized names
 	for _, weatherState in ipairs(weatherStates) do
@@ -679,8 +706,9 @@ end)
 
 registerForEvent('onOverlayOpen', function()
 	LoadSettings()
-	LoadSettings2()
 	cetOpen = true
+    width, height = GetDisplayResolution()
+    setResolutionPresets(width, height)
 end)
 
 registerForEvent('onOverlayClose', function()
@@ -702,26 +730,7 @@ function LoadSettings()
 		local content = file:read('*all')
 		file:close()
 		settings.Current = json.decode(content)
-		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen  -- Load the saved state
-	elseif not file then
-		return
-	end
-end
-
-function SaveSettings2()
-	local file = io.open('settings2.json', 'w')
-	if file then
-		file:write(json.encode(settings2.Current))
-		file:close()
-	end
-end
-
-function LoadSettings2()
-	local file = io.open('settings2.json', 'r')
-	if file then
-		local content = file:read('*all')
-		file:close()
-		settings2.Current = json.decode(content)
+		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
 	elseif not file then
 		return
 	end
