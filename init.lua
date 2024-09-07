@@ -180,34 +180,36 @@ function DrawWeatherControl()
 end
 
 registerForEvent("onUpdate", function()
-	Cron.Update(delta)
-	if hasResetOrForced == true then
-		local resetorforcedtimer = Cron.After(0.5, function()
-			hasResetOrForced = false
-		end)
-	end
-	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-	if newWeatherState ~= currentWeatherState then
-		currentWeatherState = newWeatherState
-		local localizedState = weatherStateNames[currentWeatherState]
-		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-		-- Only send weather change notifications if the weather has not been reset
-		if hasResetOrForced == false and not weatherReset then
-			if resetorforcedtimer then
-				Cron.Halt(resetorforcedtimer)
-				resetorforcedtimer = nil
-			end
-			if settings.Current.warningMessages then
-				ShowWarningMessage(messageText)
-			end
-			if settings.Current.notificationMessages then
-				ShowNotificationMessage(messageText)
-			end
-		end
-		-- Reset the weather reset flag after the weather change notification has been skipped
-		weatherReset = false
-	end
+    Cron.Update(delta)
+    if hasResetOrForced == true then
+        local resetorforcedtimer = Cron.After(0.5, function()
+            hasResetOrForced = false
+        end)
+    end
+    if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+    local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+    if newWeatherState ~= currentWeatherState then
+        currentWeatherState = newWeatherState
+        local localizedState = weatherStateNames[currentWeatherState]
+        local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+        -- Only send weather change notifications if the weather has not been reset
+        if hasResetOrForced == false and not weatherReset then
+            if resetorforcedtimer then
+                Cron.Halt(resetorforcedtimer)
+                resetorforcedtimer = nil
+            end
+            if settings.Current.warningMessages then
+                ShowWarningMessage(messageText)
+            end
+            if settings.Current.notificationMessages then
+                ShowNotificationMessage(messageText)
+            end
+        end
+        -- Reset the weather reset flag after the weather change notification has been skipped
+        weatherReset = false
+        -- Update the active button to match the current weather state
+        settings.Current.weatherState = currentWeatherState
+    end
 end)
 
 function DrawButtons()
@@ -724,7 +726,6 @@ registerForEvent('onOverlayOpen', function()
     cetOpen = true
     width, height = GetDisplayResolution()
     setResolutionPresets(width, height)
-    
     -- Check the current weather state in game and update the active button
     local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
     settings.Current.weatherState = currentWeatherState
@@ -735,7 +736,6 @@ registerForEvent('onOverlayOpen', function()
         end
     end
 end)
-
 
 registerForEvent('onOverlayClose', function()
 	cetOpen = false
