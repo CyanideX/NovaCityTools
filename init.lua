@@ -249,6 +249,11 @@ function DrawButtons()
 						local category = state[3]
 						local enableDLSSDPT = state[4]  -- Get the DLSSDSeparateParticleColor flag
 						if category == i then
+							local isActive = settings.Current.weatherState == weatherState
+							if isActive then
+								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+							end
 							if ImGui.Button(localization, 140, 30) then
 								Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 								settings.Current.weatherState = weatherState
@@ -258,6 +263,9 @@ function DrawButtons()
 								GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 								toggleDLSSDPT = enableDLSSDPT  -- Update the checkbox status
 								SaveSettings()
+							end
+							if isActive then
+								ImGui.PopStyleColor(2)
 							end
 							
 							buttonCount = buttonCount + 1
