@@ -107,11 +107,11 @@ local weatherStates = {
 
 function setResolutionPresets(width, height)
 	local presets = {
-	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12, 13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25 },
-		{ 3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1,  0.7,  24, 36, 36, 0.7,  1,  6,  320, 33, 12, 6,  650, 280, 280, 15 },
-		{ 2560, 1440, 8,  6, 1, 2, 1, 1, 1, 1,  0.45, 20, 32, 28, 0.85, 1,  8,  310, 29, 10, 4,  500, 200, 200, 9.5 },
-		{ 1920, 1080, 5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5 },
-		{ 0,    0,    5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5 },
+	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12, 13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30 },
+		{ 3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1,  0.7,  24, 36, 36, 0.7,  1,  6,  320, 33, 12, 6,  650, 280, 280, 15,   5,  8,  10, 42, 37  },
+		{ 2560, 1440, 8,  6, 1, 2, 1, 1, 1, 1,  0.45, 20, 32, 28, 0.85, 1,  8,  310, 29, 10, 4,  500, 200, 200, 9.5,  8,  6,  10, 29, 30  },
+		{ 1920, 1080, 5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5,  9,  8,  10, 29, 30  },
+		{ 0,    0,    5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5,  10, 10, 10, 29, 30  },
 	}
 
     for _, preset in ipairs(presets) do
@@ -139,6 +139,11 @@ function setResolutionPresets(width, height)
 			uiTimeMinHeight = preset[23]
 			uiTimeMaxHeight = preset[24]
 			uiTimeHourRightPadding = preset[25]
+			frameTabPaddingXValue = preset[26]
+			frameTabPaddingYValue = preset[27]
+			itemTabSpacingYValue = preset[28]
+			glyphButtonWidth = preset[29]
+			glyphButtonHeight = preset[30]
             break
         end
     end
@@ -232,9 +237,13 @@ function DrawButtons()
     end
     if ImGui.Begin('Nova City Tools - v' .. version, true, ImGuiWindowFlags.NoScrollbar) then
 
-		-- Push style variables for frame padding and item spacing
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
+		-- Push style variables for frame padding and item spacing INSIDE the tabs
+        --ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
+        --ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemTabSpacingXValue, itemTabSpacingYValue)
+
+		-- Reset padding
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
 		-- Set the font scale for the window
         ImGui.SetWindowFontScale(customFontScale)
@@ -243,11 +252,11 @@ function DrawButtons()
 
         if ImGui.BeginTabBar("Nova Tabs") then
             
-			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
+			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XXX'))
 
             --if ImGui.Button(">", 30, 29) then
 			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
-            if ImGui.Button(IconGlyphs.ClockOutline, 32, 28) then
+            if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
 				timeSliderWindowOpen = not timeSliderWindowOpen
 				settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 				SaveSettings()
@@ -255,8 +264,12 @@ function DrawButtons()
 			ui.tooltip("Toggles the time slider window.")
 
             if ImGui.BeginTabItem("Weather") then
+
+				-- Push style variables for frame padding and item spacing INSIDE the tabs
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
+				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 				
-			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
+				--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
 				for i, category in ipairs(categories) do
 					ImGui.Text(category)
@@ -312,7 +325,14 @@ function DrawButtons()
 				ImGui.EndTabItem()
 			end
 
+			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
+        	ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
+
 			if ImGui.BeginTabItem("Toggles") then
+
+				-- Push style variables for frame padding and item spacing INSIDE the tabs
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue + 2)
+				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
 				ImGui.Dummy(0, 2)
 				ImGui.Text("Grouped Toggles:")
@@ -383,7 +403,7 @@ function DrawButtons()
 					end
 				end
 				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
@@ -402,7 +422,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggle distant fog plane.")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				clouds, changed = ImGui.Checkbox('Clouds', clouds)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
@@ -457,7 +477,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Nvidia Realtime Denoiser")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				toggleDLSSDPT, changed = ImGui.Checkbox('DLSSDPT', toggleDLSSDPT)
 				if changed then
 					GameOptions.SetBool("Rendering","DLSSDSeparateParticleColor", toggleDLSSDPT)
@@ -473,7 +493,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
@@ -495,7 +515,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				rain, changed = ImGui.Checkbox('SS Rain', rain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rain)
@@ -515,7 +535,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				filmGrain, changed = ImGui.Checkbox('Film Grain', filmGrain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles","FilmGrain", filmGrain)
@@ -529,7 +549,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles depth of field.")
-				ImGui.SameLine(130)
+				ImGui.SameLine(140)
 				motionBlur, changed = ImGui.Checkbox('Motion Blur', motionBlur)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles","MotionBlur", motionBlur)
@@ -593,7 +613,15 @@ function DrawButtons()
 				ImGui.EndTabItem()
 			end
 
+			-- Reset padding
+			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
+			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
+
 			if ImGui.BeginTabItem("Misc") then
+
+				-- Push style variables for frame padding and item spacing INSIDE the tabs
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
+				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 				
 				-- Convert the current game time to minutes past midnight
 				local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -616,19 +644,23 @@ function DrawButtons()
 				local padding = 22  -- Adjust this value as needed
 				ImGui.PushItemWidth(windowWidth - padding)
 
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
+
 				-- Create a slider for the total minutes
 				totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
 				if changed then
-                                    if totalMinutes < 1439 then
-                                        local hours = math.floor(totalMinutes / 60)
-                                        local mins = totalMinutes % 60
-                                        Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-                                    else
-                                        local hours = math.floor(totalMinutes / 60)
-                                        local mins = totalMinutes % 60 + 1
-                                        Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-                                    end
+					if totalMinutes < 1439 then
+						local hours = math.floor(totalMinutes / 60)
+						local mins = totalMinutes % 60
+						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+					else
+						local hours = math.floor(totalMinutes / 60)
+						local mins = totalMinutes % 60 + 1
+						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+					end
 				end
+
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue) -- Reset padding
 				
 				--[[ if ImGui.Button('Toggle Time Slider Window', 290, 30) then
 					timeSliderWindowOpen = not timeSliderWindowOpen
@@ -647,7 +679,7 @@ function DrawButtons()
 
 				-- Create a button for each preset duration
 				for _, duration in ipairs(durations) do
-					if ImGui.Button(tostring(duration) .. 's', 49, 30) then
+					if ImGui.Button(tostring(duration) .. 's', 49, buttonHeight) then
 						settings.Current.transitionDuration = duration
 						settings.transitionTime = duration  -- Update transitionTime
 						SaveSettings()
@@ -660,22 +692,26 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-                                settings.Current.warningMessages, changed = ImGui.Checkbox('Warning Message', settings.Current.warningMessages)
-                                if changed then
-                                    SaveSettings()
-                                end
-								ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
-                                settings.Current.notificationMessages, changed = ImGui.Checkbox('Notification', settings.Current.notificationMessages)
-                                if changed then
-                                    SaveSettings()
-                                end
-								ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
+				settings.Current.warningMessages, changed = ImGui.Checkbox('Warning Message',
+					settings.Current.warningMessages)
+				if changed then
+					SaveSettings()
+				end
+				ui.tooltip(
+				"Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
+				settings.Current.notificationMessages, changed = ImGui.Checkbox('Notification',
+					settings.Current.notificationMessages)
+				if changed then
+					SaveSettings()
+				end
+				ui.tooltip(
+				"Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
 				ImGui.Dummy(0, 50)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				if ImGui.Button('Reset GUI', 290, 30) then
+				if ImGui.Button('Reset GUI', 290, buttonHeight) then
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
@@ -697,6 +733,7 @@ function DrawTimeSliderWindow()
 	
     ImGui.SetNextWindowPos(100, 100, ImGuiCond.FirstUseEver)
     ImGui.SetNextWindowSize(320, 120, ImGuiCond.FirstUseEver)
+	
     if ImGui.Begin('Time Slider', ImGuiWindowFlags.NoScrollbar) then
         -- Set the custom font scale
         ImGui.SetWindowFontScale(customFontScale)
@@ -710,6 +747,8 @@ function DrawTimeSliderWindow()
         local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
 
         ImGui.Text('Adjust Game Time:')
+
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10) -- Slider height
         ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
         ImGui.Text(timeLabel)
         ImGui.Separator()
@@ -726,6 +765,8 @@ function DrawTimeSliderWindow()
                 Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
             end
         end
+
+		ImGui.PopStyleVar(1) -- Reset padding
 
         -- Add hour buttons
         ImGui.Separator()
