@@ -106,12 +106,13 @@ local weatherStates = {
 }
 
 function setResolutionPresets(width, height)
-    local presets = {
-        {3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1, 0.7, 24, 36, 36, 0.7, 1, 6, 320, 33, 12, 6, 650, 280, 280, 15},
-        {2560, 1440, 8, 6, 1, 2, 1, 1, 1, 1, 0.45, 20, 32, 28, 0.85, 1, 8, 310, 29, 10, 4, 500, 200, 200, 9.5},
-        {1920, 1080, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4, 400, 280, 280, 10},
-        {0, 0, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4, 400, 280, 280, 10},
-    }
+	local presets = {
+	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12, 13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25 },
+		{ 3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1,  0.7,  24, 36, 36, 0.7,  1,  6,  320, 33, 12, 6,  650, 280, 280, 15 },
+		{ 2560, 1440, 8,  6, 1, 2, 1, 1, 1, 1,  0.45, 20, 32, 28, 0.85, 1,  8,  310, 29, 10, 4,  500, 200, 200, 9.5 },
+		{ 1920, 1080, 5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5 },
+		{ 0,    0,    5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5 },
+	}
 
     for _, preset in ipairs(presets) do
         if width >= preset[1] and height >= preset[2] then
@@ -594,25 +595,6 @@ function DrawButtons()
 
 			if ImGui.BeginTabItem("Misc") then
 				
-				-- Add a new section for weather transition duration presets
-				ImGui.Dummy(0, 2)
-				ImGui.Text("Weather Transition Duration:         "  .. tostring(settings.Current.transitionDuration) .. "s")
-				ImGui.Separator()
-				ImGui.Dummy(0, 1)
-				
-				-- Define the preset durations
-				local durations = {0, 5, 10, 15, 30}
-
-				-- Create a button for each preset duration
-				for _, duration in ipairs(durations) do
-					if ImGui.Button(tostring(duration) .. 's', 49, 30) then
-						settings.Current.transitionDuration = duration
-						settings.transitionTime = duration  -- Update transitionTime
-						SaveSettings()
-					end
-					ImGui.SameLine()
-				end
-
 				-- Convert the current game time to minutes past midnight
 				local currentTime = Game.GetTimeSystem():GetGameTime()
 				local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
@@ -624,7 +606,7 @@ function DrawButtons()
 				local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
 
 				ImGui.PushItemWidth(185)
-				ImGui.Dummy(0, 50)
+				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text('Adjust Game Time:                ' .. timeLabel)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
@@ -647,13 +629,33 @@ function DrawButtons()
                                         Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
                                     end
 				end
-				if ImGui.Button('Toggle Time Slider Window', 290, 30) then
+				
+				--[[ if ImGui.Button('Toggle Time Slider Window', 290, 30) then
 					timeSliderWindowOpen = not timeSliderWindowOpen
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
+				end ]]
+
+				-- Add a new section for weather transition duration presets
+				ImGui.Dummy(0, 25)
+				ImGui.Text("Weather Transition Duration:         "  .. tostring(settings.Current.transitionDuration) .. "s")
+				ImGui.Separator()
+				ImGui.Dummy(0, 1)
+				
+				-- Define the preset durations
+				local durations = {0, 5, 10, 15, 30}
+
+				-- Create a button for each preset duration
+				for _, duration in ipairs(durations) do
+					if ImGui.Button(tostring(duration) .. 's', 49, 30) then
+						settings.Current.transitionDuration = duration
+						settings.transitionTime = duration  -- Update transitionTime
+						SaveSettings()
+					end
+					ImGui.SameLine()
 				end
 
-				ImGui.Dummy(0, 15)
+				ImGui.Dummy(0, 50)
 				ImGui.Text('Weather state notifications:')
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
