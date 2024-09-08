@@ -1,4 +1,5 @@
 local Cron = require("Cron")
+local GameUI = require("GameUI")
 local version = "1.7.0"
 local cetOpen = false
 local toggleNRD = false
@@ -14,7 +15,6 @@ local vehicleCollisions = true
 local lensFlares = true
 local bloom = true
 local rain = true
-local weatherFX = true
 local rainMap = true
 local DOF = false
 local chromaticAberration = true
@@ -107,10 +107,10 @@ local weatherStates = {
 
 function setResolutionPresets(width, height)
     local presets = {
-        {3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1, 0.7, 24, 36, 36, 0.7, 1, 6, 300, 33, 12, 6},
-        {2560, 1440, 8, 1, 1, 2, 1, 1, 1, 1, 0.45, 20, 32, 28, 0.85, 1, 8, 310, 29, 10, 4},
-        {1920, 1080, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4},
-        {0, 0, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4},
+        {3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1, 0.7, 24, 36, 36, 0.7, 1, 6, 320, 33, 12, 6, 650, 280, 280, 15},
+        {2560, 1440, 8, 6, 1, 2, 1, 1, 1, 1, 0.45, 20, 32, 28, 0.85, 1, 8, 310, 29, 10, 4, 500, 200, 200, 9.5},
+        {1920, 1080, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4, 400, 280, 280, 10},
+        {0, 0, 3, 4, 1, 4, 1, 1, 1, 1, 0.5, 18, 24, 24, 0.85, 1, 0, 200, 21, 8, 4, 400, 280, 280, 10},
     }
 
     for _, preset in ipairs(presets) do
@@ -134,13 +134,17 @@ function setResolutionPresets(width, height)
             buttonPaddingRight = preset[19]
             searchPaddingXValue = preset[20]
             searchPaddingYValue = preset[21]
+			uiTimeMinWidth = preset[22]
+			uiTimeMinHeight = preset[23]
+			uiTimeMaxHeight = preset[24]
+			uiTimeHourRightPadding = preset[25]
             break
         end
     end
 end
 
 function DrawWeatherControl()
-    ImGui.Dummy(0, 10)
+    ImGui.Dummy(0, dummySpacingYValue)
     ImGui.Separator()
     ImGui.Text("Weather Control:")
 
@@ -221,11 +225,25 @@ function DrawButtons()
     if resetWindow then
         ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
         ImGui.SetNextWindowSize(312, 1110, ImGuiCond.Always)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
+    	ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
         resetWindow = false
     end
     if ImGui.Begin('Nova City Tools - v' .. version, true, ImGuiWindowFlags.NoScrollbar) then
+
+		-- Push style variables for frame padding and item spacing
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
+
+		-- Set the font scale for the window
+        ImGui.SetWindowFontScale(customFontScale)
+
+		local availableWidth = ImGui.GetContentRegionAvail() - buttonPaddingRight
+
         if ImGui.BeginTabBar("Nova Tabs") then
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
+            
+			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XX'))
+
             --if ImGui.Button(">", 30, 29) then
 			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
             if ImGui.Button(IconGlyphs.ClockOutline, 32, 28) then
@@ -233,8 +251,10 @@ function DrawButtons()
 				settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 				SaveSettings()
 			end
-			ui.tooltip("Toggles the time slider window. \nWill get a fancy clock icon in here eventually.")
+			ui.tooltip("Toggles the time slider window.")
+
             if ImGui.BeginTabItem("Weather") then
+				
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
                 local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
 				for i, category in ipairs(categories) do
@@ -254,7 +274,7 @@ function DrawButtons()
 								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
 								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 							end
-							if ImGui.Button(localization, 140, 30) then
+							if ImGui.Button(localization, 140, buttonHeight) then
 								if isActive then
 									Game.GetWeatherSystem():ResetWeather(true)
 									settings.Current.weatherState = 'None'
@@ -343,7 +363,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles all fog types: volumetric, distant volumetric, and distant fog plane.")
 				
-				ImGui.Dummy(0, 10)
+				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Weather:")
 				ImGui.Separator()
 				
@@ -426,7 +446,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 
-				ImGui.Dummy(0, 10)
+				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Features:")
 				ImGui.Separator()
 				
@@ -523,7 +543,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles Resampled Importance Sampling.")
 
-				ImGui.Dummy(0, 10)
+				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Utility:")
 				ImGui.Separator()
 				vehicleCollisions, changed = ImGui.Checkbox('Vehicle Collisions', vehicleCollisions)
@@ -552,7 +572,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles vehicle spawning.")
 
-				ImGui.Dummy(0, 10)
+				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Useless Toggles:")
 				ImGui.Separator()
 				tonemapping, changed = ImGui.Checkbox('Tonemapping', tonemapping)
@@ -670,9 +690,15 @@ function DrawTimeSliderWindow()
     if not cetOpen or not timeSliderWindowOpen then
         return
     end
+
+	ImGui.SetNextWindowSizeConstraints(uiTimeMinWidth, uiTimeMinHeight, width / 100 * 99, uiTimeMaxHeight)
+	
     ImGui.SetNextWindowPos(100, 100, ImGuiCond.FirstUseEver)
     ImGui.SetNextWindowSize(320, 120, ImGuiCond.FirstUseEver)
-    if ImGui.Begin('Time Slider') then
+    if ImGui.Begin('Time Slider', ImGuiWindowFlags.NoScrollbar) then
+        -- Set the custom font scale
+        ImGui.SetWindowFontScale(customFontScale)
+
         local currentTime = Game.GetTimeSystem():GetGameTime()
         local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
         local hours12 = math.floor(totalMinutes / 60) % 12
@@ -702,9 +728,9 @@ function DrawTimeSliderWindow()
         -- Add hour buttons
         ImGui.Separator()
         ImGui.Text('Set Hour:')
-        local buttonWidth = ImGui.GetWindowContentRegionWidth() / 12 - 9.5
+        local buttonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
         for i = 1, 24 do
-            if ImGui.Button(tostring(i), buttonWidth, 30) then
+            if ImGui.Button(tostring(i), buttonWidth, buttonHeight) then
                 local hours = i
                 local mins = 0
                 Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
@@ -739,14 +765,31 @@ function ShowNotificationMessage(message)
 end
 
 registerForEvent("onInit", function()
-	LoadSettings()
+    LoadSettings()
 
-	-- Create a mapping from weather state IDs to localized names
-	for _, weatherState in ipairs(weatherStates) do
-		local id, localization = table.unpack(weatherState)
-		weatherStateNames[id] = localization
-	end
+    -- Create a mapping from weather state IDs to localized names
+    for _, weatherState in ipairs(weatherStates) do
+        local id, localization = table.unpack(weatherState)
+        weatherStateNames[id] = localization
+    end
+
+    --[[ -- Handle session start
+    GameUI.OnSessionStart(function()
+        Cron.After(0.25, function()
+            -- Apply active weather state
+            if settings.Current.weatherState ~= 'None' then
+                Game.GetWeatherSystem():SetWeather(settings.Current.weatherState, settings.transitionTime, 0)
+                Game.GetPlayer():SetWarningMessage("Locked weather state to " .. weatherStateNames[settings.Current.weatherState]:lower() .. "!")
+            end
+        end)
+    end)
+
+    GameUI.OnSessionEnd(function()
+        -- Handle end
+    end) ]]
+
 end)
+
 
 registerForEvent('onDraw', function()
     if timeSliderWindowOpen == true then
