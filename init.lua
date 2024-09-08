@@ -147,7 +147,7 @@ function DrawWeatherControl()
     if ImGui.Button('Reset Weather', 290, 30) then
         Game.GetWeatherSystem():ResetWeather(true)
         settings.Current.weatherState = 'None'
-        settings.Current.nativeWeather = 1
+        -- settings.Current.nativeWeather = 1
         Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
         GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
         toggleDLSSDPT = true
@@ -180,36 +180,34 @@ function DrawWeatherControl()
 end
 
 registerForEvent("onUpdate", function()
-    Cron.Update(delta)
-    if hasResetOrForced == true then
-        local resetorforcedtimer = Cron.After(0.5, function()
-            hasResetOrForced = false
-        end)
-    end
-    if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-    local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-    if newWeatherState ~= currentWeatherState then
-        currentWeatherState = newWeatherState
-        local localizedState = weatherStateNames[currentWeatherState]
-        local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-        -- Only send weather change notifications if the weather has not been reset
-        if hasResetOrForced == false and not weatherReset then
-            if resetorforcedtimer then
-                Cron.Halt(resetorforcedtimer)
-                resetorforcedtimer = nil
-            end
-            if settings.Current.warningMessages then
-                ShowWarningMessage(messageText)
-            end
-            if settings.Current.notificationMessages then
-                ShowNotificationMessage(messageText)
-            end
-        end
-        -- Reset the weather reset flag after the weather change notification has been skipped
-        weatherReset = false
-        -- Update the active button to match the current weather state
-        settings.Current.weatherState = currentWeatherState
-    end
+	Cron.Update(delta)
+	if hasResetOrForced == true then
+		local resetorforcedtimer = Cron.After(0.5, function()
+			hasResetOrForced = false
+		end)
+	end
+	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+	if newWeatherState ~= currentWeatherState then
+		currentWeatherState = newWeatherState
+		local localizedState = weatherStateNames[currentWeatherState]
+		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+		-- Only send weather change notifications if the weather has not been reset
+		if hasResetOrForced == false and not weatherReset then
+			if resetorforcedtimer then
+				Cron.Halt(resetorforcedtimer)
+				resetorforcedtimer = nil
+			end
+			if settings.Current.warningMessages then
+				ShowWarningMessage(messageText)
+			end
+			if settings.Current.notificationMessages then
+				ShowNotificationMessage(messageText)
+			end
+		end
+		-- Reset the weather reset flag after the weather change notification has been skipped
+		weatherReset = false
+	end
 end)
 
 function DrawButtons()
@@ -299,53 +297,51 @@ function DrawButtons()
 				ImGui.Text("Grouped Toggles:")
 				ImGui.Separator()
 
-				toggleFog, changed = ImGui.Checkbox('ALL: Fog', toggleFog)
-				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","VolumetricFog", toggleFog)
-					if toggleFog then
-						GameOptions.SetBool("Developer/FeatureToggles","VolumetricFog", true)
-						GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", true)
-						GameOptions.SetBool("Developer/FeatureToggles","DistantFog", true)
-						volumetricFog = true
-						distantVolumetricFog = true
-						distantFog = true
-						SaveSettings()
-					else
-						GameOptions.SetBool("Developer/FeatureToggles","VolumetricFog", false)
-						GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", false)
-						GameOptions.SetBool("Developer/FeatureToggles","DistantFog", false)
-						volumetricFog = false
-						distantVolumetricFog = false
-						distantFog = false
-						SaveSettings()
-					end
-				end
-				ui.tooltip("Toggles all fog types: volumetic, distant volumetric, and distant fog plane.")
-
 				toggleFogClouds, changed = ImGui.Checkbox('ALL: Volumetrics and Clouds', toggleFogClouds)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","VolumetricFog", toggleFogClouds)
-					if toggleFogClouds then
-						GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", true)
-						GameOptions.SetBool("Developer/FeatureToggles","DistantFog", true)
-						GameOptions.SetBool("Developer/FeatureToggles","VolumetricClouds", true)
-						distantVolumetricFog = true
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFogClouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFogClouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFogClouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", toggleFogClouds)
+					distantVolumetricFog = toggleFogClouds
+					volumetricFog = toggleFogClouds
+					distantFog = toggleFogClouds
+					clouds = toggleFogClouds
+					SaveSettings()
+
+					-- Ensure ALL: Fog is also enabled/disabled
+					toggleFog = toggleFogClouds
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFog)
+					volumetricFog = toggleFog
+					distantVolumetricFog = toggleFog
+					distantFog = toggleFog
+					SaveSettings()
+				end
+				ui.tooltip("Toggles all fog and clouds: volumetric, distant volumetric, distant fog planes, and volumetric clouds.")
+
+				toggleFog, changed = ImGui.Checkbox('ALL: Fog', toggleFog)
+				if changed then
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFog)
+					volumetricFog = toggleFog
+					distantVolumetricFog = toggleFog
+					distantFog = toggleFog
+					SaveSettings()
+
+					if toggleFog and not toggleFogClouds then
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
 						volumetricFog = true
+						distantVolumetricFog = true
 						distantFog = true
-						clouds = true
-						SaveSettings()
-					else
-						GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", false)
-						GameOptions.SetBool("Developer/FeatureToggles","DistantFog", false)
-						GameOptions.SetBool("Developer/FeatureToggles","VolumetricClouds", false)
-						distantVolumetricFog = false
-						volumetricFog = false
-						distantFog = false
-						clouds = false
 						SaveSettings()
 					end
 				end
-				ui.tooltip("Toggles all fog and clouds: volumetic, distant volumetric, distant fog planes, and volumetic clouds.")
+				ui.tooltip("Toggles all fog types: volumetric, distant volumetric, and distant fog plane.")
 				
 				ImGui.Dummy(0, 10)
 				ImGui.Text("Weather:")
@@ -353,40 +349,82 @@ function DrawButtons()
 				
 				volumetricFog, changed = ImGui.Checkbox('VFog', volumetricFog)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","VolumetricFog", volumetricFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", volumetricFog)
 					SaveSettings()
 					if volumetricFog then
-						GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
 						distantVolumetricFog = true
 						SaveSettings()
 					else
-						GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
 						distantVolumetricFog = false
 						SaveSettings()
 					end
 				end
-				ui.tooltip("Toggle volumetric fog.")
+				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
 				ImGui.SameLine(130)
 				distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","DistantVolFog", distantVolumetricFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
 					SaveSettings()
+					if distantVolumetricFog and not volumetricFog then
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						volumetricFog = true
+						SaveSettings()
+					end
 				end
-				ui.tooltip("Toggle distant volumetric fog.")
+				ui.tooltip("Toggle distant volumetric fog. Also enables VFog if it's disabled.")
 				
 				distantFog, changed = ImGui.Checkbox('Fog', distantFog)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","DistantFog", distantFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", distantFog)
 					SaveSettings()
 				end
 				ui.tooltip("Toggle distant fog plane.")
 				ImGui.SameLine(130)
 				clouds, changed = ImGui.Checkbox('Clouds', clouds)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","VolumetricClouds", clouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
 					SaveSettings()
 				end
 				ui.tooltip("Toggle volumetric clouds.")
+
+				-- Update ALL: Fog and ALL: Volumetrics and Clouds based on individual toggles
+				if not volumetricFog and not distantVolumetricFog and not distantFog then
+					toggleFog = false
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
+					SaveSettings()
+				end
+
+				if not volumetricFog and not distantVolumetricFog and not distantFog and not clouds then
+					toggleFogClouds = false
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", false)
+					SaveSettings()
+				end
+
+				-- Enable ALL: Fog if all individual fog toggles are enabled
+				if volumetricFog and distantVolumetricFog and distantFog then
+					toggleFog = true
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
+					SaveSettings()
+				end
+
+				-- Enable ALL: Volumetrics and Clouds if all individual toggles are enabled
+				if volumetricFog and distantVolumetricFog and distantFog and clouds then
+					toggleFogClouds = true
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", true)
+					SaveSettings()
+				end
 
 				ImGui.Dummy(0, 10)
 				ImGui.Text("Features:")
@@ -408,51 +446,47 @@ function DrawButtons()
 
 				bloom, changed = ImGui.Checkbox('Bloom', bloom)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","Bloom", bloom)
+					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom)
+					lensFlares = bloom
 					SaveSettings()
-
-					if bloom then
-						GameOptions.SetBool("Developer/FeatureToggles","ImageBasedFlares", true)
-						lensFlares = true
-						SaveSettings()
-					else
-						GameOptions.SetBool("Developer/FeatureToggles","ImageBasedFlares", false)
-						lensFlares = false
-						SaveSettings()
-					end
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
 				ImGui.SameLine(130)
 				lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","ImageBasedFlares", lensFlares)
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
 					SaveSettings()
+
+					if lensFlares and not bloom then
+						GameOptions.SetBool("Developer/FeatureToggles", "Bloom", true)
+						bloom = true
+						SaveSettings()
+					end
 				end
 				ui.tooltip("Toggles lens flare effect.")
 
-				local rain, changed = ImGui.Checkbox('SS Rain', rain)
+				rainMap, changed = ImGui.Checkbox('Weather', rainMap)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","ScreenSpaceRain", rain)
+					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", rainMap)
+					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rainMap)
+					rain = rainMap
+					SaveSettings()
+				end
+				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
+				ImGui.SameLine(130)
+				rain, changed = ImGui.Checkbox('SS Rain', rain)
+				if changed then
+					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rain)
 					SaveSettings()
 
-					if rain then
-						GameOptions.SetBool("Developer/FeatureToggles","Weather", true)
-						weatherFX = true
-						SaveSettings()
-					else
-						GameOptions.SetBool("Developer/FeatureToggles","Weather", false)
-						weatherFX = false
+					if rain and not rainMap then
+						GameOptions.SetBool("Developer/FeatureToggles", "RainMap", true)
+						rainMap = true
 						SaveSettings()
 					end
 				end
 				ui.tooltip("Toggles screenspace rain effects, removing wet surfaces.")
-				ImGui.SameLine(130)
-				rainMap, changed = ImGui.Checkbox('Weather', rainMap)
-				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","RainMap", rainMap)
-					SaveSettings()
-				end
-				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
 
 				chromaticAberration, changed = ImGui.Checkbox('CA', chromaticAberration)
 				if changed then
@@ -722,19 +756,22 @@ registerForEvent('onDraw', function()
 end)
 
 registerForEvent('onOverlayOpen', function()
-    LoadSettings()
-    cetOpen = true
+	LoadSettings()
+	cetOpen = true
     width, height = GetDisplayResolution()
     setResolutionPresets(width, height)
-    -- Check the current weather state in game and update the active button
-    local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-    settings.Current.weatherState = currentWeatherState
-    for _, state in ipairs(weatherStates) do
-        if state[1] == currentWeatherState then
-            settings.Current.weatherState = state[1]
-            break
+	
+   --[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+    local selectedWeatherState = settings.Current.weatherState
+    if selectedWeatherState == 'Locked State' then
+        settings.Current.weatherState = currentWeatherState
+        for _, state in ipairs(weatherStates) do
+            if state[1] == currentWeatherState then
+                settings.Current.weatherState = state[1]
+                break
+            end
         end
-    end
+    end ]]
 end)
 
 registerForEvent('onOverlayClose', function()
@@ -743,12 +780,23 @@ registerForEvent('onOverlayClose', function()
 end)
 
 function SaveSettings()
-	local file = io.open('settings.json', 'w')
-	if file then
-		file:write(json.encode(settings.Current))
-		file:close()
-	end
+    local saveData = {
+        transitionDuration = settings.Current.transitionDuration,
+        timeSliderWindowOpen = settings.Current.timeSliderWindowOpen,
+        weatherState = settings.Current.weatherState,
+        -- nativeWeather = settings.Current.nativeWeather,
+        warningMessages = settings.Current.warningMessages,
+        notificationMessages = settings.Current.notificationMessages
+    }
+    local file = io.open('settings.json', 'w')
+    if file then
+        local jsonString = json.encode(saveData)
+        local formattedJsonString = jsonString:gsub(',"', ',\n    "'):gsub('{', '{\n    '):gsub('}', '\n}')
+        file:write(formattedJsonString)
+        file:close()
+    end
 end
+
 
 function LoadSettings()
 	local file = io.open('settings.json', 'r')
