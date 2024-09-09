@@ -110,10 +110,10 @@ local weatherStates = {
 function setResolutionPresets(width, height)
 	local presets = {
 	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31, 32  },
-		{ 3840, 2160, 8,  6, 1, 1, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 12, 6,  650, 260, 356, 15,   9,  8,  10, 34, 34, 22, 140 },
-		{ 2560, 1440, 8,  6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  272, 29, 10, 4,  500, 203, 280, 9.5,  8,  8,  10, 32, 32, 18, 125 },
-		{ 1920, 1080, 5,  4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 27, 27, 16, 100 },
-		{ 0,    0,    5,  4, 1, 4, 6, 7, 1, 1,  0.5,  120, 24, 24, 0.85, 1,  0,  261, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 29, 30, 16, 140 }
+		{ 3840, 2160, 8,  6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 12, 6,  650, 250, 336, 7.5,   9,  8,  10, 34, 34, 22, 140 },
+		{ 2560, 1440, 8,  6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  272, 29, 10, 4,  500, 219, 298, 7.5,  8,  8,  10, 32, 32, 18, 125 },
+		{ 1920, 1080, 5,  4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 169, 230, 4.8,  9,  8,  10, 27, 27, 16, 100 },
+		{ 0,    0,    5,  4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 169, 230, 4.8,  9,  8,  10, 27, 27, 16, 100 }
 	}
 
 	for _, preset in ipairs(presets) do
@@ -153,6 +153,104 @@ function setResolutionPresets(width, height)
 	end
 end
 
+-- Register a CET hotkey to reset weather
+registerHotkey('NCTResetWeather', 'Reset Weather', function()
+    Game.GetWeatherSystem():ResetWeather(true)
+    settings.Current.weatherState = 'None'
+    -- settings.Current.nativeWeather = 1
+    Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+    GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+    toggleDLSSDPT = true
+    SaveSettings()
+    weatherReset = true
+end)
+
+-- Register a CET hotkey to toggle freeze time
+registerHotkey('NCTFreezeToggle', 'Freeze Time Toggle', function()
+    if timeScale == 0 then
+        timeScale = previousTimeScale or 1.0
+        if settings.Current.warningMessages then
+            ShowWarningMessage("Time resumed at " .. previousTimeScale .. "x speed!")
+        end
+        if settings.Current.notificationMessages then
+            ShowNotificationMessage("Time resumed at " .. previousTimeScale .. "x speed!")
+        end
+    else
+        if settings.Current.warningMessages then
+            ShowWarningMessage("Time frozen!")
+        end
+        if settings.Current.notificationMessages then
+            ShowNotificationMessage("Time frozen!")
+        end
+        previousTimeScale = timeScale
+        timeScale = 0
+    end
+    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+    if timeScale == 1 then
+        Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+    else
+        Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+    end
+end)
+
+-- Register a CET hotkey to increase time scale
+registerHotkey('NCTIncreaseTime', 'Increase Time Scale', function()
+    if timeScale < 0.01 then
+        timeScale = timeScale + 0.001
+    elseif timeScale < 0.1 then
+        timeScale = timeScale + 0.01
+    elseif timeScale < 1.0 then
+        timeScale = timeScale + 0.1
+    else
+        timeScale = timeScale + 1.0
+    end
+    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+    Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+    if settings.Current.warningMessages then
+        ShowWarningMessage("Time scale increased to " .. timeScale .. "x speed!")
+    end
+    if settings.Current.notificationMessages then
+        ShowNotificationMessage("Time scale increased to " .. timeScale .. "x speed!")
+    end
+end)
+
+-- Register a CET hotkey to decrease time scale
+registerHotkey('NCTDecreaseTime', 'Decrease Time Scale', function()
+    if timeScale <= 0.01 then
+        timeScale = timeScale - 0.001
+        if timeScale < 0.001 then timeScale = 0.001 end -- Prevent time scale from going below 0.001
+    elseif timeScale <= 0.1 then
+        timeScale = timeScale - 0.01
+        if timeScale < 0.01 then timeScale = 0.01 end -- Prevent time scale from going below 0.01
+    elseif timeScale <= 1.0 then
+        timeScale = timeScale - 0.1
+        if timeScale < 0.1 then timeScale = 0.1 end -- Prevent time scale from going below 0.1
+    else
+        timeScale = timeScale - 1.0
+    end
+    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+    Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+    if settings.Current.warningMessages then
+        ShowWarningMessage("Time scale decreased to " .. timeScale .. "x speed!")
+    end
+    if settings.Current.notificationMessages then
+        ShowNotificationMessage("Time scale decreased to " .. timeScale .. "x speed!")
+    end
+end)
+
+-- Register a CET hotkey to reset time scale to 1.0
+registerHotkey('NCTResetTime', 'Reset Time Scale', function()
+    timeScale = 1.0
+    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(false)
+    Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+    if settings.Current.warningMessages then
+        ShowWarningMessage("Time scale reset to 1.0x speed!")
+    end
+    if settings.Current.notificationMessages then
+        ShowNotificationMessage("Time scale reset to 1.0x speed!")
+    end
+end)
+
 function DrawWeatherControl()
 	ImGui.Dummy(0, dummySpacingYValue)
 	ImGui.Separator()
@@ -164,7 +262,7 @@ function DrawWeatherControl()
 		Game.GetWeatherSystem():ResetWeather(true)
 		settings.Current.weatherState = 'None'
 		-- settings.Current.nativeWeather = 1
-		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 		toggleDLSSDPT = true
 		SaveSettings()
@@ -313,7 +411,7 @@ function DrawButtons()
 									Game.GetWeatherSystem():ResetWeather(true)
 									settings.Current.weatherState = 'None'
 									Game.GetPlayer():SetWarningMessage(
-									"Weather reset to default cycles. \n\nWeather states will progress automatically.")
+									"Weather reset to default cycles! \nWeather states will progress automatically.")
 									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 									toggleDLSSDPT = true
 									weatherReset = true
@@ -665,11 +763,10 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				
-
 				-- Set the width of the slider to the width of the window minus the padding
 				local windowWidth = ImGui.GetWindowWidth()
-				ImGui.PushItemWidth(windowWidth - timeSliderPadding)
+				ImGui.PushItemWidth(windowWidth - timeSliderPadding - 2)
+			 -- ImGui.PushItemWidth(windowWidth - timeSliderPadding - 10) -- 4K
 
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
 
@@ -687,8 +784,8 @@ function DrawButtons()
 				ImGui.Dummy(0, 25)
 				ImGui.Text("Weather Transition Duration:")
 
-		ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - 10)
-		ImGui.Text(tostring(settings.Current.transitionDuration) .. "s")
+				ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - 10)
+				ImGui.Text(tostring(settings.Current.transitionDuration) .. "s")
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
@@ -764,7 +861,9 @@ function DrawTimeSliderWindow()
 	-- Set window size constraints and position
 	ImGui.SetNextWindowSizeConstraints(uiTimeMinWidth, uiTimeMinHeight, width / 100 * 99, uiTimeMaxHeight)
 	ImGui.SetNextWindowPos(200, 200, ImGuiCond.FirstUseEver)
-	ImGui.SetNextWindowSize(200, 280, ImGuiCond.FirstUseEver)
+	ImGui.SetNextWindowSize(uiTimeMinWidth, uiTimeMaxHeight, ImGuiCond.FirstUseEver)
+	ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
+	ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 
 	if ImGui.Begin('Time Slider', ImGuiWindowFlags.NoScrollbar) then
 		-- Set the custom font scale
@@ -780,7 +879,7 @@ function DrawTimeSliderWindow()
 		local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
 
 		ImGui.Text("Adjust Game Time:")
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 4) -- Slider height
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 6) -- Slider height
 		ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
 		ImGui.Text(timeLabel)
 		ImGui.SetNextItemWidth(-1)
@@ -802,18 +901,20 @@ function DrawTimeSliderWindow()
 		ImGui.PopStyleVar(1) -- Reset padding
 
 		-- Add hour buttons
-		ImGui.Dummy(0, 2)
+		ImGui.Dummy(0, dummySpacingYValue)
 		ImGui.Separator()
 		ImGui.Text("Set Hour:")
-		local buttonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
+		
+		local hourButtonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
 		for i = 1, 24 do
-			if ImGui.Button(tostring(i), buttonWidth, buttonHeight) then
+			if ImGui.Button(tostring(i), hourButtonWidth, buttonHeight) then
 				Game.GetTimeSystem():SetGameTimeByHMS(i, 0, secs)
 			end
 			if i % 12 ~= 0 then
 				ImGui.SameLine()
 			end
 		end
+		
 
 		ImGui.Dummy(0, 4)
 		-- Add time scale slider
@@ -840,8 +941,7 @@ function DrawTimeSliderWindow()
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 6) -- Slider height
 
 		-- Calculate available width for the slider
-		local availableWidth = ImGui.GetWindowContentRegionWidth() - 2 * glyphButtonWidth -
-		2 * ImGui.GetStyle().ItemSpacing.x - 4
+		local availableWidth = ImGui.GetWindowContentRegionWidth() - 2 * glyphButtonWidth -	2 * ImGui.GetStyle().ItemSpacing.x - 4
 		ImGui.SetNextItemWidth(availableWidth)
 		timeScale, changed = ImGui.SliderFloat('##TimeScale', timeScale, 0.001, 10.0, '%.003f')
 		if changed then
@@ -923,7 +1023,7 @@ function DrawTimeSliderWindow()
 
 		ui.tooltip("Freeze time (toggle)")
 
-		ImGui.PopStyleVar(2)
+		ImGui.PopStyleVar(3)
 
 		ImGui.End()
 	end
