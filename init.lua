@@ -109,11 +109,11 @@ local weatherStates = {
 
 function setResolutionPresets(width, height)
 	local presets = {
-	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31 },
-		{ 3840, 2160, 10, 6, 1, 1, 6, 7, 1, 1,  0.7,  140, 36, 36, 0.7,  1,  6,  320, 33, 12, 6,  650, 280, 375, 15,   5,  8,  10, 42, 37, 22 },
-		{ 2560, 1440, 8,  6, 1, 2, 6, 7, 1, 1,  0.45, 140, 28, 28, 0.85, 1,  8,  310, 29, 10, 4,  500, 200, 280, 9.5,  8,  6,  10, 32, 30, 18 },
-		{ 1920, 1080, 5,  4, 1, 4, 6, 7, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 29, 30, 16 },
-		{ 0,    0,    5,  4, 1, 4, 6, 7, 1, 1,  0.5,  120, 24, 24, 0.85, 1,  0,  261, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 29, 30, 16 }
+	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31, 32  },
+		{ 3840, 2160, 8,  6, 1, 1, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 12, 6,  650, 260, 356, 15,   9,  8,  10, 34, 34, 22, 140 },
+		{ 2560, 1440, 8,  6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  272, 29, 10, 4,  500, 203, 280, 9.5,  8,  8,  10, 32, 32, 18, 125 },
+		{ 1920, 1080, 5,  4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 27, 27, 16, 100 },
+		{ 0,    0,    5,  4, 1, 4, 6, 7, 1, 1,  0.5,  120, 24, 24, 0.85, 1,  0,  261, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 29, 30, 16, 140 }
 	}
 
 	for _, preset in ipairs(presets) do
@@ -147,6 +147,7 @@ function setResolutionPresets(width, height)
 			glyphButtonWidth = preset[29]
 			glyphButtonHeight = preset[30]
 			timeSliderPadding = preset[31]
+			toggleSpacingXValue = preset[32]
 			break
 		end
 	end
@@ -253,6 +254,7 @@ function DrawButtons()
 		if ImGui.BeginTabBar("Nova Tabs") then
 			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XXX'))
 
+			-- TIME SLIDER TOGGLE ------------------------
 			-- Set button text alignment and frame padding
 			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
@@ -424,7 +426,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
 
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
@@ -443,7 +445,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggle distant fog plane.")
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local clouds, changed = ImGui.Checkbox('Clouds', clouds)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
@@ -498,7 +500,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Nvidia Realtime Denoiser")
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local toggleDLSSDPT, changed = ImGui.Checkbox('DLSSDPT', toggleDLSSDPT)
 				if changed then
 					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", toggleDLSSDPT)
@@ -514,7 +516,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
@@ -536,7 +538,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local rain, changed = ImGui.Checkbox('SS Rain', rain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rain)
@@ -556,7 +558,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local filmGrain, changed = ImGui.Checkbox('Film Grain', filmGrain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", filmGrain)
@@ -570,7 +572,7 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles depth of field.")
-				ImGui.SameLine(140)
+				ImGui.SameLine(toggleSpacingXValue)
 				local motionBlur, changed = ImGui.Checkbox('Motion Blur', motionBlur)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", motionBlur)
@@ -656,9 +658,14 @@ function DrawButtons()
 
 				ImGui.PushItemWidth(185)
 				ImGui.Dummy(0, dummySpacingYValue)
-				ImGui.Text("Adjust Game Time:                " .. timeLabel)
+				ImGui.Text("Adjust Game Time:")
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 4) -- Slider height
+				ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel) + 5)
+				ImGui.Text(timeLabel)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
+
+				
 
 				-- Set the width of the slider to the width of the window minus the padding
 				local windowWidth = ImGui.GetWindowWidth()
@@ -678,8 +685,10 @@ function DrawButtons()
 
 				-- Add a new section for weather transition duration presets
 				ImGui.Dummy(0, 25)
-				ImGui.Text("Weather Transition Duration:         " ..
-				tostring(settings.Current.transitionDuration) .. "s")
+				ImGui.Text("Weather Transition Duration:")
+
+		ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - 10)
+		ImGui.Text(tostring(settings.Current.transitionDuration) .. "s")
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
@@ -818,6 +827,12 @@ function DrawTimeSliderWindow()
 			timeScale = 1.0
 			Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(false)
 			Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+			if settings.Current.warningMessages then
+				ShowWarningMessage("Time scale reset!")
+			end
+			if settings.Current.notificationMessages then
+				ShowNotificationMessage("Time scale reset!")
+			end
 		end
 		ui.tooltip("Reset time scale to 1")
 		ImGui.SameLine()
@@ -850,10 +865,22 @@ function DrawTimeSliderWindow()
 		if timeScale == 0 then
 			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
 			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-			if ImGui.Button(IconGlyphs.Snowflake, glyphButtonWidth, glyphButtonHeight + 2) then
+			if ImGui.Button(IconGlyphs.Snowflake, glyphButtonWidth, glyphButtonHeight) then
 				if timeScale == 0 then
 					timeScale = previousTimeScale or 1.0
+					if settings.Current.warningMessages then
+						ShowWarningMessage("Time resumed at "..previousTimeScale.."x speed!")
+					end
+					if settings.Current.notificationMessages then
+						ShowNotificationMessage("Time resumed at "..previousTimeScale.."x speed!")
+					end
 				else
+					if settings.Current.warningMessages then
+						ShowWarningMessage("Time frozen!")
+					end
+					if settings.Current.notificationMessages then
+						ShowNotificationMessage("Time frozen!")
+					end
 					previousTimeScale = timeScale
 					timeScale = 0
 				end
@@ -866,10 +893,22 @@ function DrawTimeSliderWindow()
 			end
 			ImGui.PopStyleColor(2)
 		else
-			if ImGui.Button(IconGlyphs.Snowflake, glyphButtonWidth, glyphButtonHeight + 2) then
+			if ImGui.Button(IconGlyphs.Snowflake, glyphButtonWidth, glyphButtonHeight) then
 				if timeScale == 0 then
 					timeScale = previousTimeScale or 1.0
+					if settings.Current.warningMessages then
+						ShowWarningMessage("Time resumed at "..previousTimeScale.."x speed!")
+					end
+					if settings.Current.notificationMessages then
+						ShowNotificationMessage("Time resumed at "..previousTimeScale.."x speed!")
+					end
 				else
+					if settings.Current.warningMessages then
+						ShowWarningMessage("Time frozen!")
+					end
+					if settings.Current.notificationMessages then
+						ShowNotificationMessage("Time frozen!")
+					end
 					previousTimeScale = timeScale
 					timeScale = 0
 				end
