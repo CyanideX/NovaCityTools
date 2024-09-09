@@ -30,6 +30,7 @@ local hasResetOrForced = false
 local weatherReset = false
 local resetWindow = false
 local currentWeatherState = nil
+local timeScale = 1.0
 
 local weatherStateNames = {}
 
@@ -52,89 +53,90 @@ local settings =
 }
 
 local ui = {
-    tooltip = function(text)
-        if ImGui.IsItemHovered() and text ~= "" then
-            ImGui.BeginTooltip()
-            ImGui.SetTooltip(text)
-            ImGui.EndTooltip()
-        end
-    end
+	tooltip = function(text)
+		if ImGui.IsItemHovered() and text ~= "" then
+			ImGui.BeginTooltip()
+			ImGui.SetTooltip(text)
+			ImGui.EndTooltip()
+		end
+	end
 }
 
 -- Define the weather states
 local weatherStates = {
 	-- Each state is defined by a list containing the state's ID, name, category, and a flag indicating if it enables DLSSDSeparateParticleColor
-    {'24h_weather_sunny', 'Sunny', 1, false},
-    {'24h_weather_light_clouds', 'Light Clouds', 1, false},
-    {'24h_weather_cloudy', 'Clouds', 1, false},
-    {'24h_weather_heavy_clouds', 'Heavy Clouds', 1, false},
-    {'24h_weather_fog', 'Fog', 1, false},
-    {'24h_weather_rain', 'Rain', 1, true},
-    {'24h_weather_toxic_rain', 'Toxic Rain', 1, true},
-    {'24h_weather_pollution', 'Pollution', 1, false},
-    {'24h_weather_sandstorm', 'Sandstorm', 1, true},
-    {'q302_light_rain', 'Rain (Quest)', 1, true},
-    {'24h_weather_fog_dense', 'Dense Fog', 2, false},
-    {'24h_weather_dew', 'Dew', 2, true},
-    {'24h_weather_haze', 'Haze', 2, false},
-    {'24h_weather_haze_heavy', 'Heavy Haze', 2, false},
-    {'24h_weather_haze_pollution', 'Haze Pollution', 2, false},
-    {'24h_weather_smog', 'Smog', 2, false},
-    {'24h_weather_clear', 'Sunny (Clear)', 2, true},
-    {'24h_weather_drizzle', 'Drizzle', 2, true},
-    {'24h_weather_windy', 'Windy', 2, true},
-    {'24h_weather_sunny_windy', 'Sunny Windy', 2, true},
-    {'24h_weather_storm', 'Rain (Storm)', 2, true},
-    {'24h_weather_overcast', 'Overcast', 2, false},
-    {'24h_weather_drought', 'Drought', 2, false},
-    {'24h_weather_humid', 'Humid', 2, false},
-    {'24h_weather_fog_wet', 'Wet Fog', 3, true},
-    {'24h_weather_fog_heavy', 'Heavy Fog', 3, false},
-    {'24h_weather_sunny_sunset', 'Sunset', 3, false},
-    {'24h_weather_drizzle_light', 'Light Drizzle', 3, true},
-    {'24h_weather_light_rain', 'Light Rain', 3, true},
-    {'24h_weather_rain_alt_1', 'Rain (Alt 1)', 3, true},
-    {'24h_weather_rain_alt_2', 'Rain (Alt 2)', 3, true},
-    {'24h_weather_mist', 'Fog (Mist)', 3, true},
-    {'24h_weather_courier_clouds', 'Dense Clouds', 3, false},
-    {'24h_weather_downpour', 'Downpour', 4, true},
-    {'24h_weather_drizzle_heavy', 'Heavy Drizzle', 4, true},
-    {'24h_weather_distant_rain', 'Rain (Distant)', 4, true},
-    {'24h_weather_sky_softbox', 'Softbox', 5, false},
-    {'24h_weather_blackout', 'Blackout', 5, false},
-    {'24h_weather_showroom', 'Showroom', 5, false}
+ -- { '24h_weather_state_name',     'Localized Name', Category, DLSSD Flag}
+	{ '24h_weather_sunny',          'Sunny',          1, 		false },
+	{ '24h_weather_light_clouds',   'Light Clouds',   1, 		false },
+	{ '24h_weather_cloudy',         'Clouds',         1, 		false },
+	{ '24h_weather_heavy_clouds',   'Heavy Clouds',   1, 		false },
+	{ '24h_weather_fog',            'Fog',            1, 		false },
+	{ '24h_weather_rain',           'Rain',           1, 		true },
+	{ '24h_weather_toxic_rain',     'Toxic Rain',     1, 		true },
+	{ '24h_weather_pollution',      'Pollution',      1, 		false },
+	{ '24h_weather_sandstorm',      'Sandstorm',      1, 		true },
+	{ 'q302_light_rain',            'Rain (Quest)',   1, 		true },
+	{ '24h_weather_fog_dense',      'Dense Fog',      2, 		false },
+	{ '24h_weather_dew',            'Dew',            2, 		true },
+	{ '24h_weather_haze',           'Haze',           2, 		false },
+	{ '24h_weather_haze_heavy',     'Heavy Haze',     2, 		false },
+	{ '24h_weather_haze_pollution', 'Haze Pollution', 2, 		false },
+	{ '24h_weather_smog',           'Smog',           2, 		false },
+	{ '24h_weather_clear',          'Sunny (Clear)',  2, 		true },
+	{ '24h_weather_drizzle',        'Drizzle',        2, 		true },
+	{ '24h_weather_windy',          'Windy',          2, 		true },
+	{ '24h_weather_sunny_windy',    'Sunny Windy',    2, 		true },
+	{ '24h_weather_storm',          'Rain (Storm)',   2, 		true },
+	{ '24h_weather_overcast',       'Overcast',       2, 		false },
+	{ '24h_weather_drought',        'Drought',        2, 		false },
+	{ '24h_weather_humid',          'Humid',          2, 		false },
+	{ '24h_weather_fog_wet',        'Wet Fog',        3, 		true },
+	{ '24h_weather_fog_heavy',      'Heavy Fog',      3, 		false },
+	{ '24h_weather_sunny_sunset',   'Sunset',         3, 		false },
+	{ '24h_weather_drizzle_light',  'Light Drizzle',  3, 		true },
+	{ '24h_weather_light_rain',     'Light Rain',     3, 		true },
+	{ '24h_weather_rain_alt_1',     'Rain (Alt 1)',   3, 		true },
+	{ '24h_weather_rain_alt_2',     'Rain (Alt 2)',   3, 		true },
+	{ '24h_weather_mist',           'Fog (Mist)',     3, 		true },
+	{ '24h_weather_courier_clouds', 'Dense Clouds',   3, 		false },
+	{ '24h_weather_downpour',       'Downpour',       4, 		true },
+	{ '24h_weather_drizzle_heavy',  'Heavy Drizzle',  4, 		true },
+	{ '24h_weather_distant_rain',   'Rain (Distant)', 4, 		true },
+	{ '24h_weather_sky_softbox',    'Softbox',        5, 		false },
+	{ '24h_weather_blackout',       'Blackout',       5, 		false },
+	{ '24h_weather_showroom',       'Showroom',       5, 		false }
 }
 
 function setResolutionPresets(width, height)
 	local presets = {
-	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12, 13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30 },
-		{ 3840, 2160, 10, 6, 1, 1, 1, 1, 1, 1,  0.7,  24, 36, 36, 0.7,  1,  6,  320, 33, 12, 6,  650, 280, 280, 15,   5,  8,  10, 42, 37  },
-		{ 2560, 1440, 8,  6, 1, 2, 1, 1, 1, 1,  0.45, 20, 32, 28, 0.85, 1,  8,  310, 29, 10, 4,  500, 200, 200, 9.5,  8,  6,  10, 29, 30  },
-		{ 1920, 1080, 5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5,  9,  8,  10, 29, 30  },
-		{ 0,    0,    5,  4, 1, 4, 1, 1, 1, 1,  0.5,  18, 24, 24, 0.85, 1,  0,  300, 21, 8,  4,  400, 160, 160, 7.5,  10, 10, 10, 29, 30  },
+	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31 },
+		{ 3840, 2160, 10, 6, 1, 1, 6, 7, 1, 1,  0.7,  140, 36, 36, 0.7,  1,  6,  320, 33, 12, 6,  650, 280, 375, 15,   5,  8,  10, 42, 37, 22 },
+		{ 2560, 1440, 8,  6, 1, 2, 6, 7, 1, 1,  0.45, 140, 28, 28, 0.85, 1,  8,  310, 29, 10, 4,  500, 200, 280, 9.5,  8,  6,  10, 32, 30, 18 },
+		{ 1920, 1080, 5,  4, 1, 4, 6, 7, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 29, 30, 16 },
+		{ 0,    0,    5,  4, 1, 4, 6, 7, 1, 1,  0.5,  120, 24, 24, 0.85, 1,  0,  261, 21, 8,  4,  400, 163, 228, 7.5,  9,  8,  10, 29, 30, 16 }
 	}
 
-    for _, preset in ipairs(presets) do
-        if width >= preset[1] and height >= preset[2] then
-            itemSpacingXValue = preset[3]
-            itemSpacingYValue = preset[4]
-            framePaddingXValue = preset[5]
-            framePaddingYValue = preset[6]
-            glyphFramePaddingXValue = preset[7]
-            glyphFramePaddingYValue = preset[8]
-            glyphItemSpacingXValue = preset[9]
-            glyphItemSpacingYValue = preset[10]
-            glyphAlignYValue = preset[11]
-            invisibleButtonWidth = preset[12]
-            invisibleButtonHeight = preset[13]
-            buttonHeight = preset[14]
-            customFontScale = preset[15]
-            defaultFontScale = preset[16]
-            dummySpacingYValue = preset[17]
-            uiMinWidth = preset[18]
-            buttonPaddingRight = preset[19]
-            searchPaddingXValue = preset[20]
-            searchPaddingYValue = preset[21]
+	for _, preset in ipairs(presets) do
+		if width >= preset[1] and height >= preset[2] then
+			itemSpacingXValue = preset[3]
+			itemSpacingYValue = preset[4]
+			framePaddingXValue = preset[5]
+			framePaddingYValue = preset[6]
+			glyphFramePaddingXValue = preset[7]
+			glyphFramePaddingYValue = preset[8]
+			glyphItemSpacingXValue = preset[9]
+			glyphItemSpacingYValue = preset[10]
+			glyphAlignYValue = preset[11]
+			buttonWidth = preset[12]
+			buttonHeight = preset[13]
+			unused = preset[14]
+			customFontScale = preset[15]
+			defaultFontScale = preset[16]
+			dummySpacingYValue = preset[17]
+			uiMinWidth = preset[18]
+			buttonPaddingRight = preset[19]
+			searchPaddingXValue = preset[20]
+			searchPaddingYValue = preset[21]
 			uiTimeMinWidth = preset[22]
 			uiTimeMinHeight = preset[23]
 			uiTimeMaxHeight = preset[24]
@@ -144,49 +146,52 @@ function setResolutionPresets(width, height)
 			itemTabSpacingYValue = preset[28]
 			glyphButtonWidth = preset[29]
 			glyphButtonHeight = preset[30]
-            break
-        end
-    end
+			timeSliderPadding = preset[31]
+			break
+		end
+	end
 end
 
 function DrawWeatherControl()
-    ImGui.Dummy(0, dummySpacingYValue)
-    ImGui.Separator()
-    ImGui.Text("Weather Control:")
+	ImGui.Dummy(0, dummySpacingYValue)
+	ImGui.Separator()
+	ImGui.Text("Weather Control:")
 
-    if ImGui.Button('Reset Weather', 290, 30) then
-        Game.GetWeatherSystem():ResetWeather(true)
-        settings.Current.weatherState = 'None'
-        -- settings.Current.nativeWeather = 1
-        Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
-        GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-        toggleDLSSDPT = true
-        SaveSettings()
-        weatherReset = true
-    end
+	-- Make the reset button fit the width of the GUI
+	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
+	if ImGui.Button('Reset Weather', resetButtonWidth, 30) then
+		Game.GetWeatherSystem():ResetWeather(true)
+		settings.Current.weatherState = 'None'
+		-- settings.Current.nativeWeather = 1
+		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+		toggleDLSSDPT = true
+		SaveSettings()
+		weatherReset = true
+	end
 
-    ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
+	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
 
-    local selectedWeatherState = settings.Current.weatherState
-    if selectedWeatherState == 'None' then
-        selectedWeatherState = 'Default Cycles'
-    else
-        selectedWeatherState = 'Locked State'
-    end
-    ImGui.Text('Mode:  ' .. selectedWeatherState)
-    ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
+	local selectedWeatherState = settings.Current.weatherState
+	if selectedWeatherState == 'None' then
+		selectedWeatherState = 'Default Cycles'
+	else
+		selectedWeatherState = 'Locked State'
+	end
+	ImGui.Text("Mode:  " .. selectedWeatherState)
+	ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
 
-    ImGui.Text('State:')
-    ImGui.SameLine()
+	ImGui.Text("State:")
+	ImGui.SameLine()
 
-    local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-    for _, state in ipairs(weatherStates) do
-        if state[1] == currentWeatherState then
-            currentWeatherState = state[2]
-            break
-        end
-    end
-    ImGui.Text(currentWeatherState)
+	local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+	for _, state in ipairs(weatherStates) do
+		if state[1] == currentWeatherState then
+			currentWeatherState = state[2]
+			break
+		end
+	end
+	ImGui.Text(currentWeatherState)
 end
 
 registerForEvent("onUpdate", function()
@@ -221,59 +226,72 @@ registerForEvent("onUpdate", function()
 end)
 
 function DrawButtons()
-    -- Check if the CET window is open
-    if not cetOpen then
-        return
-    end
+	-- Check if the CET window is open
+	if not cetOpen then
+		return
+	end
 
-    -- Set window size constraints
-    ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
-    if resetWindow then
-        ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
-        ImGui.SetNextWindowSize(312, 1110, ImGuiCond.Always)
+	-- Set window size constraints
+	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
+	if resetWindow then
+		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
+		ImGui.SetNextWindowSize(312, 1110, ImGuiCond.Always)
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
-    	ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
-        resetWindow = false
-    end
-    if ImGui.Begin('Nova City Tools - v' .. version, true, ImGuiWindowFlags.NoScrollbar) then
-
-		-- Push style variables for frame padding and item spacing INSIDE the tabs
-        --ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
-        --ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemTabSpacingXValue, itemTabSpacingYValue)
-
+		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
+		resetWindow = false
+	end
+	if ImGui.Begin('Nova City Tools - v' .. version, true, ImGuiWindowFlags.NoScrollbar) then
 		-- Reset padding
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
+		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
 		-- Set the font scale for the window
-        ImGui.SetWindowFontScale(customFontScale)
+		ImGui.SetWindowFontScale(customFontScale)
 
 		local availableWidth = ImGui.GetContentRegionAvail() - buttonPaddingRight
 
-        if ImGui.BeginTabBar("Nova Tabs") then
-            
+		if ImGui.BeginTabBar("Nova Tabs") then
 			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize('XXX'))
 
-            --if ImGui.Button(">", 30, 29) then
+			-- Set button text alignment and frame padding
 			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
-            if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-				timeSliderWindowOpen = not timeSliderWindowOpen
-				settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-				SaveSettings()
+			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+
+			-- Create the button and toggle the time slider window
+			if timeSliderWindowOpen then
+				ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+					timeSliderWindowOpen = false
+					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+					SaveSettings()
+				end
+				ImGui.PopStyleColor(2)
+			else
+				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+					timeSliderWindowOpen = true
+					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+					SaveSettings()
+				end
 			end
+
+			-- Show tooltip
 			ui.tooltip("Toggles the time slider window.")
 
-            if ImGui.BeginTabItem("Weather") then
+			-- Reset style variables
+			ImGui.PopStyleVar(2)
 
+			if ImGui.BeginTabItem("Weather") then
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
-				
+
 				--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
-                local categories = {'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States', 'Creative'}
+				local categories = { 'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States',
+					'Creative' }
 				for i, category in ipairs(categories) do
 					ImGui.Text(category)
-					local buttonWidth = 140
+
 					local windowWidth = ImGui.GetWindowWidth()
 					local buttonsPerRow = math.floor(windowWidth / buttonWidth)
 					local buttonCount = 0
@@ -281,25 +299,27 @@ function DrawButtons()
 						local weatherState = state[1]
 						local localization = state[2]
 						local category = state[3]
-						local enableDLSSDPT = state[4]  -- Get the DLSSDSeparateParticleColor flag
+						local enableDLSSDPT = state[4] -- Get the DLSSDSeparateParticleColor flag
 						if category == i then
 							local isActive = settings.Current.weatherState == weatherState
 							if isActive then
 								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
 								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 							end
-							if ImGui.Button(localization, 140, buttonHeight) then
+							if ImGui.Button(localization, buttonWidth, buttonHeight) then
 								if isActive then
 									Game.GetWeatherSystem():ResetWeather(true)
 									settings.Current.weatherState = 'None'
-									Game.GetPlayer():SetWarningMessage("Weather reset to default cycles. \n\nWeather states will progress automatically.")
+									Game.GetPlayer():SetWarningMessage(
+									"Weather reset to default cycles. \n\nWeather states will progress automatically.")
 									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 									toggleDLSSDPT = true
 									weatherReset = true
 								else
 									Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 									settings.Current.weatherState = weatherState
-									Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+									Game.GetPlayer():SetWarningMessage("Locked weather state to " ..
+									localization:lower() .. "!")
 									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 									toggleDLSSDPT = enableDLSSDPT
 								end
@@ -308,28 +328,27 @@ function DrawButtons()
 							if isActive then
 								ImGui.PopStyleColor(2)
 							end
-							
+
 							buttonCount = buttonCount + 1
 							if buttonCount % buttonsPerRow ~= 0 then
 								ImGui.SameLine()
 							end
 						end
 					end
-					
+
 					if buttonCount % buttonsPerRow ~= 0 then
-						ImGui.NewLine()  -- Force a new line only if the last button is not on a new line
+						ImGui.NewLine() -- Force a new line only if the last button is not on a new line
 					end
 				end
-				
+
 				DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
 
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
-        	ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
+			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
 			if ImGui.BeginTabItem("Toggles") then
-
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue + 2)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
@@ -338,7 +357,7 @@ function DrawButtons()
 				ImGui.Text("Grouped Toggles:")
 				ImGui.Separator()
 
-				toggleFogClouds, changed = ImGui.Checkbox('ALL: Volumetrics and Clouds', toggleFogClouds)
+				local toggleFogClouds, changed = ImGui.Checkbox('ALL: Volumetrics and Clouds', toggleFogClouds)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFogClouds)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFogClouds)
@@ -360,9 +379,10 @@ function DrawButtons()
 					distantFog = toggleFog
 					SaveSettings()
 				end
-				ui.tooltip("Toggles all fog and clouds: volumetric, distant volumetric, distant fog planes, and volumetric clouds.")
+				ui.tooltip(
+					"Toggles all fog and clouds: volumetric, distant volumetric, distant fog planes, and volumetric clouds.")
 
-				toggleFog, changed = ImGui.Checkbox('ALL: Fog', toggleFog)
+				local toggleFog, changed = ImGui.Checkbox('ALL: Fog', toggleFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
@@ -383,12 +403,12 @@ function DrawButtons()
 					end
 				end
 				ui.tooltip("Toggles all fog types: volumetric, distant volumetric, and distant fog plane.")
-				
+
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Weather:")
 				ImGui.Separator()
-				
-				volumetricFog, changed = ImGui.Checkbox('VFog', volumetricFog)
+
+				local volumetricFog, changed = ImGui.Checkbox('VFog', volumetricFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", volumetricFog)
 					SaveSettings()
@@ -403,8 +423,9 @@ function DrawButtons()
 					end
 				end
 				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
+
 				ImGui.SameLine(140)
-				distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
+				local distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
 					SaveSettings()
@@ -415,15 +436,15 @@ function DrawButtons()
 					end
 				end
 				ui.tooltip("Toggle distant volumetric fog. Also enables VFog if it's disabled.")
-				
-				distantFog, changed = ImGui.Checkbox('Fog', distantFog)
+
+				local distantFog, changed = ImGui.Checkbox('Fog', distantFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", distantFog)
 					SaveSettings()
 				end
 				ui.tooltip("Toggle distant fog plane.")
 				ImGui.SameLine(140)
-				clouds, changed = ImGui.Checkbox('Clouds', clouds)
+				local clouds, changed = ImGui.Checkbox('Clouds', clouds)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
 					SaveSettings()
@@ -470,22 +491,22 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Features:")
 				ImGui.Separator()
-				
-				toggleNRD, changed = ImGui.Checkbox('NRD', toggleNRD)
+
+				local toggleNRD, changed = ImGui.Checkbox('NRD', toggleNRD)
 				if changed then
-					GameOptions.SetBool("RayTracing","EnableNRD", toggleNRD)
+					GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
 					SaveSettings()
 				end
 				ui.tooltip("Nvidia Realtime Denoiser")
 				ImGui.SameLine(140)
-				toggleDLSSDPT, changed = ImGui.Checkbox('DLSSDPT', toggleDLSSDPT)
+				local toggleDLSSDPT, changed = ImGui.Checkbox('DLSSDPT', toggleDLSSDPT)
 				if changed then
-					GameOptions.SetBool("Rendering","DLSSDSeparateParticleColor", toggleDLSSDPT)
+					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", toggleDLSSDPT)
 					SaveSettings()
 				end
 				ui.tooltip("DLSSD Separate Particle Color - Disabling will reduce \ndistant shimmering but also makes other paricles invisible \nlike rain and debris particles. Disabling is not recommended. \nManually selecting a weather state will enable or disable \nthis as needed.")
 
-				bloom, changed = ImGui.Checkbox('Bloom', bloom)
+				local bloom, changed = ImGui.Checkbox('Bloom', bloom)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
 					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom)
@@ -494,7 +515,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
 				ImGui.SameLine(140)
-				lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
+				local lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
 					SaveSettings()
@@ -507,7 +528,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles lens flare effect.")
 
-				rainMap, changed = ImGui.Checkbox('Weather', rainMap)
+				local rainMap, changed = ImGui.Checkbox('Weather', rainMap)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", rainMap)
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rainMap)
@@ -516,7 +537,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
 				ImGui.SameLine(140)
-				rain, changed = ImGui.Checkbox('SS Rain', rain)
+				local rain, changed = ImGui.Checkbox('SS Rain', rain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rain)
 					SaveSettings()
@@ -529,37 +550,37 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles screenspace rain effects, removing wet surfaces.")
 
-				chromaticAberration, changed = ImGui.Checkbox('CA', chromaticAberration)
+				local chromaticAberration, changed = ImGui.Checkbox('CA', chromaticAberration)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","ChromaticAberration", chromaticAberration)
+					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", chromaticAberration)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
 				ImGui.SameLine(140)
-				filmGrain, changed = ImGui.Checkbox('Film Grain', filmGrain)
+				local filmGrain, changed = ImGui.Checkbox('Film Grain', filmGrain)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","FilmGrain", filmGrain)
+					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", filmGrain)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles film grain.")
 
-				DOF, changed = ImGui.Checkbox('DOF', DOF)
+				local DOF, changed = ImGui.Checkbox('DOF', DOF)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","DepthOfField", DOF)
+					GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", DOF)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles depth of field.")
 				ImGui.SameLine(140)
-				motionBlur, changed = ImGui.Checkbox('Motion Blur', motionBlur)
+				local motionBlur, changed = ImGui.Checkbox('Motion Blur', motionBlur)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","MotionBlur", motionBlur)
+					GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", motionBlur)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles motion blur.")
 
-				RIS, changed = ImGui.Checkbox('RIS', RIS)
+				local RIS, changed = ImGui.Checkbox('RIS', RIS)
 				if changed then
-					GameOptions.SetBool("RayTracing/Reference","EnableRIS", RIS)
+					GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles Resampled Importance Sampling.")
@@ -567,26 +588,26 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Utility:")
 				ImGui.Separator()
-				vehicleCollisions, changed = ImGui.Checkbox('Vehicle Collisions', vehicleCollisions)
+				local vehicleCollisions, changed = ImGui.Checkbox('Vehicle Collisions', vehicleCollisions)
 				if changed then
-					GameOptions.SetBool("Vehicle","vehicleVsVehicleCollisions", vehicleCollisions)
+					GameOptions.SetBool("Vehicle", "vehicleVsVehicleCollisions", vehicleCollisions)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles vehicle collisions. Great for driving through \n Night City with Nova City Population density!")
-				crowdSpawning, changed = ImGui.Checkbox('Crowd Spawning', crowdSpawning)
+				local crowdSpawning, changed = ImGui.Checkbox('Crowd Spawning', crowdSpawning)
 				if changed then
-					GameOptions.SetBool("Crowd","Enabled", crowdSpawning)
+					GameOptions.SetBool("Crowd", "Enabled", crowdSpawning)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles vehicle spawning.")
-				stopVehicleSpawning, changed = ImGui.Checkbox('Vehicle Spawning', stopVehicleSpawning)
+				local stopVehicleSpawning, changed = ImGui.Checkbox('Vehicle Spawning', stopVehicleSpawning)
 				if changed then
 					if stopVehicleSpawning then
-						GameOptions.SetBool("Traffic","StopSpawn", false)
+						GameOptions.SetBool("Traffic", "StopSpawn", false)
 						vehicleSpawning = true
 						SaveSettings()
 					else
-						GameOptions.SetBool("Traffic","StopSpawn", true)
+						GameOptions.SetBool("Traffic", "StopSpawn", true)
 						vehicleSpawning = false
 						SaveSettings()
 					end
@@ -596,19 +617,20 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Useless Toggles:")
 				ImGui.Separator()
-				tonemapping, changed = ImGui.Checkbox('Tonemapping', tonemapping)
+				local tonemapping, changed = ImGui.Checkbox('Tonemapping', tonemapping)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles","Tonemapping", tonemapping)
+					GameOptions.SetBool("Developer/FeatureToggles", "Tonemapping", tonemapping)
 					SaveSettings()
 				end
 				ui.tooltip("This toggle serves absolutely no purpose and toggling \n it does nothing but make the game look bad and kills \n a puppy each time you do.")
 
-				graphics, changed = ImGui.Checkbox('gRaPhiCs', graphics)
+					local graphics, changed = ImGui.Checkbox('gRaPhiCs', graphics)
 				if changed then
-					GameOptions.SetBool("","", graphics)
+					GameOptions.SetBool("", "", graphics)
 					SaveSettings()
 				end
 				ui.tooltip("Coming soon.")
+
 				--DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
@@ -618,77 +640,77 @@ function DrawButtons()
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
 			if ImGui.BeginTabItem("Misc") then
-
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
-				
+
 				-- Convert the current game time to minutes past midnight
 				local currentTime = Game.GetTimeSystem():GetGameTime()
 				local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
 				-- Convert the total minutes to a 12-hour format
 				local hours12 = math.floor(totalMinutes / 60) % 12
-				if hours12 == 0 then hours12 = 12 end  -- Convert 0 to 12
+				if hours12 == 0 then hours12 = 12 end -- Convert 0 to 12
 				local mins = totalMinutes % 60
 				local amPm = math.floor(totalMinutes / 60) < 12 and 'AM' or 'PM'
 				local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
 
 				ImGui.PushItemWidth(185)
 				ImGui.Dummy(0, dummySpacingYValue)
-				ImGui.Text('Adjust Game Time:                ' .. timeLabel)
+				ImGui.Text("Adjust Game Time:                " .. timeLabel)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
 				-- Set the width of the slider to the width of the window minus the padding
 				local windowWidth = ImGui.GetWindowWidth()
-				local padding = 22  -- Adjust this value as needed
-				ImGui.PushItemWidth(windowWidth - padding)
+				ImGui.PushItemWidth(windowWidth - timeSliderPadding)
 
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
 
 				-- Create a slider for the total minutes
 				totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
 				if changed then
-					if totalMinutes < 1439 then
-						local hours = math.floor(totalMinutes / 60)
-						local mins = totalMinutes % 60
-						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-					else
-						local hours = math.floor(totalMinutes / 60)
-						local mins = totalMinutes % 60 + 1
-						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-					end
+					local hours = math.floor(totalMinutes / 60)
+					local mins = totalMinutes % 60
+					Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
 				end
 
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue) -- Reset padding
-				
-				--[[ if ImGui.Button('Toggle Time Slider Window', 290, 30) then
-					timeSliderWindowOpen = not timeSliderWindowOpen
-					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-					SaveSettings()
-				end ]]
 
 				-- Add a new section for weather transition duration presets
 				ImGui.Dummy(0, 25)
-				ImGui.Text("Weather Transition Duration:         "  .. tostring(settings.Current.transitionDuration) .. "s")
+				ImGui.Text("Weather Transition Duration:         " ..
+				tostring(settings.Current.transitionDuration) .. "s")
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
-				
+
 				-- Define the preset durations
-				local durations = {0, 5, 10, 15, 30}
+				local durations = { 0, 5, 10, 15, 30 }
+
+				-- Calculate the button width based on the available width
+				local buttonWidth = (ImGui.GetWindowContentRegionWidth() - (#durations - 1) * ImGui.GetStyle().ItemSpacing.x) /
+				#durations
 
 				-- Create a button for each preset duration
 				for _, duration in ipairs(durations) do
-					if ImGui.Button(tostring(duration) .. 's', 49, buttonHeight) then
+					if settings.Current.transitionDuration == duration then
+						ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+						ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+					end
+					if ImGui.Button(tostring(duration) .. 's', buttonWidth, buttonHeight) then
 						settings.Current.transitionDuration = duration
-						settings.transitionTime = duration  -- Update transitionTime
+						settings.transitionTime = duration -- Update transitionTime
 						SaveSettings()
+					end
+					if settings.Current.transitionDuration == duration then
+						ImGui.PopStyleColor(2)
 					end
 					ImGui.SameLine()
 				end
 
+				ImGui.NewLine() -- Move to the next line after the last button
+
 				ImGui.Dummy(0, 50)
-				ImGui.Text('Weather state notifications:')
+				ImGui.Text("Weather state notifications:")
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
@@ -697,27 +719,28 @@ function DrawButtons()
 				if changed then
 					SaveSettings()
 				end
-				ui.tooltip(
-				"Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
+				ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 				settings.Current.notificationMessages, changed = ImGui.Checkbox('Notification',
 					settings.Current.notificationMessages)
 				if changed then
 					SaveSettings()
 				end
-				ui.tooltip(
-				"Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
+				ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
 				ImGui.Dummy(0, 50)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				if ImGui.Button('Reset GUI', 290, buttonHeight) then
+				-- Make the reset button fit the width of the GUI
+				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
+				if ImGui.Button('Reset GUI', resetButtonWidth, buttonHeight) then
 					resetWindow = true
 				end
 				ui.tooltip("Reset GUI to default position and size.")
 				--DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
+
 			ImGui.EndTabBar()
 		end
 		ImGui.End()
@@ -725,98 +748,180 @@ function DrawButtons()
 end
 
 function DrawTimeSliderWindow()
-    if not cetOpen or not timeSliderWindowOpen then
-        return
-    end
+	if not cetOpen or not timeSliderWindowOpen then
+		return
+	end
 
+	-- Set window size constraints and position
 	ImGui.SetNextWindowSizeConstraints(uiTimeMinWidth, uiTimeMinHeight, width / 100 * 99, uiTimeMaxHeight)
-	
-    ImGui.SetNextWindowPos(100, 100, ImGuiCond.FirstUseEver)
-    ImGui.SetNextWindowSize(320, 120, ImGuiCond.FirstUseEver)
-	
-    if ImGui.Begin('Time Slider', ImGuiWindowFlags.NoScrollbar) then
-        -- Set the custom font scale
-        ImGui.SetWindowFontScale(customFontScale)
+	ImGui.SetNextWindowPos(200, 200, ImGuiCond.FirstUseEver)
+	ImGui.SetNextWindowSize(200, 280, ImGuiCond.FirstUseEver)
 
-        local currentTime = Game.GetTimeSystem():GetGameTime()
-        local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
-        local hours12 = math.floor(totalMinutes / 60) % 12
-        if hours12 == 0 then hours12 = 12 end
-        local mins = totalMinutes % 60
-        local amPm = math.floor(totalMinutes / 60) < 12 and 'AM' or 'PM'
-        local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
+	if ImGui.Begin('Time Slider', ImGuiWindowFlags.NoScrollbar) then
+		-- Set the custom font scale
+		ImGui.SetWindowFontScale(customFontScale)
 
-        ImGui.Text('Adjust Game Time:')
+		-- Get current game time
+		local currentTime = Game.GetTimeSystem():GetGameTime()
+		local totalMinutes = currentTime:Hours() * 60 + currentTime:Minutes()
+		local hours12 = math.floor(totalMinutes / 60) % 12
+		if hours12 == 0 then hours12 = 12 end
+		local mins = totalMinutes % 60
+		local amPm = math.floor(totalMinutes / 60) < 12 and 'AM' or 'PM'
+		local timeLabel = string.format('%02d:%02d %s', hours12, mins, amPm)
 
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10) -- Slider height
-        ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
-        ImGui.Text(timeLabel)
-        ImGui.Separator()
-        ImGui.SetNextItemWidth(-1)
-        totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
-        if changed then
-            if totalMinutes < 1439 then
-                local hours = math.floor(totalMinutes / 60)
-                local mins = totalMinutes % 60
-                Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-            else
-                local hours = math.floor(totalMinutes / 60)
-                local mins = totalMinutes % 60 + 1
-                Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-            end
-        end
-
+		ImGui.Text("Adjust Game Time:")
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 4) -- Slider height
+		ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
+		ImGui.Text(timeLabel)
+		ImGui.SetNextItemWidth(-1)
+		totalMinutes, changed = ImGui.SliderInt('##', totalMinutes, 0, 24 * 60 - 1)
+		if changed then
+			--local hours = math.floor(totalMinutes / 60)
+			--local mins = totalMinutes % 60
+			--Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+			if totalMinutes < 1439 then
+				local hours = math.floor(totalMinutes / 60)
+				local mins = totalMinutes % 60
+				Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+			else
+				local hours = math.floor(totalMinutes / 60)
+				local mins = totalMinutes % 60 + 1
+				Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
+			end
+		end
 		ImGui.PopStyleVar(1) -- Reset padding
 
-        -- Add hour buttons
-        ImGui.Separator()
-        ImGui.Text('Set Hour:')
-        local buttonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
-        for i = 1, 24 do
-            if ImGui.Button(tostring(i), buttonWidth, buttonHeight) then
-                local hours = i
-                local mins = 0
-                Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
-            end
-            if i % 12 ~= 0 then
-                ImGui.SameLine()
-            end
-        end
+		-- Add hour buttons
+		ImGui.Dummy(0, 2)
+		ImGui.Separator()
+		ImGui.Text("Set Hour:")
+		local buttonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
+		for i = 1, 24 do
+			if ImGui.Button(tostring(i), buttonWidth, buttonHeight) then
+				Game.GetTimeSystem():SetGameTimeByHMS(i, 0, secs)
+			end
+			if i % 12 ~= 0 then
+				ImGui.SameLine()
+			end
+		end
 
-        ImGui.End()
-    end
+		ImGui.Dummy(0, 4)
+		-- Add time scale slider
+		ImGui.Separator()
+		ImGui.Text("Time Scale:")
+
+		-- Add reset button
+		ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue - 0.5, glyphFramePaddingYValue)
+		if ImGui.Button(IconGlyphs.History, glyphButtonWidth, glyphButtonHeight) then
+			timeScale = 1.0
+			Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(false)
+			Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+		end
+		ui.tooltip("Reset time scale to 1")
+		ImGui.SameLine()
+
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 6) -- Slider height
+
+		-- Calculate available width for the slider
+		local availableWidth = ImGui.GetWindowContentRegionWidth() - 2 * glyphButtonWidth -
+		2 * ImGui.GetStyle().ItemSpacing.x - 4
+		ImGui.SetNextItemWidth(availableWidth)
+		timeScale, changed = ImGui.SliderFloat('##TimeScale', timeScale, 0.001, 10.0, '%.003f')
+		if changed then
+			Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+			if timeScale == 1 then
+				Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+			else
+				Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+			end
+		end
+		ui.tooltip("Scaling above 1.0 does not affect vehicles.\n0.001 is REALLY slow but it's working, I promise.")
+
+		ImGui.PopStyleVar(3) -- Reset slider height
+
+		-- Add snowflake button
+		ImGui.SameLine()
+
+		ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+
+		if timeScale == 0 then
+			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+			if ImGui.Button(IconGlyphs.Snowflake, glyphButtonWidth, glyphButtonHeight + 2) then
+				if timeScale == 0 then
+					timeScale = previousTimeScale or 1.0
+				else
+					previousTimeScale = timeScale
+					timeScale = 0
+				end
+				Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+				if timeScale == 1 then
+					Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+				else
+					Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+				end
+			end
+			ImGui.PopStyleColor(2)
+		else
+			if ImGui.Button(IconGlyphs.Snowflake, glyphButtonWidth, glyphButtonHeight + 2) then
+				if timeScale == 0 then
+					timeScale = previousTimeScale or 1.0
+				else
+					previousTimeScale = timeScale
+					timeScale = 0
+				end
+				Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+				if timeScale == 1 then
+					Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+				else
+					Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+				end
+			end
+		end
+
+		ui.tooltip("Freeze time (toggle)")
+
+		ImGui.PopStyleVar(2)
+
+		ImGui.End()
+	end
 end
 
 function ShowWarningMessage(message)
-    if settings.Current.warningMessages == false then return end
-    local text = SimpleScreenMessage.new()
-    text.duration = 1.0
-    text.message = message
-    text.isInstant = true
-    text.isShown = true
-    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(text), true)
+	if settings.Current.warningMessages == false then return end
+	local text = SimpleScreenMessage.new()
+	text.duration = 1.0
+	text.message = message
+	text.isInstant = true
+	text.isShown = true
+	Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(
+		GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(text), true)
 end
 
 function ShowNotificationMessage(message)
-    if settings.Current.notificationMessages == false then return end
-    local text = SimpleScreenMessage.new()
-    text.duration = 4.0
-    text.message = message
-    text.isInstant = true
-    text.isShown = true
-    Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
+	if settings.Current.notificationMessages == false then return end
+	local text = SimpleScreenMessage.new()
+	text.duration = 4.0
+	text.message = message
+	text.isInstant = true
+	text.isShown = true
+	Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(
+		GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
 end
 
 registerForEvent("onInit", function()
-    LoadSettings()
+	LoadSettings()
 
-    -- Create a mapping from weather state IDs to localized names
-    for _, weatherState in ipairs(weatherStates) do
-        local id, localization = table.unpack(weatherState)
-        weatherStateNames[id] = localization
-    end
+	-- Create a mapping from weather state IDs to localized names
+	for _, weatherState in ipairs(weatherStates) do
+		local id, localization = table.unpack(weatherState)
+		weatherStateNames[id] = localization
+	end
 
-    --[[ -- Handle session start
+	--[[ -- Handle session start
     GameUI.OnSessionStart(function()
         Cron.After(0.25, function()
             -- Apply active weather state
@@ -830,24 +935,22 @@ registerForEvent("onInit", function()
     GameUI.OnSessionEnd(function()
         -- Handle end
     end) ]]
-
 end)
 
-
 registerForEvent('onDraw', function()
-    if timeSliderWindowOpen == true then
-        DrawTimeSliderWindow()
-    end
-    DrawButtons()
+	if timeSliderWindowOpen == true then
+		DrawTimeSliderWindow()
+	end
+	DrawButtons()
 end)
 
 registerForEvent('onOverlayOpen', function()
 	LoadSettings()
 	cetOpen = true
-    width, height = GetDisplayResolution()
-    setResolutionPresets(width, height)
-	
-   --[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+	width, height = GetDisplayResolution()
+	setResolutionPresets(width, height)
+
+	--[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
     local selectedWeatherState = settings.Current.weatherState
     if selectedWeatherState == 'Locked State' then
         settings.Current.weatherState = currentWeatherState
@@ -866,23 +969,22 @@ registerForEvent('onOverlayClose', function()
 end)
 
 function SaveSettings()
-    local saveData = {
-        transitionDuration = settings.Current.transitionDuration,
-        timeSliderWindowOpen = settings.Current.timeSliderWindowOpen,
-        weatherState = settings.Current.weatherState,
-        -- nativeWeather = settings.Current.nativeWeather,
-        warningMessages = settings.Current.warningMessages,
-        notificationMessages = settings.Current.notificationMessages
-    }
-    local file = io.open('settings.json', 'w')
-    if file then
-        local jsonString = json.encode(saveData)
-        local formattedJsonString = jsonString:gsub(',"', ',\n    "'):gsub('{', '{\n    '):gsub('}', '\n}')
-        file:write(formattedJsonString)
-        file:close()
-    end
+	local saveData = {
+		transitionDuration = settings.Current.transitionDuration,
+		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen,
+		weatherState = settings.Current.weatherState,
+		-- nativeWeather = settings.Current.nativeWeather,
+		warningMessages = settings.Current.warningMessages,
+		notificationMessages = settings.Current.notificationMessages
+	}
+	local file = io.open('settings.json', 'w')
+	if file then
+		local jsonString = json.encode(saveData)
+		local formattedJsonString = jsonString:gsub(',"', ',\n    "'):gsub('{', '{\n    '):gsub('}', '\n}')
+		file:write(formattedJsonString)
+		file:close()
+	end
 end
-
 
 function LoadSettings()
 	local file = io.open('settings.json', 'r')
