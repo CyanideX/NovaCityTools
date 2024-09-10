@@ -457,7 +457,7 @@ function DrawButtons()
 				ImGui.Text("Grouped Toggles:")
 				ImGui.Separator()
 
-				local toggleFogClouds, changed = ImGui.Checkbox('ALL: Volumetrics and Clouds', toggleFogClouds)
+				toggleFogClouds, changed = ImGui.Checkbox('ALL: Volumetrics and Clouds', toggleFogClouds)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFogClouds)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFogClouds)
@@ -482,7 +482,7 @@ function DrawButtons()
 				ui.tooltip(
 					"Toggles all fog and clouds: volumetric, distant volumetric, distant fog planes, and volumetric clouds.")
 
-				local toggleFog, changed = ImGui.Checkbox('ALL: Fog', toggleFog)
+				toggleFog, changed = ImGui.Checkbox('ALL: Fog', toggleFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
@@ -508,7 +508,7 @@ function DrawButtons()
 				ImGui.Text("Weather:")
 				ImGui.Separator()
 
-				local volumetricFog, changed = ImGui.Checkbox('VFog', volumetricFog)
+				volumetricFog, changed = ImGui.Checkbox('VFog', volumetricFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", volumetricFog)
 					SaveSettings()
@@ -525,7 +525,7 @@ function DrawButtons()
 				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
 
 				ImGui.SameLine(toggleSpacingXValue)
-				local distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
+				distantVolumetricFog, changed = ImGui.Checkbox('Distant VFog', distantVolumetricFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
 					SaveSettings()
@@ -537,14 +537,14 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggle distant volumetric fog. Also enables VFog if it's disabled.")
 
-				local distantFog, changed = ImGui.Checkbox('Fog', distantFog)
+				distantFog, changed = ImGui.Checkbox('Fog', distantFog)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", distantFog)
 					SaveSettings()
 				end
 				ui.tooltip("Toggle distant fog plane.")
 				ImGui.SameLine(toggleSpacingXValue)
-				local clouds, changed = ImGui.Checkbox('Clouds', clouds)
+				clouds, changed = ImGui.Checkbox('Clouds', clouds)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
 					SaveSettings()
@@ -592,21 +592,21 @@ function DrawButtons()
 				ImGui.Text("Features:")
 				ImGui.Separator()
 
-				local toggleNRD, changed = ImGui.Checkbox('NRD', toggleNRD)
+				toggleNRD, changed = ImGui.Checkbox('NRD', toggleNRD)
 				if changed then
 					GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
 					SaveSettings()
 				end
 				ui.tooltip("Nvidia Realtime Denoiser")
 				ImGui.SameLine(toggleSpacingXValue)
-				local toggleDLSSDPT, changed = ImGui.Checkbox('DLSSDPT', toggleDLSSDPT)
+				toggleDLSSDPT, changed = ImGui.Checkbox('DLSSDPT', toggleDLSSDPT)
 				if changed then
 					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", toggleDLSSDPT)
 					SaveSettings()
 				end
 				ui.tooltip("DLSSD Separate Particle Color - Disabling will reduce \ndistant shimmering but also makes other paricles invisible \nlike rain and debris particles. Disabling is not recommended. \nManually selecting a weather state will enable or disable \nthis as needed.")
 
-				local bloom, changed = ImGui.Checkbox('Bloom', bloom)
+				bloom, changed = ImGui.Checkbox('Bloom', bloom)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
 					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom)
@@ -615,7 +615,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
 				ImGui.SameLine(toggleSpacingXValue)
-				local lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
+				lensFlares, changed = ImGui.Checkbox('Lens Flares', lensFlares)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
 					SaveSettings()
@@ -628,7 +628,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles lens flare effect.")
 
-				local rainMap, changed = ImGui.Checkbox('Weather', rainMap)
+				rainMap, changed = ImGui.Checkbox('Weather', rainMap)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", rainMap)
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rainMap)
@@ -637,7 +637,7 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
 				ImGui.SameLine(toggleSpacingXValue)
-				local rain, changed = ImGui.Checkbox('SS Rain', rain)
+				rain, changed = ImGui.Checkbox('SS Rain', rain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rain)
 					SaveSettings()
@@ -650,35 +650,35 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles screenspace rain effects, removing wet surfaces.")
 
-				local chromaticAberration, changed = ImGui.Checkbox('CA', chromaticAberration)
+				chromaticAberration, changed = ImGui.Checkbox('CA', chromaticAberration)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", chromaticAberration)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
 				ImGui.SameLine(toggleSpacingXValue)
-				local filmGrain, changed = ImGui.Checkbox('Film Grain', filmGrain)
+				filmGrain, changed = ImGui.Checkbox('Film Grain', filmGrain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", filmGrain)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles film grain.")
 
-				local DOF, changed = ImGui.Checkbox('DOF', DOF)
+				DOF, changed = ImGui.Checkbox('DOF', DOF)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", DOF)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles depth of field.")
 				ImGui.SameLine(toggleSpacingXValue)
-				local motionBlur, changed = ImGui.Checkbox('Motion Blur', motionBlur)
+				motionBlur, changed = ImGui.Checkbox('Motion Blur', motionBlur)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", motionBlur)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles motion blur.")
 
-				local RIS, changed = ImGui.Checkbox('RIS', RIS)
+				RIS, changed = ImGui.Checkbox('RIS', RIS)
 				if changed then
 					GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
 					SaveSettings()
@@ -688,19 +688,19 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Utility:")
 				ImGui.Separator()
-				local vehicleCollisions, changed = ImGui.Checkbox('Vehicle Collisions', vehicleCollisions)
+				vehicleCollisions, changed = ImGui.Checkbox('Vehicle Collisions', vehicleCollisions)
 				if changed then
 					GameOptions.SetBool("Vehicle", "vehicleVsVehicleCollisions", vehicleCollisions)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles vehicle collisions. Great for driving through \n Night City with Nova City Population density!")
-				local crowdSpawning, changed = ImGui.Checkbox('Crowd Spawning', crowdSpawning)
+				crowdSpawning, changed = ImGui.Checkbox('Crowd Spawning', crowdSpawning)
 				if changed then
 					GameOptions.SetBool("Crowd", "Enabled", crowdSpawning)
 					SaveSettings()
 				end
 				ui.tooltip("Toggles vehicle spawning.")
-				local stopVehicleSpawning, changed = ImGui.Checkbox('Vehicle Spawning', stopVehicleSpawning)
+				stopVehicleSpawning, changed = ImGui.Checkbox('Vehicle Spawning', stopVehicleSpawning)
 				if changed then
 					if stopVehicleSpawning then
 						GameOptions.SetBool("Traffic", "StopSpawn", false)
@@ -717,14 +717,14 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Useless Toggles:")
 				ImGui.Separator()
-				local tonemapping, changed = ImGui.Checkbox('Tonemapping', tonemapping)
+				tonemapping, changed = ImGui.Checkbox('Tonemapping', tonemapping)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "Tonemapping", tonemapping)
 					SaveSettings()
 				end
 				ui.tooltip("This toggle serves absolutely no purpose and toggling \n it does nothing but make the game look bad and kills \n a puppy each time you do.")
 
-					local graphics, changed = ImGui.Checkbox('gRaPhiCs', graphics)
+					graphics, changed = ImGui.Checkbox('gRaPhiCs', graphics)
 				if changed then
 					GameOptions.SetBool("", "", graphics)
 					SaveSettings()
