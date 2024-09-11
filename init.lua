@@ -1,5 +1,6 @@
 local Cron = require("Cron")
 local GameUI = require("GameUI")
+local GameSettings = require('GameSettings')
 local version = "1.7.0"
 local cetOpen = false
 local toggleNRD = false
@@ -250,6 +251,30 @@ registerHotkey('NCTResetTime', 'Reset Time Scale', function()
         ShowNotificationMessage("Time scale reset to 1.0x speed!")
     end
 end)
+
+-- Register an HDR hotkey toggle
+registerHotkey('NCTHDRToggle', 'Toggle HDR Mode', function()
+    local options, current = GameSettings.Options('/video/display/HDRModes')
+    local hdrMode = (current % 2) + 1
+
+    -- Change labels
+    local displayOptions = { "SDR", "HDR" }
+
+    GameSettings.Set('/video/display/HDRModes', options[hdrMode])
+    GameSettings.Save()
+    
+    if GameSettings.NeedsConfirmation() then
+        GameSettings.Confirm()
+    end
+
+    if settings.Current.warningMessages then
+        ShowWarningMessage(('Switched display mode from %s to %s'):format(displayOptions[current], displayOptions[hdrMode]))
+    end
+    if settings.Current.notificationMessages then
+        ShowNotificationMessage(('Switched display mode from %s to %s'):format(displayOptions[current], displayOptions[hdrMode]))
+    end
+end)
+
 
 function DrawWeatherControl()
 	ImGui.Dummy(0, dummySpacingYValue)
@@ -715,6 +740,18 @@ function DrawButtons()
 				ui.tooltip("Toggles vehicle spawning.")
 
 				ImGui.Dummy(0, dummySpacingYValue)
+				ImGui.Text("Display:")
+				ImGui.Separator()
+
+				-- ImGui toggle button to switch between SDR and HDR
+				enableHDR, changed = ImGui.Checkbox("HDR", enableHDR)
+				if changed then
+					-- do stuff
+				end
+				--ui.tooltip("Requires CET menu to be closed to complete display mode toggle.")
+				ui.tooltip("Currently not working correctly. Use the CET binding hotkey instead.")
+				
+				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Useless Toggles:")
 				ImGui.Separator()
 				tonemapping, changed = ImGui.Checkbox('Tonemapping', tonemapping)
@@ -1103,8 +1140,8 @@ registerForEvent('onOverlayOpen', function()
 end)
 
 registerForEvent('onOverlayClose', function()
-	cetOpen = false
-	SaveSettings()
+    cetOpen = false
+    SaveSettings()
 end)
 
 function SaveSettings()
