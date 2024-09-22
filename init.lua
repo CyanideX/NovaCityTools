@@ -761,12 +761,44 @@ function DrawButtons()
 				end
 				ui.tooltip("This toggle serves absolutely no purpose and toggling \n it does nothing but make the game look bad and kills \n a puppy each time you do.")
 
-					graphics, changed = ImGui.Checkbox('gRaPhiCs', graphics)
+				graphics, changed = ImGui.Checkbox('gRaPhiCs', graphics)
 				if changed then
-					GameOptions.SetBool("", "", graphics)
+					-- Toggle all volumetrics and clouds
+					toggleFogClouds = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", graphics)
+					volumetricFog = graphics
+					distantVolumetricFog = graphics
+					distantFog = graphics
+					clouds = graphics
+
+					-- Toggle DLSSDPT
+					toggleDLSSDPT = graphics
+					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", graphics)
+
+					-- Toggle bloom and lens flare
+					bloom = graphics
+					lensFlares = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", graphics)
+
+					-- Toggle weather and screen space rain
+					rainMap = graphics
+					rain = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", graphics)
+
+					-- Toggle chromatic aberration and film grain
+					chromaticAberration = graphics
+					filmGrain = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", graphics)
+
 					SaveSettings()
 				end
-				ui.tooltip("Coming soon.")
+				ui.tooltip("Toggles all volumetrics, clouds, DLSSDPT, bloom, lens flare, weather, screen space rain, chromatic aberration, and film grain.")
 
 				--DrawWeatherControl()
 				ImGui.EndTabItem()
