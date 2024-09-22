@@ -32,6 +32,7 @@ local weatherReset = false
 local resetWindow = false
 local currentWeatherState = nil
 local timeScale = 1.0
+local searchText = ""
 
 local weatherStateNames = {}
 
@@ -66,46 +67,46 @@ local ui = {
 -- Define the weather states
 local weatherStates = {
 	-- Each state is defined by a list containing the state's ID, name, category, and a flag indicating if it enables DLSSDSeparateParticleColor
- -- { '24h_weather_state_name',     'Localized Name', Category, DLSSD Flag}
-	{ '24h_weather_sunny',          'Sunny',          1, 		false },
-	{ '24h_weather_light_clouds',   'Light Clouds',   1, 		false },
-	{ '24h_weather_cloudy',         'Clouds',         1, 		false },
-	{ '24h_weather_heavy_clouds',   'Heavy Clouds',   1, 		false },
-	{ '24h_weather_fog',            'Fog',            1, 		false },
-	{ '24h_weather_rain',           'Rain',           1, 		true },
-	{ '24h_weather_toxic_rain',     'Toxic Rain',     1, 		true },
-	{ '24h_weather_pollution',      'Pollution',      1, 		false },
-	{ '24h_weather_sandstorm',      'Sandstorm',      1, 		true },
-	{ 'q302_light_rain',            'Rain (Quest)',   1, 		true },
-	{ '24h_weather_fog_dense',      'Dense Fog',      2, 		false },
-	{ '24h_weather_dew',            'Dew',            2, 		true },
-	{ '24h_weather_haze',           'Haze',           2, 		false },
-	{ '24h_weather_haze_heavy',     'Heavy Haze',     2, 		false },
-	{ '24h_weather_haze_pollution', 'Haze Pollution', 2, 		false },
-	{ '24h_weather_smog',           'Smog',           2, 		false },
-	{ '24h_weather_clear',          'Sunny (Clear)',  2, 		true },
-	{ '24h_weather_drizzle',        'Drizzle',        2, 		true },
-	{ '24h_weather_windy',          'Windy',          2, 		true },
-	{ '24h_weather_sunny_windy',    'Sunny Windy',    2, 		true },
-	{ '24h_weather_storm',          'Rain (Storm)',   2, 		true },
-	{ '24h_weather_overcast',       'Overcast',       2, 		false },
-	{ '24h_weather_drought',        'Drought',        2, 		false },
-	{ '24h_weather_humid',          'Humid',          2, 		false },
-	{ '24h_weather_fog_wet',        'Wet Fog',        3, 		true },
-	{ '24h_weather_fog_heavy',      'Heavy Fog',      3, 		false },
-	{ '24h_weather_sunny_sunset',   'Sunset',         3, 		false },
-	{ '24h_weather_drizzle_light',  'Light Drizzle',  3, 		true },
-	{ '24h_weather_light_rain',     'Light Rain',     3, 		true },
-	{ '24h_weather_rain_alt_1',     'Rain (Alt 1)',   3, 		true },
-	{ '24h_weather_rain_alt_2',     'Rain (Alt 2)',   3, 		true },
-	{ '24h_weather_mist',           'Fog (Mist)',     3, 		true },
-	{ '24h_weather_courier_clouds', 'Dense Clouds',   3, 		false },
-	{ '24h_weather_downpour',       'Downpour',       4, 		true },
-	{ '24h_weather_drizzle_heavy',  'Heavy Drizzle',  4, 		true },
-	{ '24h_weather_distant_rain',   'Rain (Distant)', 4, 		true },
-	{ '24h_weather_sky_softbox',    'Softbox',        5, 		false },
-	{ '24h_weather_blackout',       'Blackout',       5, 		false },
-	{ '24h_weather_showroom',       'Showroom',       5, 		false }
+	-- { '24h_weather_state_name',  'Localized Name', Category, DLSSD Flag}
+	{ '24h_weather_sunny',          'Sunny',           1, false },
+	{ '24h_weather_light_clouds',   'Clouds (Light)',  1, false },
+	{ '24h_weather_cloudy',         'Clouds',          1, false },
+	{ '24h_weather_heavy_clouds',   'Clouds (Heavy)',  1, false },
+	{ '24h_weather_fog',            'Fog',             1, false },
+	{ '24h_weather_rain',           'Rain',            1, true },
+	{ '24h_weather_toxic_rain',     'Rain (Toxic)',    1, true },
+	{ '24h_weather_pollution',      'Pollution',       1, false },
+	{ '24h_weather_sandstorm',      'Sandstorm',       1, true },
+	{ 'q302_light_rain',            'Rain (Quest)',    1, true },
+	{ '24h_weather_fog_dense',      'Fog (Dense)',     2, false },
+	{ '24h_weather_dew',            'Sunny (Dew)',     2, true },
+	{ '24h_weather_haze',           'Haze',            2, false },
+	{ '24h_weather_haze_heavy',     'Haze (Heavy)',    2, false },
+	{ '24h_weather_haze_pollution', 'Haze Pollution',  2, false },
+	{ '24h_weather_smog',           'Smog',            2, false },
+	{ '24h_weather_clear',          'Sunny (Clear)',   2, true },
+	{ '24h_weather_drizzle',        'Drizzle',         2, true },
+	{ '24h_weather_windy',          'Windy',           2, true },
+	{ '24h_weather_sunny_windy',    'Sunny (Windy)',   2, true },
+	{ '24h_weather_storm',          'Rain (Storm)',    2, true },
+	{ '24h_weather_overcast',       'Clouds (Heavy)',  2, false },
+	{ '24h_weather_drought',        'Hot (Drought)',   2, false },
+	{ '24h_weather_humid',          'Hot (Humid)',     2, false },
+	{ '24h_weather_fog_wet',        'Fog (Wet)',       3, true },
+	{ '24h_weather_fog_heavy',      'Fog (Heavy)',     3, false },
+	{ '24h_weather_sunny_sunset',   'Sunny (Sunset)',  3, false },
+	{ '24h_weather_drizzle_light',  'Drizzle (Light)', 3, true },
+	{ '24h_weather_light_rain',     'Rain (Light)',    3, true },
+	{ '24h_weather_rain_alt_1',     'Rain (Alt 1)',    3, true },
+	{ '24h_weather_rain_alt_2',     'Rain (Alt 2)',    3, true },
+	{ '24h_weather_mist',           'Fog (Mist)',      3, true },
+	{ '24h_weather_courier_clouds', 'Clouds (Dense)',  3, false },
+	{ '24h_weather_downpour',       'Rain (Downpour)', 4, true },
+	{ '24h_weather_drizzle_heavy',  'Drizzle (Heavy)', 4, true },
+	{ '24h_weather_distant_rain',   'Rain (Distant)',  4, true },
+	{ '24h_weather_sky_softbox',    'Softbox',         5, false },
+	{ '24h_weather_blackout',       'Blackout',        5, false },
+	{ '24h_weather_showroom',       'Showroom',        5, false }
 }
 
 function setResolutionPresets(width, height)
@@ -275,7 +276,6 @@ registerHotkey('NCTHDRToggle', 'Toggle HDR Mode', function()
     end
 end)
 
-
 function DrawWeatherControl()
 	ImGui.Dummy(0, dummySpacingYValue)
 	ImGui.Separator()
@@ -286,7 +286,6 @@ function DrawWeatherControl()
 	if ImGui.Button('Reset Weather', resetButtonWidth, 30) then
 		Game.GetWeatherSystem():ResetWeather(true)
 		settings.Current.weatherState = 'None'
-		-- settings.Current.nativeWeather = 1
 		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 		toggleDLSSDPT = true
@@ -400,18 +399,23 @@ function DrawButtons()
 				end
 			end
 
-			-- Show tooltip
 			ui.tooltip("Toggles the time slider window.")
 
 			-- Reset style variables
 			ImGui.PopStyleVar(2)
 
+		  --if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
 			if ImGui.BeginTabItem("Weather") then
+
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
-				--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
+				--ImGui.Text(IconGlyphs.Magnify)
+				ImGui.Text("Search:")
+				ImGui.SameLine()
+				searchText = ImGui.InputText("##search", searchText, 100)
+
 				local categories = { 'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States',
 					'Creative' }
 				for i, category in ipairs(categories) do
@@ -424,8 +428,8 @@ function DrawButtons()
 						local weatherState = state[1]
 						local localization = state[2]
 						local category = state[3]
-						local enableDLSSDPT = state[4] -- Get the DLSSDSeparateParticleColor flag
-						if category == i then
+						local enableDLSSDPT = state[4]
+						if category == i and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
 							local isActive = settings.Current.weatherState == weatherState
 							if isActive then
 								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
@@ -469,6 +473,8 @@ function DrawButtons()
 				DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
+
+			
 
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
@@ -915,7 +921,6 @@ function DrawButtons()
 				--DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
-
 			ImGui.EndTabBar()
 		end
 		ImGui.End()
@@ -1120,6 +1125,12 @@ function ShowNotificationMessage(message)
 		GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
 end
 
+local function sortWeatherStates()
+	table.sort(weatherStates, function(a, b)
+		return a[2] < b[2]
+	end)
+end
+
 registerForEvent("onInit", function()
 	LoadSettings()
 
@@ -1128,7 +1139,7 @@ registerForEvent("onInit", function()
 		local id, localization = table.unpack(weatherState)
 		weatherStateNames[id] = localization
 	end
-
+	sortWeatherStates()
 	--[[ -- Handle session start
     GameUI.OnSessionStart(function()
         Cron.After(0.25, function()
