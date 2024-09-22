@@ -1,0 +1,38 @@
+{
+    "Vanilla States": [
+        {
+            "name": "Sunny",
+            "location": "24h_weather_sunny",
+            "DLSSDSeparateParticleColor": false
+        },
+        {
+            "name": "Cloudy",
+            "location": "24h_weather_cloudy",
+            "DLSSDSeparateParticleColor": false
+        }
+    ],
+    "Nova Beta States": [
+        {
+            "name": "Haze",
+            "location": "24h_weather_haze",
+            "DLSSDSeparateParticleColor": false
+        },
+        {
+            "name": "Pollution",
+            "location": "24h_weather_pollution",
+            "DLSSDSeparateParticleColor": false
+        }
+    ],
+    "Nova Alpha States": [
+        {
+            "name": "Storm",
+            "location": "24h_weather_storm",
+            "DLSSDSeparateParticleColor": true
+        },
+        {
+            "name": "Heavy Fog",
+            "location": "24h_weather_fog_heavy",
+            "DLSSDSeparateParticleColor": false
+        }
+    ]
+}
