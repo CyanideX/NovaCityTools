@@ -358,7 +358,7 @@ function DrawButtons()
 	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
 	if resetWindow then
 		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
-		ImGui.SetNextWindowSize(312, 1110, ImGuiCond.Always)
+		ImGui.SetNextWindowSize(312, 1226, ImGuiCond.Always)
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
 		resetWindow = false
@@ -412,9 +412,9 @@ function DrawButtons()
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
 				--ImGui.Text(IconGlyphs.Magnify)
-				ImGui.Text("Search:")
-				ImGui.SameLine()
-				searchText = ImGui.InputText("##search", searchText, 100)
+				--ImGui.Text("Search:")
+				--ImGui.SameLine()
+				--searchText = ImGui.InputText("##search", searchText, 100)
 
 				local categories = { 'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States',
 					'Creative' }
