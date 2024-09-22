@@ -1,7 +1,7 @@
 local Cron = require("Cron")
 local GameUI = require("GameUI")
 local GameSettings = require('GameSettings')
-local version = "1.7.0"
+local version = "1.8.0"
 local cetOpen = false
 local toggleNRD = false
 local toggleDLSSDPT = true
@@ -68,54 +68,56 @@ local ui = {
 local weatherStates = {
 	-- Each state is defined by a list containing the state's ID, name, category, and a flag indicating if it enables DLSSDSeparateParticleColor
 	-- { '24h_weather_state_name',  'Localized Name', Category, DLSSD Flag}
-	{ '24h_weather_sunny',          'Sunny',           1, false },
-	{ '24h_weather_light_clouds',   'Clouds (Light)',  1, false },
-	{ '24h_weather_cloudy',         'Clouds',          1, false },
-	{ '24h_weather_heavy_clouds',   'Clouds (Heavy)',  1, false },
-	{ '24h_weather_fog',            'Fog',             1, false },
-	{ '24h_weather_rain',           'Rain',            1, true },
-	{ '24h_weather_toxic_rain',     'Rain (Toxic)',    1, true },
-	{ '24h_weather_pollution',      'Pollution',       1, false },
-	{ '24h_weather_sandstorm',      'Sandstorm',       1, true },
-	{ 'q302_light_rain',            'Rain (Quest)',    1, true },
-	{ '24h_weather_fog_dense',      'Fog (Dense)',     2, false },
-	{ '24h_weather_dew',            'Sunny (Dew)',     2, true },
-	{ '24h_weather_haze',           'Haze',            2, false },
-	{ '24h_weather_haze_heavy',     'Haze (Heavy)',    2, false },
-	{ '24h_weather_haze_pollution', 'Haze Pollution',  2, false },
-	{ '24h_weather_smog',           'Smog',            2, false },
-	{ '24h_weather_clear',          'Sunny (Clear)',   2, true },
-	{ '24h_weather_drizzle',        'Drizzle',         2, true },
-	{ '24h_weather_windy',          'Windy',           2, true },
-	{ '24h_weather_sunny_windy',    'Sunny (Windy)',   2, true },
-	{ '24h_weather_storm',          'Rain (Storm)',    2, true },
-	{ '24h_weather_overcast',       'Clouds (Heavy)',  2, false },
-	{ '24h_weather_drought',        'Hot (Drought)',   2, false },
-	{ '24h_weather_humid',          'Hot (Humid)',     2, false },
-	{ '24h_weather_fog_wet',        'Fog (Wet)',       3, true },
-	{ '24h_weather_fog_heavy',      'Fog (Heavy)',     3, false },
-	{ '24h_weather_sunny_sunset',   'Sunny (Sunset)',  3, false },
-	{ '24h_weather_drizzle_light',  'Drizzle (Light)', 3, true },
-	{ '24h_weather_light_rain',     'Rain (Light)',    3, true },
-	{ '24h_weather_rain_alt_1',     'Rain (Alt 1)',    3, true },
-	{ '24h_weather_rain_alt_2',     'Rain (Alt 2)',    3, true },
-	{ '24h_weather_mist',           'Fog (Mist)',      3, true },
-	{ '24h_weather_courier_clouds', 'Clouds (Dense)',  3, false },
-	{ '24h_weather_downpour',       'Rain (Downpour)', 4, true },
-	{ '24h_weather_drizzle_heavy',  'Drizzle (Heavy)', 4, true },
-	{ '24h_weather_distant_rain',   'Rain (Distant)',  4, true },
-	{ '24h_weather_sky_softbox',    'Softbox',         5, false },
-	{ '24h_weather_blackout',       'Blackout',        5, false },
-	{ '24h_weather_showroom',       'Showroom',        5, false }
+	{ '24h_weather_sunny',          'Sunny',             1, false },
+	{ '24h_weather_light_clouds',   'Clouds (Light)',    1, false },
+	{ '24h_weather_cloudy',         'Clouds',            1, false },
+	{ '24h_weather_heavy_clouds',   'Clouds (Heavy)',    1, false },
+	{ '24h_weather_fog',            'Fog',               1, false },
+	{ '24h_weather_rain',           'Rain',              1, true },
+	{ '24h_weather_toxic_rain',     'Rain (Toxic)',      1, true },
+	{ '24h_weather_pollution',      'Pollution',         1, false },
+	{ '24h_weather_sandstorm',      'Sandstorm',         1, true },
+	{ 'q302_light_rain',            'Rain (Quest)',      1, true },
+	{ '24h_weather_arid',           'Hot (Arid)',        2, false },
+	{ '24h_weather_clear',          'Sunny (Clear)',     2, true },
+	{ '24h_weather_courier_clouds', 'Clouds (Dense)',    2, false },
+	{ '24h_weather_dew',            'Sunny (Dew)',       2, true },
+	{ '24h_weather_distant_rain',   'Rain (Distant)',    2, true },
+	{ '24h_weather_downpour',       'Rain (Downpour)',   2, true },
+	{ '24h_weather_drizzle_heavy',  'Drizzle (Heavy)',   2, true },
+	{ '24h_weather_drizzle_light',  'Drizzle (Light)',   2, true },
+	{ '24h_weather_drizzle',        'Drizzle',           2, true },
+	{ '24h_weather_drought',        'Hot (Drought)',     2, false },
+	{ '24h_weather_fog_dense',      'Fog (Dense)',       2, false },
+	{ '24h_weather_fog_heavy',      'Fog (Heavy)',       2, false },
+	{ '24h_weather_fog_wet',        'Fog (Wet)',         2, true },
+	{ '24h_weather_haze_heavy',     'Haze (Heavy)',      2, false },
+	{ '24h_weather_haze_pollution', 'Haze Pollution',    2, false },
+	{ '24h_weather_haze',           'Haze',              2, false },
+	{ '24h_weather_humid',          'Hot (Humid)',       2, false },
+	{ '24h_weather_light_rain',     'Rain (Light)',      2, true },
+	{ '24h_weather_mist',           'Fog (Mist)',        2, true },
+	{ '24h_weather_muggy',          'Hot (Muggy)',       2, false },
+	{ '24h_weather_overcast',       'Clouds (Overcast)', 2, false },
+	{ '24h_weather_rain_alt_1',     'Rain (Alt 1)',      2, true },
+	{ '24h_weather_rain_alt_2',     'Rain (Alt 2)',      2, true },
+	{ '24h_weather_smog',           'Smog',              2, false },
+	{ '24h_weather_storm',          'Rain (Storm)',      2, true },
+	{ '24h_weather_sunny_sunset',   'Sunny (Sunset)',    2, false },
+	{ '24h_weather_sunny_windy',    'Sunny (Windy)',     2, true },
+	{ '24h_weather_windy',          'Windy',             2, true },
+	{ '24h_weather_sky_softbox',    'Softbox',           3, false },
+	{ '24h_weather_blackout',       'Blackout',          3, false },
+	{ '24h_weather_showroom',       'Showroom',          3, false }
 }
 
 function setResolutionPresets(width, height)
 	local presets = {
-	 -- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31, 32  },
-		{ 3840, 2160, 8,  6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 12, 6,  650, 250, 336, 7.5,   9,  8,  10, 34, 34, 22, 140 },
-		{ 2560, 1440, 8,  6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  272, 29, 10, 4,  500, 219, 298, 7.5,  8,  8,  10, 32, 32, 18, 125 },
-		{ 1920, 1080, 5,  4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 169, 230, 4.8,  9,  8,  10, 27, 27, 16, 100 },
-		{ 0,    0,    5,  4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 8,  4,  400, 169, 230, 4.8,  9,  8,  10, 27, 27, 16, 100 }
+		-- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31, 32  },
+		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1, 0.7,  140, 34, 36, 0.62, 1, 6, 320, 33, 12, 6, 650, 250, 336, 7.5, 9, 8, 10, 34, 34, 22, 140 },
+		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1, 0.45, 122, 28, 28, 0.85, 1, 8, 272, 29, 10, 4, 500, 219, 298, 7.5, 8, 8, 10, 32, 32, 18, 125 },
+		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1, 0.5,  100, 24, 24, 0.85, 1, 0, 221, 21, 8,  4, 400, 169, 230, 4.8, 9, 8, 10, 27, 27, 16, 100 },
+		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1, 0.5,  100, 24, 24, 0.85, 1, 0, 221, 21, 8,  4, 400, 169, 230, 4.8, 9, 8, 10, 27, 27, 16, 100 }
 	}
 
 	for _, preset in ipairs(presets) do
@@ -157,123 +159,125 @@ end
 
 -- Register a CET hotkey to reset weather
 registerHotkey('NCTResetWeather', 'Reset Weather', function()
-    Game.GetWeatherSystem():ResetWeather(true)
-    settings.Current.weatherState = 'None'
-    -- settings.Current.nativeWeather = 1
-    Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
-    GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-    toggleDLSSDPT = true
-    SaveSettings()
-    weatherReset = true
+	Game.GetWeatherSystem():ResetWeather(true)
+	settings.Current.weatherState = 'None'
+	-- settings.Current.nativeWeather = 1
+	Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+	GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+	toggleDLSSDPT = true
+	SaveSettings()
+	weatherReset = true
 end)
 
 -- Register a CET hotkey to toggle freeze time
 registerHotkey('NCTFreezeToggle', 'Freeze Time Toggle', function()
-    if timeScale == 0 then
-        timeScale = previousTimeScale or 1.0
-        if settings.Current.warningMessages then
-            ShowWarningMessage("Time resumed at " .. previousTimeScale .. "x speed!")
-        end
-        if settings.Current.notificationMessages then
-            ShowNotificationMessage("Time resumed at " .. previousTimeScale .. "x speed!")
-        end
-    else
-        if settings.Current.warningMessages then
-            ShowWarningMessage("Time frozen!")
-        end
-        if settings.Current.notificationMessages then
-            ShowNotificationMessage("Time frozen!")
-        end
-        previousTimeScale = timeScale
-        timeScale = 0
-    end
-    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
-    if timeScale == 1 then
-        Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
-    else
-        Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
-    end
+	if timeScale == 0 then
+		timeScale = previousTimeScale or 1.0
+		if settings.Current.warningMessages then
+			ShowWarningMessage("Time resumed at " .. previousTimeScale .. "x speed!")
+		end
+		if settings.Current.notificationMessages then
+			ShowNotificationMessage("Time resumed at " .. previousTimeScale .. "x speed!")
+		end
+	else
+		if settings.Current.warningMessages then
+			ShowWarningMessage("Time frozen!")
+		end
+		if settings.Current.notificationMessages then
+			ShowNotificationMessage("Time frozen!")
+		end
+		previousTimeScale = timeScale
+		timeScale = 0
+	end
+	Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+	if timeScale == 1 then
+		Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+	else
+		Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+	end
 end)
 
 -- Register a CET hotkey to increase time scale
 registerHotkey('NCTIncreaseTime', 'Increase Time Scale', function()
-    if timeScale < 0.01 then
-        timeScale = timeScale + 0.001
-    elseif timeScale < 0.1 then
-        timeScale = timeScale + 0.01
-    elseif timeScale < 1.0 then
-        timeScale = timeScale + 0.1
-    else
-        timeScale = timeScale + 1.0
-    end
-    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
-    Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
-    if settings.Current.warningMessages then
-        ShowWarningMessage("Time scale increased to " .. timeScale .. "x speed!")
-    end
-    if settings.Current.notificationMessages then
-        ShowNotificationMessage("Time scale increased to " .. timeScale .. "x speed!")
-    end
+	if timeScale < 0.01 then
+		timeScale = timeScale + 0.001
+	elseif timeScale < 0.1 then
+		timeScale = timeScale + 0.01
+	elseif timeScale < 1.0 then
+		timeScale = timeScale + 0.1
+	else
+		timeScale = timeScale + 1.0
+	end
+	Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+	Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+	if settings.Current.warningMessages then
+		ShowWarningMessage("Time scale increased to " .. timeScale .. "x speed!")
+	end
+	if settings.Current.notificationMessages then
+		ShowNotificationMessage("Time scale increased to " .. timeScale .. "x speed!")
+	end
 end)
 
 -- Register a CET hotkey to decrease time scale
 registerHotkey('NCTDecreaseTime', 'Decrease Time Scale', function()
-    if timeScale <= 0.01 then
-        timeScale = timeScale - 0.001
-        if timeScale < 0.001 then timeScale = 0.001 end -- Prevent time scale from going below 0.001
-    elseif timeScale <= 0.1 then
-        timeScale = timeScale - 0.01
-        if timeScale < 0.01 then timeScale = 0.01 end -- Prevent time scale from going below 0.01
-    elseif timeScale <= 1.0 then
-        timeScale = timeScale - 0.1
-        if timeScale < 0.1 then timeScale = 0.1 end -- Prevent time scale from going below 0.1
-    else
-        timeScale = timeScale - 1.0
-    end
-    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
-    Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
-    if settings.Current.warningMessages then
-        ShowWarningMessage("Time scale decreased to " .. timeScale .. "x speed!")
-    end
-    if settings.Current.notificationMessages then
-        ShowNotificationMessage("Time scale decreased to " .. timeScale .. "x speed!")
-    end
+	if timeScale <= 0.01 then
+		timeScale = timeScale - 0.001
+		if timeScale < 0.001 then timeScale = 0.001 end -- Prevent time scale from going below 0.001
+	elseif timeScale <= 0.1 then
+		timeScale = timeScale - 0.01
+		if timeScale < 0.01 then timeScale = 0.01 end -- Prevent time scale from going below 0.01
+	elseif timeScale <= 1.0 then
+		timeScale = timeScale - 0.1
+		if timeScale < 0.1 then timeScale = 0.1 end -- Prevent time scale from going below 0.1
+	else
+		timeScale = timeScale - 1.0
+	end
+	Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(timeScale ~= 1)
+	Game.GetTimeSystem():SetTimeDilation("consoleCommand", timeScale)
+	if settings.Current.warningMessages then
+		ShowWarningMessage("Time scale decreased to " .. timeScale .. "x speed!")
+	end
+	if settings.Current.notificationMessages then
+		ShowNotificationMessage("Time scale decreased to " .. timeScale .. "x speed!")
+	end
 end)
 
 -- Register a CET hotkey to reset time scale to 1.0
 registerHotkey('NCTResetTime', 'Reset Time Scale', function()
-    timeScale = 1.0
-    Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(false)
-    Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
-    if settings.Current.warningMessages then
-        ShowWarningMessage("Time scale reset to 1.0x speed!")
-    end
-    if settings.Current.notificationMessages then
-        ShowNotificationMessage("Time scale reset to 1.0x speed!")
-    end
+	timeScale = 1.0
+	Game.GetTimeSystem():SetIgnoreTimeDilationOnLocalPlayerZero(false)
+	Game.GetTimeSystem():UnsetTimeDilation("consoleCommand")
+	if settings.Current.warningMessages then
+		ShowWarningMessage("Time scale reset to 1.0x speed!")
+	end
+	if settings.Current.notificationMessages then
+		ShowNotificationMessage("Time scale reset to 1.0x speed!")
+	end
 end)
 
 -- Register an HDR hotkey toggle
 registerHotkey('NCTHDRToggle', 'Toggle HDR Mode', function()
-    local options, current = GameSettings.Options('/video/display/HDRModes')
-    local hdrMode = (current % 2) + 1
+	local options, current = GameSettings.Options('/video/display/HDRModes')
+	local hdrMode = (current % 2) + 1
 
-    -- Change labels
-    local displayOptions = { "SDR", "HDR" }
+	-- Change labels
+	local displayOptions = { "SDR", "HDR" }
 
-    GameSettings.Set('/video/display/HDRModes', options[hdrMode])
-    GameSettings.Save()
-    
-    if GameSettings.NeedsConfirmation() then
-        GameSettings.Confirm()
-    end
+	GameSettings.Set('/video/display/HDRModes', options[hdrMode])
+	GameSettings.Save()
 
-    if settings.Current.warningMessages then
-        ShowWarningMessage(('Switched display mode from %s to %s'):format(displayOptions[current], displayOptions[hdrMode]))
-    end
-    if settings.Current.notificationMessages then
-        ShowNotificationMessage(('Switched display mode from %s to %s'):format(displayOptions[current], displayOptions[hdrMode]))
-    end
+	if GameSettings.NeedsConfirmation() then
+		GameSettings.Confirm()
+	end
+
+	if settings.Current.warningMessages then
+		ShowWarningMessage(('Switched display mode from %s to %s'):format(displayOptions[current],
+			displayOptions[hdrMode]))
+	end
+	if settings.Current.notificationMessages then
+		ShowNotificationMessage(('Switched display mode from %s to %s'):format(displayOptions[current],
+			displayOptions[hdrMode]))
+	end
 end)
 
 function DrawWeatherControl()
@@ -358,7 +362,7 @@ function DrawButtons()
 	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
 	if resetWindow then
 		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
-		ImGui.SetNextWindowSize(312, 1226, ImGuiCond.Always)
+		ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
 		resetWindow = false
@@ -404,9 +408,8 @@ function DrawButtons()
 			-- Reset style variables
 			ImGui.PopStyleVar(2)
 
-		  --if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
+			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
 			if ImGui.BeginTabItem("Weather") then
-
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
@@ -416,8 +419,7 @@ function DrawButtons()
 				--ImGui.SameLine()
 				--searchText = ImGui.InputText("##search", searchText, 100)
 
-				local categories = { 'Vanilla States', 'Nova Beta States', 'Nova Alpha States', 'Nova Concept States',
-					'Creative' }
+				local categories = { 'Vanilla', 'Nova City', 'Creative' }
 				for i, category in ipairs(categories) do
 					ImGui.Text(category)
 
@@ -439,16 +441,14 @@ function DrawButtons()
 								if isActive then
 									Game.GetWeatherSystem():ResetWeather(true)
 									settings.Current.weatherState = 'None'
-									Game.GetPlayer():SetWarningMessage(
-									"Weather reset to default cycles! \nWeather states will progress automatically.")
+									Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 									toggleDLSSDPT = true
 									weatherReset = true
 								else
 									Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 									settings.Current.weatherState = weatherState
-									Game.GetPlayer():SetWarningMessage("Locked weather state to " ..
-									localization:lower() .. "!")
+									Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 									toggleDLSSDPT = enableDLSSDPT
 								end
@@ -474,7 +474,7 @@ function DrawButtons()
 				ImGui.EndTabItem()
 			end
 
-			
+
 
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
@@ -756,7 +756,7 @@ function DrawButtons()
 				end
 				--ui.tooltip("Requires CET menu to be closed to complete display mode toggle.")
 				ui.tooltip("Currently not working correctly. Use the CET binding hotkey instead.")
-				
+
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Useless Toggles:")
 				ImGui.Separator()
@@ -841,7 +841,7 @@ function DrawButtons()
 				-- Set the width of the slider to the width of the window minus the padding
 				local windowWidth = ImGui.GetWindowWidth()
 				ImGui.PushItemWidth(windowWidth - timeSliderPadding - 2)
-			 -- ImGui.PushItemWidth(windowWidth - timeSliderPadding - 10) -- 4K
+				-- ImGui.PushItemWidth(windowWidth - timeSliderPadding - 10) -- 4K
 
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
 
@@ -869,7 +869,7 @@ function DrawButtons()
 
 				-- Calculate the button width based on the available width
 				local buttonWidth = (ImGui.GetWindowContentRegionWidth() - (#durations - 1) * ImGui.GetStyle().ItemSpacing.x) /
-				#durations
+					#durations
 
 				-- Create a button for each preset duration
 				for _, duration in ipairs(durations) do
@@ -978,7 +978,7 @@ function DrawTimeSliderWindow()
 		ImGui.Dummy(0, dummySpacingYValue)
 		ImGui.Separator()
 		ImGui.Text("Set Hour:")
-		
+
 		local hourButtonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
 		for i = 1, 24 do
 			if ImGui.Button(tostring(i), hourButtonWidth, buttonHeight) then
@@ -988,7 +988,7 @@ function DrawTimeSliderWindow()
 				ImGui.SameLine()
 			end
 		end
-		
+
 
 		ImGui.Dummy(0, 4)
 		-- Add time scale slider
@@ -1015,7 +1015,8 @@ function DrawTimeSliderWindow()
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 6) -- Slider height
 
 		-- Calculate available width for the slider
-		local availableWidth = ImGui.GetWindowContentRegionWidth() - 2 * glyphButtonWidth -	2 * ImGui.GetStyle().ItemSpacing.x - 4
+		local availableWidth = ImGui.GetWindowContentRegionWidth() - 2 * glyphButtonWidth -
+		2 * ImGui.GetStyle().ItemSpacing.x - 4
 		ImGui.SetNextItemWidth(availableWidth)
 		timeScale, changed = ImGui.SliderFloat('##TimeScale', timeScale, 0.001, 10.0, '%.003f')
 		if changed then
@@ -1043,10 +1044,10 @@ function DrawTimeSliderWindow()
 				if timeScale == 0 then
 					timeScale = previousTimeScale or 1.0
 					if settings.Current.warningMessages then
-						ShowWarningMessage("Time resumed at "..previousTimeScale.."x speed!")
+						ShowWarningMessage("Time resumed at " .. previousTimeScale .. "x speed!")
 					end
 					if settings.Current.notificationMessages then
-						ShowNotificationMessage("Time resumed at "..previousTimeScale.."x speed!")
+						ShowNotificationMessage("Time resumed at " .. previousTimeScale .. "x speed!")
 					end
 				else
 					if settings.Current.warningMessages then
@@ -1071,10 +1072,10 @@ function DrawTimeSliderWindow()
 				if timeScale == 0 then
 					timeScale = previousTimeScale or 1.0
 					if settings.Current.warningMessages then
-						ShowWarningMessage("Time resumed at "..previousTimeScale.."x speed!")
+						ShowWarningMessage("Time resumed at " .. previousTimeScale .. "x speed!")
 					end
 					if settings.Current.notificationMessages then
-						ShowNotificationMessage("Time resumed at "..previousTimeScale.."x speed!")
+						ShowNotificationMessage("Time resumed at " .. previousTimeScale .. "x speed!")
 					end
 				else
 					if settings.Current.warningMessages then
@@ -1183,8 +1184,8 @@ registerForEvent('onOverlayOpen', function()
 end)
 
 registerForEvent('onOverlayClose', function()
-    cetOpen = false
-    SaveSettings()
+	cetOpen = false
+	SaveSettings()
 end)
 
 function SaveSettings()
