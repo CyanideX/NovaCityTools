@@ -286,6 +286,12 @@ function DrawWeatherControl()
 
 	-- Make the reset button fit the width of the GUI
 	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
+	
+
+	-- Change button color, hover color, and text color
+	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1)) -- Custom button color
+	ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
+	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1)) -- Custom text color
 	if ImGui.Button('Reset Weather', resetButtonWidth, 30) then
 		Game.GetWeatherSystem():ResetWeather(true)
 		settings.Current.weatherState = 'None'
@@ -295,6 +301,8 @@ function DrawWeatherControl()
 		SaveSettings()
 		weatherReset = true
 	end
+	-- Revert to original color
+	ImGui.PopStyleColor(3)
 
 	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
 
@@ -387,19 +395,24 @@ function DrawButtons()
 			-- Create the button and toggle the time slider window
 			if timeSliderWindowOpen then
 				ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1)) -- Custom hover color
+				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1)) -- Click color
 				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
 					timeSliderWindowOpen = false
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
 				end
-				ImGui.PopStyleColor(2)
+				ImGui.PopStyleColor(4)
 			else
+				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1)) -- Custom hover color
+				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1)) -- Click color
 				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
 					timeSliderWindowOpen = true
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
 				end
+				ImGui.PopStyleColor(2)
 			end
 
 			ui.tooltip("Toggles the time slider window.")
@@ -432,9 +445,17 @@ function DrawButtons()
 						local enableDLSSDPT = state[4]
 						if category == i and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
 							local isActive = settings.Current.weatherState == weatherState
+
 							if isActive then
 								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+								ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1)) -- Hover color
+								ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1)) -- Click color
 								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+							else
+								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1)) -- Inactive button color
+								ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1)) -- Inactive hover color
+								ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1)) -- Inactive click color
+								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1)) -- Inactive text color
 							end
 							if ImGui.Button(localization, buttonWidth, buttonHeight) then
 								if isActive then
@@ -454,7 +475,7 @@ function DrawButtons()
 								SaveSettings()
 							end
 							if isActive then
-								ImGui.PopStyleColor(2)
+								ImGui.PopStyleColor(4)
 							end
 
 							buttonCount = buttonCount + 1
