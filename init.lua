@@ -262,8 +262,8 @@ registerHotkey("NCTHDRToggle", "Toggle HDR Mode", function()
 end)
 
 function DrawWeatherControl()
-	ImGui.Dummy(0, dummySpacingYValue)
-	ImGui.Separator()
+	--ImGui.Dummy(0, dummySpacingYValue)
+	--ImGui.Separator()
 	ImGui.Text("Weather Control:")
 
 	-- Make the reset button fit the width of the GUI
@@ -476,19 +476,21 @@ function DrawButtons()
                         if buttonCount % buttonsPerRow ~= 0 then
                             ImGui.NewLine()
                         end
+                        ImGui.Dummy(0, dummySpacingYValue) -- Added here
                     else
                         if not collapsedCategories[category.name] then
                             collapsedCategories[category.name] = true
                         end
                     end
                     ImGui.PopStyleColor(3)
-                    ImGui.Dummy(0, dummySpacingYValue)
+                    --ImGui.Dummy(0, dummySpacingYValue)
                     ImGui.Separator()
-                    ImGui.Dummy(0, dummySpacingYValue)
+                    --ImGui.Dummy(0, dummySpacingYValue)
                 end
                 DrawWeatherControl()
                 ImGui.EndTabItem()
             end
+
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
