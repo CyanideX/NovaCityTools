@@ -101,7 +101,7 @@
                 "name": "Drizzle",
                 "location": "24h_weather_drizzle",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["drizzle", "light rain", "shower"]
+                "weatherType": ["drizzle", "sprinkle", "shower", "rain"]
             },
             {
                 "name": "Fog Wet",
@@ -149,7 +149,7 @@
                 "name": "Drizzle Light",
                 "location": "24h_weather_drizzle_light",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["light drizzle", "light rain", "shower"]
+                "weatherType": ["drizzle", "light", "shower", "rain", "sprinkle"]
             },
             {
                 "name": "Sunny Sunset",
@@ -191,13 +191,13 @@
                 "name": "Drizzle Heavy",
                 "location": "24h_weather_drizzle_heavy",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["heavy drizzle", "heavy rain", "shower"]
+                "weatherType": ["drizzle", "heavy", "shower", "rain"]
             },
             {
                 "name": "Downpour",
                 "location": "24h_weather_downpour",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["downpour", "heavy rain", "shower"]
+                "weatherType": ["downpour", "heavy", "rain", "shower"]
             },
             {
                 "name": "Fog Rain",
@@ -274,36 +274,6 @@
                 "location": "24h_weather_muggy",
                 "DLSSDSeparateParticleColor": false,
                 "weatherType": ["muggy", "humid", "sticky", "hot"]
-            }
-        ]
-    },
-    "Halloween": {
-        "order": 5,
-        "states": [
-            {
-                "name": "Silent Hill",
-                "location": "24h_weather_silent_hill",
-                "DLSSDSeparateParticleColor": false
-            },
-            {
-                "name": "Apocalypse",
-                "location": "24h_weather_apocalypse",
-                "DLSSDSeparateParticleColor": false
-            },
-            {
-                "name": "The Fog",
-                "location": "24h_weather_the_fog",
-                "DLSSDSeparateParticleColor": false
-            },
-            {
-                "name": "Amityville",
-                "location": "24h_weather_amityville",
-                "DLSSDSeparateParticleColor": false
-            },
-            {
-                "name": "Poltergeist",
-                "location": "24h_weather_poltergeist",
-                "DLSSDSeparateParticleColor": false
             }
         ]
     }
