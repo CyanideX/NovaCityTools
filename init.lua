@@ -444,7 +444,7 @@ function DrawButtons()
 				ImGui.SetNextItemWidth(availableWidth)
 
 				-- Push text within the search bar
-				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, searchPaddingXValue, searchPaddingYValue)
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, searchPaddingYValue)
 				searchText = ImGui.InputText(" ", searchText, 100)
 				if searchText ~= "" then
 					searchIcon = IconGlyphs.MagnifyClose
