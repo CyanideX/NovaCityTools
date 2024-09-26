@@ -85,11 +85,12 @@ local function loadWeatherStates()
                         end
                     end
                 end
+				print(IconGlyphs.CityVariant .. " Nova City Tools: Successfully loaded "  .. filePath)
             else
-                print("Failed to decode JSON content from " .. filePath)
+                print(IconGlyphs.CityVariant .. " Nova City Tools: Failed to decode JSON content from " .. filePath)
             end
         else
-            print("No file found at " .. filePath)
+            print(IconGlyphs.CityVariant .. " Nova City Tools: No file found at " .. filePath)
         end
     end
     -- Load weather states from weatherStates.json
@@ -286,6 +287,7 @@ function DrawWeatherControl()
 		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 		toggleDLSSDPT = true
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Weather reset")
 		SaveSettings()
 		weatherReset = true
 	end
@@ -396,6 +398,7 @@ function DrawButtons()
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
                 if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Closing time slider window.")
                     timeSliderWindowOpen = false
                     settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
                     SaveSettings()
@@ -405,6 +408,7 @@ function DrawButtons()
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
                 if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Opening time slider window.")
                     timeSliderWindowOpen = true
                     settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
                     SaveSettings()
@@ -497,12 +501,14 @@ function DrawButtons()
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 										toggleDLSSDPT = true
 										weatherReset = true
+										print(IconGlyphs.CityVariant .. " Nova City Tools: Weather reset to default cycles.")
 									else
 										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 										settings.Current.weatherState = weatherState
 										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 										toggleDLSSDPT = enableDLSSDPT
+										print(IconGlyphs.CityVariant .. " Nova City Tools: Weather locked to selected state.")
 									end
 									SaveSettings()
 								end
@@ -953,11 +959,13 @@ function DrawButtons()
 
 				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message", settings.Current.warningMessages)
 				if changed then
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled warning message to " .. tostring(settings.Current.warningMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification", settings.Current.notificationMessages)
 				if changed then
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled notifications to " .. tostring(settings.Current.notificationMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
@@ -970,6 +978,7 @@ function DrawButtons()
 				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 				if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
 					resetWindow = true
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Reset GUI size and position.")
 				end
 				ui.tooltip("Reset GUI to default position and size.")
 				--DrawWeatherControl()
@@ -986,6 +995,7 @@ function DrawTimeSliderWindow()
 	if not cetOpen or not timeSliderWindowOpen then
 		return
 	end
+	
 
 	-- Set window size constraints and position
 	ImGui.SetNextWindowSizeConstraints(uiTimeMinWidth, uiTimeMinHeight, width / 100 * 99, uiTimeMaxHeight)
@@ -1194,7 +1204,9 @@ local function sortCategories()
 end
 
 registerForEvent("onInit", function()
-    LoadSettings()
+    print(IconGlyphs.CityVariant .. " Nova City Tools: Initializing")
+	
+	LoadSettings()
     loadWeatherStates()
     sortWeatherStates()
 	sortCategories()
@@ -1291,8 +1303,9 @@ function SaveSettings()
         local formattedJsonString = formatTable(saveData, 1)
         file:write(formattedJsonString)
         file:close()
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings saved")
     else
-        print("Error: Unable to open file for writing.")
+        print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
     end
 end
 
@@ -1305,6 +1318,7 @@ function LoadSettings()
 		settings.Current = loadedSettings
 		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
 		collapsedCategories = loadedSettings.collapsedCategories or {}
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded")
 	elseif not file then
 		return
 	end
