@@ -33,6 +33,7 @@ local resetWindow = false
 local currentWeatherState = nil
 local timeScale = 1.0
 local searchText = ""
+local weatherTypeKeywords = {}
 
 local settings =
 {
@@ -77,8 +78,11 @@ local function loadWeatherStates()
                 for category, info in pairs(data) do
                     table.insert(categories, { name = category, order = info.order })
                     for _, state in ipairs(info.states) do
-                        table.insert(weatherStates, { state.location, state.name, category, state.DLSSDSeparateParticleColor })
+                        table.insert(weatherStates, { state.location, state.name, category, state.DLSSDSeparateParticleColor, state.weatherType })
                         weatherStateNames[state.location] = state.name
+                        if state.weatherType then
+                            weatherTypeKeywords[state.location] = state.weatherType
+                        end
                     end
                 end
             else
@@ -88,17 +92,17 @@ local function loadWeatherStates()
             print("No file found at " .. filePath)
         end
     end
-	-- Load weather states from weatherStates.json
+    -- Load weather states from weatherStates.json
     processFile("weatherStates.json")
 end
 
 function setResolutionPresets(width, height)
 	local presets = {
-		-- { 1,    2,    3,  4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,   26, 27, 28, 29, 30, 31, 32  },
-		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1, 0.7,  140, 34, 36, 0.62, 1, 6, 320, 33, 12, 6, 650, 250, 336, 7.5, 9, 8, 10, 34, 34, 22, 140 },
-		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1, 0.45, 122, 28, 28, 0.85, 1, 8, 272, 29, 10, 4, 500, 219, 298, 7.5, 8, 8, 10, 32, 32, 18, 125 },
-		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1, 0.5,  100, 24, 24, 0.85, 1, 0, 221, 21, 8,  4, 400, 169, 230, 4.8, 9, 8, 10, 27, 27, 16, 100 },
-		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1, 0.5,  100, 24, 24, 0.85, 1, 0, 221, 21, 8,  4, 400, 169, 230, 4.8, 9, 8, 10, 27, 27, 16, 100 }
+	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34 },
+		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 34, 6,  650, 250, 336, 7.5, 9,  8,  5,  34, 34, 22, 140, 36, 36 },
+		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  272, 29, 34, 4,  500, 219, 298, 7.5, 8,  8,  3,  32, 32, 18, 125, 34, 36 },
+		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 },
+		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 }
 	}
 
 	for _, preset in ipairs(presets) do
@@ -133,6 +137,8 @@ function setResolutionPresets(width, height)
 			glyphButtonHeight = preset[30]
 			timeSliderPadding = preset[31]
 			toggleSpacingXValue = preset[32]
+			invisibleButtonWidth = preset[33]
+            invisibleButtonHeight = preset[34]
 			break
 		end
 	end
@@ -343,6 +349,15 @@ end)
 
 local collapsedCategories = {}
 
+local function anyKeywordMatches(keywords, searchText)
+    for _, keyword in ipairs(keywords) do
+        if string.find(keyword:lower(), searchText:lower()) then
+            return true
+        end
+    end
+    return false
+end
+
 function DrawButtons()
 	-- Check if the CET window is open
     if not cetOpen then
@@ -365,8 +380,6 @@ function DrawButtons()
 
 		-- Set the font scale for the window
         ImGui.SetWindowFontScale(customFontScale)
-
-        local availableWidth = ImGui.GetContentRegionAvail() - buttonPaddingRight
 
         if ImGui.BeginTabBar("Nova Tabs") then
             ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
@@ -406,90 +419,119 @@ function DrawButtons()
 
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
             if ImGui.BeginTabItem("Weather") then
-                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
-                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
+			
+				local availableWidth = ImGui.GetContentRegionAvail() - searchPaddingXValue
 
-				--ImGui.Text(IconGlyphs.Magnify)
-				--ImGui.Text("Search:")
-				--ImGui.SameLine()
-				--searchText = ImGui.InputText("##search", searchText, 100)
+				ImGui.Dummy(0, dummySpacingYValue)
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 
-                for _, category in ipairs(categories) do
-                    local isCollapsed = collapsedCategories[category.name] or false
-                    ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetColorU32(0, 0, 0, 0))
-                    ImGui.PushStyleColor(ImGuiCol.HeaderActive, ImGui.GetColorU32(0, 0, 0, 0))
-                    if ImGui.CollapsingHeader(category.name .. " ", isCollapsed and ImGuiTreeNodeFlags.None or ImGuiTreeNodeFlags.DefaultOpen) then
-                        if collapsedCategories[category.name] then
-                            collapsedCategories[category.name] = false
-                        end
-                        ImGui.Dummy(0, dummySpacingYValue)
-                        local windowWidth = ImGui.GetWindowWidth()
-                        local buttonsPerRow = math.floor(windowWidth / buttonWidth)
-                        local buttonCount = 0
-                        for _, state in ipairs(weatherStates) do
-                            local weatherState = state[1]
-                            local localization = state[2]
-                            local stateCategory = state[3]
-                            local enableDLSSDPT = state[4]
-                            if stateCategory == category.name and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
-                                local isActive = settings.Current.weatherState == weatherState
-                                if isActive then
-                                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-                                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
-                                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
-                                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-                                else
-                                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
-                                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
-                                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
-                                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
-                                end
-                                if ImGui.Button(localization, buttonWidth, buttonHeight) then
-                                    if isActive then
-                                        Game.GetWeatherSystem():ResetWeather(true)
-                                        settings.Current.weatherState = "None"
-                                        Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
-                                        GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-                                        toggleDLSSDPT = true
-                                        weatherReset = true
-                                    else
-                                        Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
-                                        settings.Current.weatherState = weatherState
-                                        Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
-                                        GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
-                                        toggleDLSSDPT = enableDLSSDPT
-                                    end
-                                    SaveSettings()
-                                end
+				if searchIcon == IconGlyphs.MagnifyClose then
+					ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1) -- Set color to red
+				end
+				InvisibleButton(searchIcon)
+				if ImGui.IsItemClicked() and searchIcon == IconGlyphs.MagnifyClose then
+					searchText = ""
+					searchIcon = IconGlyphs.Magnify
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.PopStyleColor()
+					ui.tooltip("Click to clear search.")
+				end
+				if searchIcon == IconGlyphs.MagnifyClose then
+					ImGui.PopStyleColor()
+				end
+				ImGui.SameLine()
+				ImGui.SetNextItemWidth(availableWidth)
 
-                                if isActive then
-                                    ImGui.PopStyleColor(4)
-                                end
+				-- Push text within the search bar
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, searchPaddingXValue, searchPaddingYValue)
+				searchText = ImGui.InputText(" ", searchText, 100)
+				if searchText ~= "" then
+					searchIcon = IconGlyphs.MagnifyClose
+				else
+					searchIcon = IconGlyphs.Magnify
+					ui.tooltip("Search for a weather state by typing in this field.")
+				end
+				ImGui.PopStyleVar()
 
-                                buttonCount = buttonCount + 1
-                                if buttonCount % buttonsPerRow ~= 0 then
-                                    ImGui.SameLine()
-                                end
-                            end
-                        end
-                        if buttonCount % buttonsPerRow ~= 0 then
-                            ImGui.NewLine()
-                        end
-                        ImGui.Dummy(0, dummySpacingYValue) -- Added here
-                    else
-                        if not collapsedCategories[category.name] then
-                            collapsedCategories[category.name] = true
-                        end
-                    end
-                    ImGui.PopStyleColor(3)
-                    --ImGui.Dummy(0, dummySpacingYValue)
-                    ImGui.Separator()
-                    --ImGui.Dummy(0, dummySpacingYValue)
-                end
-                DrawWeatherControl()
-                ImGui.EndTabItem()
-            end
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
+				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
+			
+				for _, category in ipairs(categories) do
+					local isCollapsed = collapsedCategories[category.name] or false
+					ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
+					ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetColorU32(0, 0, 0, 0))
+					ImGui.PushStyleColor(ImGuiCol.HeaderActive, ImGui.GetColorU32(0, 0, 0, 0))
+					if ImGui.CollapsingHeader(category.name .. " ", isCollapsed and ImGuiTreeNodeFlags.None or ImGuiTreeNodeFlags.DefaultOpen) then
+						if collapsedCategories[category.name] then
+							collapsedCategories[category.name] = false
+						end
+						ImGui.Dummy(0, dummySpacingYValue)
+						local windowWidth = ImGui.GetWindowWidth()
+						local buttonsPerRow = math.floor(windowWidth / buttonWidth)
+						local buttonCount = 0
+						for _, state in ipairs(weatherStates) do
+							local weatherState = state[1]
+							local localization = state[2]
+							local stateCategory = state[3]
+							local enableDLSSDPT = state[4]
+							local weatherType = state[5]
+							if stateCategory == category.name and (searchText == "" or string.find(localization:lower(), searchText:lower()) or (weatherType and anyKeywordMatches(weatherType, searchText))) then
+								local isActive = settings.Current.weatherState == weatherState
+								if isActive then
+									ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+									ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+									ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+									ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+								else
+									ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+									ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+									ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+									ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
+								end
+								if ImGui.Button(localization, buttonWidth, buttonHeight) then
+									if isActive then
+										Game.GetWeatherSystem():ResetWeather(true)
+										settings.Current.weatherState = "None"
+										Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+										toggleDLSSDPT = true
+										weatherReset = true
+									else
+										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
+										settings.Current.weatherState = weatherState
+										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
+										toggleDLSSDPT = enableDLSSDPT
+									end
+									SaveSettings()
+								end
+			
+								if isActive then
+									ImGui.PopStyleColor(4)
+								end
+			
+								buttonCount = buttonCount + 1
+								if buttonCount % buttonsPerRow ~= 0 then
+									ImGui.SameLine()
+								end
+							end
+						end
+						if buttonCount % buttonsPerRow ~= 0 then
+							ImGui.NewLine()
+						end
+						ImGui.Dummy(0, dummySpacingYValue) -- Added here
+					else
+						if not collapsedCategories[category.name] then
+							collapsedCategories[category.name] = true
+						end
+					end
+					ImGui.PopStyleColor(3)
+					ImGui.Separator()
+				end
+				DrawWeatherControl()
+				ImGui.EndTabItem()
+			end
 
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
@@ -1266,4 +1308,40 @@ function LoadSettings()
 	elseif not file then
 		return
 	end
+end
+
+----------------------------------------
+------------- styling stuff ------------
+----------------------------------------
+
+function InvisibleButton(text, active)
+    -- define 4 styles
+    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, glyphItemSpacingXValue, glyphItemSpacingYValue)
+    ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 0, 0)
+    ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, glyphAlignYValue)
+
+    -- define 3 colors (transparent)
+    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0, 0, 0))
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0, 0, 0, 0))
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0, 0, 0))
+
+    -- conditional text color
+    if active then
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 1, 0.7, 1))
+    end
+
+    -- draw useless button
+    ImGui.Button(text, invisibleButtonWidth, invisibleButtonHeight)
+
+    -- drop active color
+    if active then
+        ImGui.PopStyleColor(1)
+    end
+
+    -- drop 3 colors
+    ImGui.PopStyleColor(3)
+
+    -- drop 4 styles
+    ImGui.PopStyleVar(4)
 end
