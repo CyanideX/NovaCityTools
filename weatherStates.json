@@ -5,47 +5,56 @@
             {
                 "name": "Sunny",
                 "location": "24h_weather_sunny",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["clear", "sunny", "bright", "hot"]
             },
             {
                 "name": "Rain",
                 "location": "24h_weather_rain",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["rain", "wet", "shower"]
             },
             {
                 "name": "Fog",
                 "location": "24h_weather_fog",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["fog", "mist", "haze"]
             },
             {
                 "name": "Pollution",
                 "location": "24h_weather_pollution",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["pollution", "smog", "cloudy"]
             },
             {
                 "name": "Toxic Rain",
                 "location": "24h_weather_toxic_rain",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["toxic", "rain", "acid"]
             },
             {
                 "name": "Sandstorm",
                 "location": "24h_weather_sandstorm",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["sandstorm", "dust", "storm"]
             },
             {
                 "name": "Light Clouds",
                 "location": "24h_weather_light_clouds",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["light", "clouds", "overcast"]
             },
             {
                 "name": "Cloudy",
                 "location": "24h_weather_cloudy",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["cloudy", "overcast", "gray"]
             },
             {
                 "name": "Heavy Clouds",
                 "location": "24h_weather_heavy_clouds",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["heavy", "clouds", "dark"]
             }
         ]
     },
@@ -55,122 +64,146 @@
             {
                 "name": "Smog",
                 "location": "24h_weather_smog",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["smog", "pollution", "haze"]
             },
             {
                 "name": "Haze",
                 "location": "24h_weather_haze",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["haze", "mist", "fog", "hot"]
             },
             {
                 "name": "Windy",
                 "location": "24h_weather_windy",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["windy", "breezy", "gusty"]
             },
             {
                 "name": "Dew",
                 "location": "24h_weather_dew",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["dew", "moist", "humid"]
             },
             {
                 "name": "Light Rain",
                 "location": "24h_weather_light_rain",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["light rain", "drizzle", "shower"]
             },
             {
                 "name": "Clear",
                 "location": "24h_weather_clear",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["clear", "sunny", "bright", "hot"]
             },
             {
                 "name": "Drizzle",
                 "location": "24h_weather_drizzle",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["drizzle", "light rain", "shower"]
             },
             {
                 "name": "Fog Wet",
                 "location": "24h_weather_fog_wet",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["fog", "wet", "mist"]
             },
             {
                 "name": "Mist",
                 "location": "24h_weather_mist",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["mist", "haze", "fog"]
             },
             {
                 "name": "Haze Pollution",
                 "location": "24h_weather_haze_pollution",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["haze", "pollution", "smog"]
             },
             {
                 "name": "Fog Heavy",
                 "location": "24h_weather_fog_heavy",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["heavy fog", "dense fog", "thick fog"]
             },
             {
                 "name": "Sunny Windy",
                 "location": "24h_weather_sunny_windy",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["sunny", "windy", "breezy"]
             },
             {
                 "name": "Rain Alt 1",
                 "location": "24h_weather_rain_alt_1",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["rain", "wet", "shower"]
             },
             {
                 "name": "Rain Alt 2",
                 "location": "24h_weather_rain_alt_2",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["rain", "wet", "shower"]
             },
             {
                 "name": "Drizzle Light",
                 "location": "24h_weather_drizzle_light",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["light drizzle", "light rain", "shower"]
             },
             {
                 "name": "Sunny Sunset",
                 "location": "24h_weather_sunny_sunset",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["sunny", "sunset", "clear"]
             },
             {
                 "name": "Drought",
                 "location": "24h_weather_drought",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["drought", "dry", "arid", "hot"]
             },
             {
                 "name": "Humid",
                 "location": "24h_weather_humid",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["humid", "moist", "damp", "sticky", "hot"]
             },
             {
                 "name": "Overcast",
                 "location": "24h_weather_overcast",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["overcast", "cloudy", "gray"]
             },
             {
                 "name": "Courier Clouds",
                 "location": "24h_weather_courier_clouds",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["courier clouds", "cloudy", "overcast"]
             },
             {
                 "name": "Distant Rain",
                 "location": "24h_weather_distant_rain",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["distant rain", "rain", "shower"]
             },
             {
                 "name": "Drizzle Heavy",
                 "location": "24h_weather_drizzle_heavy",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["heavy drizzle", "heavy rain", "shower"]
             },
             {
                 "name": "Downpour",
                 "location": "24h_weather_downpour",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["downpour", "heavy rain", "shower"]
             },
             {
                 "name": "Fog Rain",
                 "location": "24h_weather_fog_rain",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["fog", "rain", "mist"]
             }
         ]
     },
@@ -180,17 +213,20 @@
             {
                 "name": "Sky Softbox",
                 "location": "24h_weather_sky_softbox",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["overcast", "bright", "creative", "cloud", "meme"]
             },
             {
                 "name": "Blackout",
                 "location": "24h_weather_blackout",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["blackout", "dark", "night"]
             },
             {
                 "name": "Showroom",
                 "location": "24h_weather_showroom",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["showroom", "creative", "bright"]
             }
         ]
     },
@@ -200,37 +236,44 @@
             {
                 "name": "Storm",
                 "location": "24h_weather_storm",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["storm", "thunderstorm", "rain", "heavy"]
             },
             {
                 "name": "Haze Heavy",
                 "location": "24h_weather_haze_heavy",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["heavy", "dense", "hot", "smog"]
             },
             {
                 "name": "Fog Dense",
                 "location": "24h_weather_fog_dense",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["dense", "thick", "heavy", "fog"]
             },
             {
                 "name": "Heavy Clouds Dense",
                 "location": "24h_weather_heavy_clouds_dense",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["heavy", "dense", "overcast", "cloud"]
             },
             {
                 "name": "Haze Rain",
                 "location": "24h_weather_haze_rain",
-                "DLSSDSeparateParticleColor": true
+                "DLSSDSeparateParticleColor": true,
+                "weatherType": ["haze", "rain", "mist"]
             },
             {
                 "name": "Arid",
                 "location": "24h_weather_arid",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["arid", "dry", "hot", "bright"]
             },
             {
                 "name": "Muggy",
                 "location": "24h_weather_muggy",
-                "DLSSDSeparateParticleColor": false
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["muggy", "humid", "sticky", "hot"]
             }
         ]
     },
