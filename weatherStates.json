@@ -1,38 +1,267 @@
 {
-    "Vanilla States": [
-        {
-            "name": "Sunny",
-            "location": "24h_weather_sunny",
-            "DLSSDSeparateParticleColor": false
-        },
-        {
-            "name": "Cloudy",
-            "location": "24h_weather_cloudy",
-            "DLSSDSeparateParticleColor": false
-        }
-    ],
-    "Nova Beta States": [
-        {
-            "name": "Haze",
-            "location": "24h_weather_haze",
-            "DLSSDSeparateParticleColor": false
-        },
-        {
-            "name": "Pollution",
-            "location": "24h_weather_pollution",
-            "DLSSDSeparateParticleColor": false
-        }
-    ],
-    "Nova Alpha States": [
-        {
-            "name": "Storm",
-            "location": "24h_weather_storm",
-            "DLSSDSeparateParticleColor": true
-        },
-        {
-            "name": "Heavy Fog",
-            "location": "24h_weather_fog_heavy",
-            "DLSSDSeparateParticleColor": false
-        }
-    ]
+    "Vanilla States": {
+        "order": 1,
+        "states": [
+            {
+                "name": "Sunny",
+                "location": "24h_weather_sunny",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Rain",
+                "location": "24h_weather_rain",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Fog",
+                "location": "24h_weather_fog",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Pollution",
+                "location": "24h_weather_pollution",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Toxic Rain",
+                "location": "24h_weather_toxic_rain",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Sandstorm",
+                "location": "24h_weather_sandstorm",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Light Clouds",
+                "location": "24h_weather_light_clouds",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Cloudy",
+                "location": "24h_weather_cloudy",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Heavy Clouds",
+                "location": "24h_weather_heavy_clouds",
+                "DLSSDSeparateParticleColor": false
+            }
+        ]
+    },
+    "Nova City Beta States": {
+        "order": 2,
+        "states": [
+            {
+                "name": "Smog",
+                "location": "24h_weather_smog",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Haze",
+                "location": "24h_weather_haze",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Windy",
+                "location": "24h_weather_windy",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Dew",
+                "location": "24h_weather_dew",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Light Rain",
+                "location": "24h_weather_light_rain",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Clear",
+                "location": "24h_weather_clear",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Drizzle",
+                "location": "24h_weather_drizzle",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Fog Wet",
+                "location": "24h_weather_fog_wet",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Mist",
+                "location": "24h_weather_mist",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Haze Pollution",
+                "location": "24h_weather_haze_pollution",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Fog Heavy",
+                "location": "24h_weather_fog_heavy",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Sunny Windy",
+                "location": "24h_weather_sunny_windy",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Rain Alt 1",
+                "location": "24h_weather_rain_alt_1",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Rain Alt 2",
+                "location": "24h_weather_rain_alt_2",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Drizzle Light",
+                "location": "24h_weather_drizzle_light",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Sunny Sunset",
+                "location": "24h_weather_sunny_sunset",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Drought",
+                "location": "24h_weather_drought",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Humid",
+                "location": "24h_weather_humid",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Overcast",
+                "location": "24h_weather_overcast",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Courier Clouds",
+                "location": "24h_weather_courier_clouds",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Distant Rain",
+                "location": "24h_weather_distant_rain",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Drizzle Heavy",
+                "location": "24h_weather_drizzle_heavy",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Downpour",
+                "location": "24h_weather_downpour",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Fog Rain",
+                "location": "24h_weather_fog_rain",
+                "DLSSDSeparateParticleColor": true
+            }
+        ]
+    },
+    "Creative": {
+        "order": 4,
+        "states": [
+            {
+                "name": "Sky Softbox",
+                "location": "24h_weather_sky_softbox",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Blackout",
+                "location": "24h_weather_blackout",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Showroom",
+                "location": "24h_weather_showroom",
+                "DLSSDSeparateParticleColor": false
+            }
+        ]
+    },
+    "Nova City Alpha States": {
+        "order": 3,
+        "states": [
+            {
+                "name": "Storm",
+                "location": "24h_weather_storm",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Haze Heavy",
+                "location": "24h_weather_haze_heavy",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Fog Dense",
+                "location": "24h_weather_fog_dense",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Heavy Clouds Dense",
+                "location": "24h_weather_heavy_clouds_dense",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Haze Rain",
+                "location": "24h_weather_haze_rain",
+                "DLSSDSeparateParticleColor": true
+            },
+            {
+                "name": "Arid",
+                "location": "24h_weather_arid",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Muggy",
+                "location": "24h_weather_muggy",
+                "DLSSDSeparateParticleColor": false
+            }
+        ]
+    },
+    "Halloween": {
+        "order": 5,
+        "states": [
+            {
+                "name": "Silent Hill",
+                "location": "24h_weather_silent_hill",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Apocalypse",
+                "location": "24h_weather_apocalypse",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "The Fog",
+                "location": "24h_weather_the_fog",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Amityville",
+                "location": "24h_weather_amityville",
+                "DLSSDSeparateParticleColor": false
+            },
+            {
+                "name": "Poltergeist",
+                "location": "24h_weather_poltergeist",
+                "DLSSDSeparateParticleColor": false
+            }
+        ]
+    }
 }

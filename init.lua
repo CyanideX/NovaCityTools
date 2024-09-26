@@ -74,9 +74,9 @@ local function loadWeatherStates()
             fileHandle:close()
             local success, data = pcall(json.decode, content)
             if success and data then
-                for category, states in pairs(data) do
-                    table.insert(categories, category)
-                    for _, state in ipairs(states) do
+                for category, info in pairs(data) do
+                    table.insert(categories, { name = category, order = info.order })
+                    for _, state in ipairs(info.states) do
                         table.insert(weatherStates, { state.location, state.name, category, state.DLSSDSeparateParticleColor })
                         weatherStateNames[state.location] = state.name
                     end
@@ -88,11 +88,9 @@ local function loadWeatherStates()
             print("No file found at " .. filePath)
         end
     end
-
-    -- Load weather states from weatherStates.json
+	-- Load weather states from weatherStates.json
     processFile("weatherStates.json")
 end
-
 
 function setResolutionPresets(width, height)
 	local presets = {
@@ -345,77 +343,77 @@ end)
 
 function DrawButtons()
 	-- Check if the CET window is open
-	if not cetOpen then
-		return
-	end
+    if not cetOpen then
+        return
+    end
 
 	-- Set window size constraints
-	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
-	if resetWindow then
-		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
-		ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
-		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
-		resetWindow = false
-	end
-	if ImGui.Begin("Nova City Tools - v" .. version, true, ImGuiWindowFlags.NoScrollbar) then
+    ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
+    if resetWindow then
+        ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
+        resetWindow = false
+    end
+    if ImGui.Begin("Nova City Tools - v" .. version, true, ImGuiWindowFlags.NoScrollbar) then
 		-- Reset padding
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
-		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
 		-- Set the font scale for the window
-		ImGui.SetWindowFontScale(customFontScale)
+        ImGui.SetWindowFontScale(customFontScale)
 
-		local availableWidth = ImGui.GetContentRegionAvail() - buttonPaddingRight
+        local availableWidth = ImGui.GetContentRegionAvail() - buttonPaddingRight
 
-		if ImGui.BeginTabBar("Nova Tabs") then
-			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
+        if ImGui.BeginTabBar("Nova Tabs") then
+            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
 
 			-- TIME SLIDER TOGGLE ------------------------
 			-- Set button text alignment and frame padding
-			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
-			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+            ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
 
 			-- Create the button and toggle the time slider window
-			if timeSliderWindowOpen then
-				ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1)) -- Custom hover color
-				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1)) -- Click color
-				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					timeSliderWindowOpen = false
-					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-					SaveSettings()
-				end
-				ImGui.PopStyleColor(4)
-			else
-				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1)) -- Custom hover color
-				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1)) -- Click color
-				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					timeSliderWindowOpen = true
-					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-					SaveSettings()
-				end
-				ImGui.PopStyleColor(2)
-			end
+            if timeSliderWindowOpen then
+                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+                if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+                    timeSliderWindowOpen = false
+                    settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+                    SaveSettings()
+                end
+                ImGui.PopStyleColor(4)
+            else
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+                if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+                    timeSliderWindowOpen = true
+                    settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+                    SaveSettings()
+                end
+				-- Reset style variables
+                ImGui.PopStyleColor(2)
+            end
 
-			ui.tooltip("Toggles the time slider window.")
+            ui.tooltip("Toggles the time slider window.")
 
-			-- Reset style variables
-			ImGui.PopStyleVar(2)
+            ImGui.PopStyleVar(2)
 
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
             if ImGui.BeginTabItem("Weather") then
-				-- Push style variables for frame padding and item spacing INSIDE the tabs
-				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
-				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
+                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
 				--ImGui.Text(IconGlyphs.Magnify)
 				--ImGui.Text("Search:")
 				--ImGui.SameLine()
 				--searchText = ImGui.InputText("##search", searchText, 100)
+
                 for _, category in ipairs(categories) do
-                    ImGui.Text(category)
+                    ImGui.Text(category.name)
                     local windowWidth = ImGui.GetWindowWidth()
                     local buttonsPerRow = math.floor(windowWidth / buttonWidth)
                     local buttonCount = 0
@@ -424,19 +422,19 @@ function DrawButtons()
                         local localization = state[2]
                         local stateCategory = state[3]
                         local enableDLSSDPT = state[4]
-                        if stateCategory == category and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
+                        if stateCategory == category.name and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
                             local isActive = settings.Current.weatherState == weatherState
-							if isActive then
-								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-								ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1)) -- Hover color
-								ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1)) -- Click color
-								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-							else
-								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1)) -- Inactive button color
-								ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1)) -- Inactive hover color
-								ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1)) -- Inactive click color
-								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1)) -- Inactive text color
-							end
+                            if isActive then
+                                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+                                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+                                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+                                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+                            else
+                                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+                                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+                                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+                                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
+                            end
                             if ImGui.Button(localization, buttonWidth, buttonHeight) then
                                 if isActive then
                                     Game.GetWeatherSystem():ResetWeather(true)
@@ -455,9 +453,9 @@ function DrawButtons()
                                 SaveSettings()
                             end
 
-							if isActive then
-								ImGui.PopStyleColor(4)
-							end
+                            if isActive then
+                                ImGui.PopStyleColor(4)
+                            end
 
                             buttonCount = buttonCount + 1
                             if buttonCount % buttonsPerRow ~= 0 then
@@ -1126,10 +1124,17 @@ local function sortWeatherStates()
 	end)
 end
 
+local function sortCategories()
+    table.sort(categories, function(a, b)
+        return a.order < b.order
+    end)
+end
+
 registerForEvent("onInit", function()
     LoadSettings()
     loadWeatherStates()
     sortWeatherStates()
+	sortCategories()
 	--[[ -- Handle session start
     GameUI.OnSessionStart(function()
         Cron.After(0.25, function()
