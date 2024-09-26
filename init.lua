@@ -34,8 +34,6 @@ local currentWeatherState = nil
 local timeScale = 1.0
 local searchText = ""
 
-local weatherStateNames = {}
-
 local settings =
 {
 	Current = {
@@ -64,59 +62,37 @@ local ui = {
 	end
 }
 
--- Define the weather states
-local weatherStates = {
-	-- Each state is defined by a list containing the state's ID, name, category, and a flag indicating if it enables DLSSDSeparateParticleColor
-	-- { '24h_weather_state_name',  'Localized Name', Category, DLSSD Flag}
-	{ "24h_weather_sunny",              "Sunny",              1, false },
-	{ "24h_weather_rain",               "Rain",               1, true },
-	{ "24h_weather_fog",                "Fog",                1, false },
-	{ "24h_weather_pollution",          "Pollution",          1, false },
-	{ "24h_weather_toxic_rain",         "Toxic Rain",         1, true },
-	{ "24h_weather_sandstorm",          "Sandstorm",          1, true },
-	{ "24h_weather_light_clouds",       "Light Clouds",       1, false },
-	{ "24h_weather_cloudy",             "Cloudy",             1, false },
-	{ "24h_weather_heavy_clouds",       "Heavy Clouds",       1, false },
-	{ "24h_weather_smog",               "Smog",               2, false },
-	{ "24h_weather_haze",               "Haze",               2, false },
-	{ "24h_weather_windy",              "Windy",              2, true },
-	{ "24h_weather_dew",                "Dew",                2, false },
-	{ "24h_weather_light_rain",         "Light Rain",         2, true },
-	{ "24h_weather_clear",              "Clear",              2, false },
-	{ "24h_weather_storm",              "Storm",              3, true },
-	{ "24h_weather_drizzle",            "Drizzle",            2, true },
-	{ "24h_weather_haze_heavy",         "Haze Heavy",         3, false },
-	{ "24h_weather_fog_dense",          "Fog Dense",          3, false },
-	{ "24h_weather_fog_wet",            "Fog Wet",            2, true },
-	{ "24h_weather_mist",               "Mist",               2, false },
-	{ "24h_weather_haze_pollution",     "Haze Pollution",     2, false },
-	{ "24h_weather_fog_heavy",          "Fog Heavy",          2, false },
-	{ "24h_weather_sunny_windy",        "Sunny Windy",        2, true },
-	{ "24h_weather_rain_alt_1",         "Rain Alt 1",         2, true },
-	{ "24h_weather_rain_alt_2",         "Rain Alt 2",         2, true },
-	{ "24h_weather_drizzle_light",      "Drizzle Light",      2, true },
-	{ "24h_weather_sky_softbox",        "Sky Softbox",        4, false },
-	{ "24h_weather_sunny_sunset",       "Sunny Sunset",       2, false },
-	{ "24h_weather_drought",            "Drought",            2, true },
-	{ "24h_weather_humid",              "Humid",              2, true },
-	{ "24h_weather_overcast",           "Overcast",           2, false },
-	{ "24h_weather_courier_clouds",     "Courier Clouds",     2, true },
-	{ "24h_weather_distant_rain",       "Distant Rain",       2, true },
-	{ "24h_weather_drizzle_heavy",      "Drizzle Heavy",      2, true },
-	{ "24h_weather_downpour",           "Downpour",           2, true },
-	{ "24h_weather_blackout",           "Blackout",           4, false },
-	--{ "24h_weather_showroom",       	"Showroom",       	  4, false },
-	{ "24h_weather_arid",               "Arid",               3, false },
-	{ "24h_weather_muggy",              "Muggy",              3, false },
-	{ "24h_weather_fog_rain",           "Fog Rain",           2, true },
-	{ "24h_weather_silent_hill",        "Silent Hill",        5, false },
-	--{ "24h_weather_apocalypse",         "Apocalypse",         5, false },
-	--{ "24h_weather_the_fog",            "The Fog",            5, false },
-	--{ "24h_weather_amityville",         "Amityville ",        5, false },
-	--{ "24h_weather_poltergeist",        "Poltergeist ",       5, false },
-	{ "24h_weather_heavy_clouds_dense", "Heavy Clouds Dense", 3, false },
-	{ "24h_weather_haze_rain",          "Haze Rain",          3, true }
-}
+local weatherStates = {}
+local weatherStateNames = {}
+local categories = {}
+
+local function loadWeatherStates()
+    local function processFile(filePath)
+        local fileHandle = io.open(filePath, "r")
+        if fileHandle then
+            local content = fileHandle:read("*a")
+            fileHandle:close()
+            local success, data = pcall(json.decode, content)
+            if success and data then
+                for category, states in pairs(data) do
+                    table.insert(categories, category)
+                    for _, state in ipairs(states) do
+                        table.insert(weatherStates, { state.location, state.name, category, state.DLSSDSeparateParticleColor })
+                        weatherStateNames[state.location] = state.name
+                    end
+                end
+            else
+                print("Failed to decode JSON content from " .. filePath)
+            end
+        else
+            print("No file found at " .. filePath)
+        end
+    end
+
+    -- Load weather states from weatherStates.json
+    processFile("weatherStates.json")
+end
+
 
 function setResolutionPresets(width, height)
 	local presets = {
@@ -429,7 +405,7 @@ function DrawButtons()
 			ImGui.PopStyleVar(2)
 
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
-			if ImGui.BeginTabItem("Weather") then
+            if ImGui.BeginTabItem("Weather") then
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
@@ -438,22 +414,18 @@ function DrawButtons()
 				--ImGui.Text("Search:")
 				--ImGui.SameLine()
 				--searchText = ImGui.InputText("##search", searchText, 100)
-
-				local categories = { "Vanilla States", "Nova City: Beta States", "Nova City: Alpha States", "Creative", "Halloween Pack" }
-				for i, category in ipairs(categories) do
-					ImGui.Text(category)
-
-					local windowWidth = ImGui.GetWindowWidth()
-					local buttonsPerRow = math.floor(windowWidth / buttonWidth)
-					local buttonCount = 0
-					for _, state in ipairs(weatherStates) do
-						local weatherState = state[1]
-						local localization = state[2]
-						local category = state[3]
-						local enableDLSSDPT = state[4]
-						if category == i and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
-							local isActive = settings.Current.weatherState == weatherState
-
+                for _, category in ipairs(categories) do
+                    ImGui.Text(category)
+                    local windowWidth = ImGui.GetWindowWidth()
+                    local buttonsPerRow = math.floor(windowWidth / buttonWidth)
+                    local buttonCount = 0
+                    for _, state in ipairs(weatherStates) do
+                        local weatherState = state[1]
+                        local localization = state[2]
+                        local stateCategory = state[3]
+                        local enableDLSSDPT = state[4]
+                        if stateCategory == category and (searchText == "" or string.find(localization:lower(), searchText:lower())) then
+                            local isActive = settings.Current.weatherState == weatherState
 							if isActive then
 								ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
 								ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1)) -- Hover color
@@ -465,44 +437,41 @@ function DrawButtons()
 								ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1)) -- Inactive click color
 								ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1)) -- Inactive text color
 							end
-							if ImGui.Button(localization, buttonWidth, buttonHeight) then
-								if isActive then
-									Game.GetWeatherSystem():ResetWeather(true)
-									settings.Current.weatherState = "None"
-									Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
-									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-									toggleDLSSDPT = true
-									weatherReset = true
-								else
-									Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
-									settings.Current.weatherState = weatherState
-									Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
-									GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
-									toggleDLSSDPT = enableDLSSDPT
-								end
-								SaveSettings()
-							end
+                            if ImGui.Button(localization, buttonWidth, buttonHeight) then
+                                if isActive then
+                                    Game.GetWeatherSystem():ResetWeather(true)
+                                    settings.Current.weatherState = "None"
+                                    Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+                                    GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+                                    toggleDLSSDPT = true
+                                    weatherReset = true
+                                else
+                                    Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
+                                    settings.Current.weatherState = weatherState
+                                    Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+                                    GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
+                                    toggleDLSSDPT = enableDLSSDPT
+                                end
+                                SaveSettings()
+                            end
+
 							if isActive then
 								ImGui.PopStyleColor(4)
 							end
 
-							buttonCount = buttonCount + 1
-							if buttonCount % buttonsPerRow ~= 0 then
-								ImGui.SameLine()
-							end
-						end
-					end
-
-					if buttonCount % buttonsPerRow ~= 0 then
-						ImGui.NewLine() -- Force a new line only if the last button is not on a new line
-					end
-				end
-
-				DrawWeatherControl()
-				ImGui.EndTabItem()
-			end
-
-
+                            buttonCount = buttonCount + 1
+                            if buttonCount % buttonsPerRow ~= 0 then
+                                ImGui.SameLine()
+                            end
+                        end
+                    end
+                    if buttonCount % buttonsPerRow ~= 0 then
+                        ImGui.NewLine()
+                    end
+                end
+                DrawWeatherControl()
+                ImGui.EndTabItem()
+            end
 
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
@@ -1158,14 +1127,9 @@ local function sortWeatherStates()
 end
 
 registerForEvent("onInit", function()
-	LoadSettings()
-
-	-- Create a mapping from weather state IDs to localized names
-	for _, weatherState in ipairs(weatherStates) do
-		local id, localization = table.unpack(weatherState)
-		weatherStateNames[id] = localization
-	end
-	sortWeatherStates()
+    LoadSettings()
+    loadWeatherStates()
+    sortWeatherStates()
 	--[[ -- Handle session start
     GameUI.OnSessionStart(function()
         Cron.After(0.25, function()
