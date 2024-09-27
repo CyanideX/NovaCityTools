@@ -463,7 +463,7 @@ function DrawButtons()
 					searchIcon = IconGlyphs.MagnifyClose
 				else
 					searchIcon = IconGlyphs.Magnify
-					ui.tooltip("Search for a weather state by typing in this field.")
+					ui.tooltip("Search for a weather state by typing in this field.\nUse keywords like 'wet', 'hot', 'bright', to search by properties.")
 				end
 				ImGui.PopStyleVar()
 
