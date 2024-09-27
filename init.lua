@@ -994,13 +994,27 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				-- Make the buttons fit the width of the GUI
 				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
-				if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
-					exportDebugFile()
-					print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
+
+				if not Game.GetSystemRequestsHandler():IsPreGame() and not Game.GetSystemRequestsHandler():IsGamePaused() then
+					ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+					if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
+						exportDebugFile()
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
+					end
+					ImGui.PopStyleColor()
+					ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.")
+				else
+					ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+					ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
+					ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
+					ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0.6, 0.6, 0.6, 1))
+					if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Cannot export debug file while in menu")
+					end
+					ImGui.PopStyleColor(4)
+					ui.tooltip("Cannot export debug file while in menu")
 				end
-				ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.")
 
 				if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
 					resetWindow = true
@@ -1017,7 +1031,12 @@ function DrawButtons()
 end
 
 function exportDebugFile()
-    local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
+    -- Check if the player is in menu or game is paused
+    if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
+        return
+    end
+	
+	local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
 	local inVehicle = false
 	local file = io.open("novaCityDebug.json", "r")
     local debugData = {}
@@ -1027,11 +1046,6 @@ function exportDebugFile()
 	else
 		selectedWeatherState = "Locked State"
 	end
-
-	-- Check if the player is in menu or game is paused
-    if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
-        return
-    end
 
     if not Game.GetPlayer().mountedVehicle then
         if inVehicle then
@@ -1054,7 +1068,6 @@ function exportDebugFile()
         weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
         gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
 		inVehicle = inVehicle,
-		playerDirection = ToEulerAngles(Game.GetPlayer():GetWorldOrientation()),
         playerPosition = (function()
             if pos then
                 return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
@@ -1077,12 +1090,11 @@ function exportDebugFile()
 		modVersion = data.modVersion,
         gameVersion = data.gameVersion,
         dateTime = data.dateTime,
-		selectedWeatherState = data.selectedWeatherState,
+		weatherCycleMode = data.weatherCycleMode,
 		localizedState = data.localizedState,
         weatherState = data.weatherState,
         gameTime = data.gameTime,
 		inVehicle = data.inVehicle,
-		playerDirection = data.playerDirection,
         playerPosition = data.playerPosition
     })
 
