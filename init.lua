@@ -1,7 +1,7 @@
 local Cron = require("Cron")
 local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
-local version = "1.7.4"
+local version = "1.7.5"
 local cetOpen = false
 local toggleNRD = false
 local toggleDLSSDPT = true
@@ -1332,28 +1332,15 @@ function LoadSettings()
 	if file then
 		local content = file:read("*all")
 		file:close()
-		local success, loadedSettings = pcall(json.decode, content)
-		if success and type(loadedSettings) == "table" then
-			-- Set default values for missing fields
-			loadedSettings.collapsedCategories = loadedSettings.collapsedCategories or {}
-			loadedSettings.timeSliderWindowOpen = loadedSettings.timeSliderWindowOpen or false
-			loadedSettings.weatherState = loadedSettings.weatherState or "None"
-			loadedSettings.transitionDuration = loadedSettings.transitionDuration or 0
-			loadedSettings.warningMessages = loadedSettings.warningMessages or true
-			loadedSettings.notificationMessages = loadedSettings.notificationMessages or true
-			loadedSettings.debugOutput = loadedSettings.debugOutput or false
-
-			settings.Current = loadedSettings
-			timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
-			collapsedCategories = loadedSettings.collapsedCategories
-			settings.Current.debugOutput = loadedSettings.debugOutput  -- Added debugOutput
-			debugPrint("Settings loaded")
-		else
-			print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Invalid settings format")
-		end
-	else
+		local loadedSettings = json.decode(content)
+		settings.Current = loadedSettings
+		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
+		collapsedCategories = loadedSettings.collapsedCategories or {}
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded")
+	elseif not file then
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings file not found")
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default settings file")
+		return
 	end
 end
 
