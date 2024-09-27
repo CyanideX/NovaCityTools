@@ -33,8 +33,9 @@ local resetWindow = false
 local currentWeatherState = nil
 local timeScale = 1.0
 local searchText = ""
-local weatherTypeKeywords = {}
 local userInteracted = false
+local debugOutput = false
+
 
 local settings =
 {
@@ -66,6 +67,7 @@ local ui = {
 
 local weatherStates = {}
 local weatherStateNames = {}
+local weatherTypeKeywords = {}
 local categories = {}
 
 local function loadWeatherStates()
@@ -470,6 +472,7 @@ function DrawButtons()
 					if ImGui.CollapsingHeader(category.name .. " ", isCollapsed and ImGuiTreeNodeFlags.None or ImGuiTreeNodeFlags.DefaultOpen) then
 						if collapsedCategories[category.name] then
 							collapsedCategories[category.name] = false
+							SaveSettings()
 						end
 						ImGui.Dummy(0, dummySpacingYValue)
 						local windowWidth = ImGui.GetWindowWidth()
@@ -533,6 +536,7 @@ function DrawButtons()
 					else
 						if not collapsedCategories[category.name] then
 							collapsedCategories[category.name] = true
+							SaveSettings()
 						end
 					end
 					ImGui.PopStyleColor(3)
