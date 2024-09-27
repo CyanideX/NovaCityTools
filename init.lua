@@ -34,7 +34,6 @@ local currentWeatherState = nil
 local timeScale = 1.0
 local searchText = ""
 local userInteracted = false
-local debugOutput = false
 
 
 local settings =
@@ -45,6 +44,7 @@ local settings =
 		timeSliderWindowOpen = false,
 		warningMessages = true,
 		notificationMessages = true,
+		debugOutput = false,
 	},
 	Default = {
 		weatherState = "None",
@@ -52,6 +52,7 @@ local settings =
 		timeSliderWindowOpen = false,
 		warningMessages = true,
 		notificationMessages = true,
+		debugOutput = false,
 	}
 }
 
@@ -64,6 +65,12 @@ local ui = {
 		end
 	end
 }
+
+function debugPrint(message)
+    if settings.Current.debugOutput then
+        print(IconGlyphs.CityVariant .. " Nova City Tools: " .. message)
+    end
+end
 
 local weatherStates = {}
 local weatherStateNames = {}
@@ -88,7 +95,7 @@ local function loadWeatherStates()
                         end
                     end
                 end
-				print(IconGlyphs.CityVariant .. " Nova City Tools: Successfully loaded "  .. filePath)
+				debugPrint("Successfully loaded "  .. filePath)
             else
                 print(IconGlyphs.CityVariant .. " Nova City Tools: Failed to decode JSON content from " .. filePath)
             end
@@ -290,7 +297,7 @@ function DrawWeatherControl()
 		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 		toggleDLSSDPT = true
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Weather reset")
+		debugPrint("Weather reset")
 		SaveSettings()
 		weatherReset = true
 	end
@@ -346,7 +353,7 @@ registerForEvent("onUpdate", function()
 			if settings.Current.notificationMessages then
 				ShowNotificationMessage(messageText)
 			end
-			print(IconGlyphs.CityVariant .. " Nova City Tools: Weather changed to " .. (tostring(currentWeatherState)))
+			debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
 		end
 		-- Reset the weather reset flag after the weather change notification has been skipped
 		weatherReset = false
@@ -402,7 +409,7 @@ function DrawButtons()
 				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
 				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					print(IconGlyphs.CityVariant .. " Nova City Tools: Closing time slider window.")
+					debugPrint("Closing time slider window.")
 					timeSliderWindowOpen = false
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
@@ -412,7 +419,7 @@ function DrawButtons()
 				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
 				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
 				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					print(IconGlyphs.CityVariant .. " Nova City Tools: Opening time slider window.")
+					debugPrint("Opening time slider window.")
 					timeSliderWindowOpen = true
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
@@ -505,16 +512,14 @@ function DrawButtons()
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 										toggleDLSSDPT = true
 										weatherReset = true
-										print(IconGlyphs.CityVariant ..
-										" Nova City Tools: Weather reset to default cycles.")
+										debugPrint("Weather reset to default cycles.")
 									else
 										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 										settings.Current.weatherState = weatherState
 										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 										toggleDLSSDPT = enableDLSSDPT
-										print(IconGlyphs.CityVariant ..
-										" Nova City Tools: Weather locked to selected state.")
+										debugPrint("Weather locked to selected state.")
 									end
 									SaveSettings()
 								end
@@ -561,7 +566,7 @@ function DrawButtons()
 				toggleFogClouds, changed = ImGui.Checkbox("ALL: Volumetrics and Clouds", toggleFogClouds)
 				if changed then
 					userInteracted = true
-					print(IconGlyphs.CityVariant .. " Toggles: Volumetrics and Clouds changed!")
+					debugPrint("Volumetrics and Clouds toggled!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFogClouds)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFogClouds)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFogClouds)
@@ -585,7 +590,7 @@ function DrawButtons()
 				toggleFog, changed = ImGui.Checkbox("ALL: Fog", toggleFog)
 				if changed then
 					userInteracted = true
-					print(IconGlyphs.CityVariant .. " Toggles: Fog changed!")
+					debugPrint("Fog toggled!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFog)
@@ -612,7 +617,7 @@ function DrawButtons()
 				volumetricFog, changed = ImGui.Checkbox("VFog", volumetricFog)
 				if changed then
 					userInteracted = true
-					print(IconGlyphs.CityVariant .. " Toggles: VFog changed!")
+					debugPrint("VFog toggled!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", volumetricFog)
 
 					if volumetricFog then
@@ -629,7 +634,7 @@ function DrawButtons()
 				distantVolumetricFog, changed = ImGui.Checkbox("Distant VFog", distantVolumetricFog)
 				if changed then
 					userInteracted = true
-					print(IconGlyphs.CityVariant .. " Toggles: Distant Fog changed!")
+					debugPrint("Distant Fog toggled!")
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
 
 					if distantVolumetricFog and not volumetricFog then
@@ -642,7 +647,7 @@ function DrawButtons()
 				distantFog, changed = ImGui.Checkbox("Fog", distantFog)
 				if changed then
 					userInteracted = true
-					print(IconGlyphs.CityVariant .. " Toggles: Fog changed!")
+					debugPrint("Fog changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", distantFog)
 				end
 				ui.tooltip("Toggle distant fog plane.")
@@ -650,7 +655,7 @@ function DrawButtons()
 				clouds, changed = ImGui.Checkbox("Clouds", clouds)
 				if changed then
 					userInteracted = true
-					print(IconGlyphs.CityVariant .. " Toggles: Clouds changed!")
+					debugPrint("Clouds changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
 				end
 				ui.tooltip("Toggle volumetric clouds.")
@@ -967,23 +972,25 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message",
-					settings.Current.warningMessages)
+				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message", settings.Current.warningMessages)
 				if changed then
-					print(IconGlyphs.CityVariant ..
-					" Nova City Tools: Toggled warning message to " .. tostring(settings.Current.warningMessages))
+					debugPrint("Toggled warning message to " .. tostring(settings.Current.warningMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
-				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification",
-					settings.Current.notificationMessages)
+				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification", settings.Current.notificationMessages)
 				if changed then
-					print(IconGlyphs.CityVariant ..
-					" Nova City Tools: Toggled notifications to " .. tostring(settings.Current.notificationMessages))
+					debugPrint("Toggled notifications to " .. tostring(settings.Current.notificationMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
+				settings.Current.debugOutput, changed = ImGui.Checkbox("Debug Output", settings.Current.debugOutput)
+				if changed then
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled debug output to " .. tostring(settings.Current.debugOutput))
+					SaveSettings()
+				end
+					
 				ImGui.Dummy(0, 50)
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
@@ -992,7 +999,7 @@ function DrawButtons()
 				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 				if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
 					resetWindow = true
-					print(IconGlyphs.CityVariant .. " Nova City Tools: Reset GUI size and position.")
+					debugPrint("Reset GUI size and position.")
 				end
 				ui.tooltip("Reset GUI to default position and size.")
 				--DrawWeatherControl()
@@ -1215,7 +1222,7 @@ local function sortCategories()
 end
 
 registerForEvent("onInit", function()
-	print(IconGlyphs.CityVariant .. " Nova City Tools: Initializing")
+	print(IconGlyphs.CityVariant .. " Nova City Tools: Initialized")
 
 	LoadSettings()
 	loadWeatherStates()
@@ -1275,6 +1282,7 @@ function SaveSettings()
 		weatherState = settings.Current.weatherState,
 		warningMessages = settings.Current.warningMessages,
 		notificationMessages = settings.Current.notificationMessages,
+		debugOutput = settings.Current.debugOutput,  -- Added debugOutput
 		collapsedCategories = {}
 	}
 
@@ -1314,7 +1322,7 @@ function SaveSettings()
 		local formattedJsonString = formatTable(saveData, 1)
 		file:write(formattedJsonString)
 		file:close()
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings saved")
+		debugPrint("Settings saved")
 	else
 		print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
 	end
@@ -1325,13 +1333,28 @@ function LoadSettings()
 	if file then
 		local content = file:read("*all")
 		file:close()
-		local loadedSettings = json.decode(content)
-		settings.Current = loadedSettings
-		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
-		collapsedCategories = loadedSettings.collapsedCategories or {}
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded")
-	elseif not file then
-		return
+		local success, loadedSettings = pcall(json.decode, content)
+		if success and type(loadedSettings) == "table" then
+			-- Set default values for missing fields
+			loadedSettings.collapsedCategories = loadedSettings.collapsedCategories or {}
+			loadedSettings.timeSliderWindowOpen = loadedSettings.timeSliderWindowOpen or false
+			loadedSettings.weatherState = loadedSettings.weatherState or "None"
+			loadedSettings.transitionDuration = loadedSettings.transitionDuration or 0
+			loadedSettings.warningMessages = loadedSettings.warningMessages or true
+			loadedSettings.notificationMessages = loadedSettings.notificationMessages or true
+			loadedSettings.debugOutput = loadedSettings.debugOutput or false
+
+			settings.Current = loadedSettings
+			timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
+			collapsedCategories = loadedSettings.collapsedCategories
+			settings.Current.debugOutput = loadedSettings.debugOutput  -- Added debugOutput
+			debugPrint("Settings loaded")
+		else
+			print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Invalid settings format")
+		end
+	else
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings file not found")
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default settings file")
 	end
 end
 
