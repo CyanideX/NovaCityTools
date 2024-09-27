@@ -1,6 +1,7 @@
 local Cron = require("Cron")
 local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
+local modName = "Nova City"
 local modVersion = "1.7.6"
 local cetOpen = false
 local toggleNRD = false
@@ -1016,44 +1017,54 @@ function DrawButtons()
 end
 
 function exportDebugFile()
-    -- Check if the player is in menu or game is paused
+    local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
+	local inVehicle = false
+	local file = io.open("novaCityDebug.json", "r")
+    local debugData = {}
+	local selectedWeatherState = settings.Current.weatherState
+	if selectedWeatherState == "None" then
+		selectedWeatherState = "Default Cycles"
+	else
+		selectedWeatherState = "Locked State"
+	end
+
+	-- Check if the player is in menu or game is paused
     if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
         return
     end
 
-	local inVehicle = false
-	if not Game.GetPlayer().mountedVehicle then
-		if inVehicle then
-			inVehicle = false
-		end
-	else
-		if not inVehicle then
-			inVehicle = true
-		end
-	end
+    if not Game.GetPlayer().mountedVehicle then
+        if inVehicle then
+            inVehicle = false
+        end
+    else
+        if not inVehicle then
+            inVehicle = true
+        end
+    end
 
     -- Collect data with error handling
     local data = {
-        modName = "Nova City",
-        modVersion = modVersion,
+		modName = tostring(modName),
+        modVersion = tostring(modVersion) or nil,
         gameVersion = Game.GetSystemRequestsHandler():GetGameVersion() or nil,
         dateTime = os.date("%m/%d/%Y - %H:%M:%S", os.time()) or nil,
+		weatherCycleMode = tostring(selectedWeatherState),
+		localizedState = tostring(weatherStateNames[currentWeatherState]),
         weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
+        gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
+		inVehicle = inVehicle,
+		playerDirection = ToEulerAngles(Game.GetPlayer():GetWorldOrientation()),
         playerPosition = (function()
-            local pos = Game.GetPlayer():GetWorldPosition()
             if pos then
                 return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
             else
                 return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
             end
-        end)(),
-		inVehicle = inVehicle
+        end)()
     }
 
     -- Read existing data from Debug.json
-    local file = io.open("novaCityDebug.json", "r")
-    local debugData = {}
-
     if file then
         local content = file:read("*a")
         debugData = json.decode(content)
@@ -1062,13 +1073,17 @@ function exportDebugFile()
 
     -- Insert new data in the same order as defined in 'data'
     table.insert(debugData, {
-        modName = data.modName,
-        modVersion = data.modVersion,
+		modName = data.modName,
+		modVersion = data.modVersion,
         gameVersion = data.gameVersion,
         dateTime = data.dateTime,
+		selectedWeatherState = data.selectedWeatherState,
+		localizedState = data.localizedState,
         weatherState = data.weatherState,
-        playerPosition = data.playerPosition,
-		inVehicle = data.inVehicle
+        gameTime = data.gameTime,
+		inVehicle = data.inVehicle,
+		playerDirection = data.playerDirection,
+        playerPosition = data.playerPosition
     })
 
     -- Write updated data to Debug.json
@@ -1077,7 +1092,7 @@ function exportDebugFile()
         file:write(json.encode(debugData))
         file:close()
     else
-        print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open Debug.json for writing.")
+        print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open Debug.json for writing")
     end
 end
 
