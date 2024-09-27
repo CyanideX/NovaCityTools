@@ -18,7 +18,7 @@
                 "name": "Fog",
                 "location": "24h_weather_fog",
                 "DLSSDSeparateParticleColor": false,
-                "weatherType": ["fog", "mist", "haze"]
+                "weatherType": ["fog", "mist", "haze", "cold"]
             },
             {
                 "name": "Pollution",
@@ -77,13 +77,13 @@
                 "name": "Windy",
                 "location": "24h_weather_windy",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["windy", "breezy", "gusty"]
+                "weatherType": ["windy", "breezy", "gusty", "cold"]
             },
             {
                 "name": "Dew",
                 "location": "24h_weather_dew",
                 "DLSSDSeparateParticleColor": false,
-                "weatherType": ["dew", "moist", "humid"]
+                "weatherType": ["dew", "moist", "humid", "sunny"]
             },
             {
                 "name": "Light Rain",
@@ -113,7 +113,7 @@
                 "name": "Mist",
                 "location": "24h_weather_mist",
                 "DLSSDSeparateParticleColor": false,
-                "weatherType": ["mist", "haze", "fog"]
+                "weatherType": ["mist", "haze", "fog", "cold"]
             },
             {
                 "name": "Haze Pollution",
@@ -125,7 +125,7 @@
                 "name": "Fog Heavy",
                 "location": "24h_weather_fog_heavy",
                 "DLSSDSeparateParticleColor": false,
-                "weatherType": ["heavy fog", "dense fog", "thick fog"]
+                "weatherType": ["heavy fog", "dense fog", "thick fog", "cold"]
             },
             {
                 "name": "Sunny Windy",
@@ -137,13 +137,13 @@
                 "name": "Rain Alt 1",
                 "location": "24h_weather_rain_alt_1",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["rain", "wet", "shower"]
+                "weatherType": ["rain", "wet", "shower", "cold"]
             },
             {
                 "name": "Rain Alt 2",
                 "location": "24h_weather_rain_alt_2",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["rain", "wet", "shower"]
+                "weatherType": ["rain", "wet", "shower", "cold"]
             },
             {
                 "name": "Drizzle Light",
@@ -203,7 +203,7 @@
                 "name": "Fog Rain",
                 "location": "24h_weather_fog_rain",
                 "DLSSDSeparateParticleColor": true,
-                "weatherType": ["fog", "rain", "mist"]
+                "weatherType": ["fog", "rain", "mist", "cold"]
             }
         ]
     },
@@ -249,7 +249,7 @@
                 "name": "Fog Dense",
                 "location": "24h_weather_fog_dense",
                 "DLSSDSeparateParticleColor": false,
-                "weatherType": ["dense", "thick", "heavy", "fog"]
+                "weatherType": ["dense", "thick", "heavy", "fog", "cold"]
             },
             {
                 "name": "Heavy Clouds Dense",
