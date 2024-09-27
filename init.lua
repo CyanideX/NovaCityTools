@@ -34,6 +34,7 @@ local currentWeatherState = nil
 local timeScale = 1.0
 local searchText = ""
 local weatherTypeKeywords = {}
+local userInteracted = false
 
 local settings =
 {
@@ -275,12 +276,12 @@ function DrawWeatherControl()
 
 	-- Make the reset button fit the width of the GUI
 	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
-	
+
 
 	-- Change button color, hover color, and text color
-	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1)) -- Custom button color
+	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
 	ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
-	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1)) -- Custom text color
+	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
 	if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
 		Game.GetWeatherSystem():ResetWeather(true)
 		settings.Current.weatherState = "None"
@@ -343,6 +344,7 @@ registerForEvent("onUpdate", function()
 			if settings.Current.notificationMessages then
 				ShowNotificationMessage(messageText)
 			end
+			print(IconGlyphs.CityVariant .. " Nova City Tools: Weather changed to " .. (tostring(currentWeatherState)))
 		end
 		-- Reset the weather reset flag after the weather change notification has been skipped
 		weatherReset = false
@@ -352,78 +354,77 @@ end)
 local collapsedCategories = {}
 
 local function anyKeywordMatches(keywords, searchText)
-    for _, keyword in ipairs(keywords) do
-        if string.find(keyword:lower(), searchText:lower()) then
-            return true
-        end
-    end
-    return false
+	for _, keyword in ipairs(keywords) do
+		if string.find(keyword:lower(), searchText:lower()) then
+			return true
+		end
+	end
+	return false
 end
 
 function DrawButtons()
 	-- Check if the CET window is open
-    if not cetOpen then
-        return
-    end
+	if not cetOpen then
+		return
+	end
 
 	-- Set window size constraints
-    ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
-    if resetWindow then
-        ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
-        ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
-        resetWindow = false
-    end
-    if ImGui.Begin("Nova City Tools - v" .. version, true, ImGuiWindowFlags.NoScrollbar) then
+	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
+	if resetWindow then
+		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
+		ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 0, 5)
+		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
+		resetWindow = false
+	end
+	if ImGui.Begin("Nova City Tools - v" .. version, true, ImGuiWindowFlags.NoScrollbar) then
 		-- Reset padding
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
+		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
 		-- Set the font scale for the window
-        ImGui.SetWindowFontScale(customFontScale)
+		ImGui.SetWindowFontScale(customFontScale)
 
-        if ImGui.BeginTabBar("Nova Tabs") then
-            ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
+		if ImGui.BeginTabBar("Nova Tabs") then
+			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
 
 			-- TIME SLIDER TOGGLE ------------------------
 			-- Set button text alignment and frame padding
-            ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
+			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
 
 			-- Create the button and toggle the time slider window
-            if timeSliderWindowOpen then
-                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-                if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+			if timeSliderWindowOpen then
+				ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
 					print(IconGlyphs.CityVariant .. " Nova City Tools: Closing time slider window.")
-                    timeSliderWindowOpen = false
-                    settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-                    SaveSettings()
-                end
-                ImGui.PopStyleColor(4)
-            else
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
-                if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
+					timeSliderWindowOpen = false
+					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+					SaveSettings()
+				end
+				ImGui.PopStyleColor(4)
+			else
+				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
+				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
 					print(IconGlyphs.CityVariant .. " Nova City Tools: Opening time slider window.")
-                    timeSliderWindowOpen = true
-                    settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-                    SaveSettings()
-                end
+					timeSliderWindowOpen = true
+					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+					SaveSettings()
+				end
 				-- Reset style variables
-                ImGui.PopStyleColor(2)
-            end
+				ImGui.PopStyleColor(2)
+			end
 
-            ui.tooltip("Toggles the time slider window.")
+			ui.tooltip("Toggles the time slider window.")
 
-            ImGui.PopStyleVar(2)
+			ImGui.PopStyleVar(2)
 
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
-            if ImGui.BeginTabItem("Weather") then
-			
+			if ImGui.BeginTabItem("Weather") then
 				local availableWidth = ImGui.GetContentRegionAvail() - searchPaddingXValue
 
 				ImGui.Dummy(0, dummySpacingYValue)
@@ -460,7 +461,7 @@ function DrawButtons()
 
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
-			
+
 				for _, category in ipairs(categories) do
 					local isCollapsed = collapsedCategories[category.name] or false
 					ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
@@ -501,22 +502,24 @@ function DrawButtons()
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 										toggleDLSSDPT = true
 										weatherReset = true
-										print(IconGlyphs.CityVariant .. " Nova City Tools: Weather reset to default cycles.")
+										print(IconGlyphs.CityVariant ..
+										" Nova City Tools: Weather reset to default cycles.")
 									else
 										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 										settings.Current.weatherState = weatherState
 										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 										toggleDLSSDPT = enableDLSSDPT
-										print(IconGlyphs.CityVariant .. " Nova City Tools: Weather locked to selected state.")
+										print(IconGlyphs.CityVariant ..
+										" Nova City Tools: Weather locked to selected state.")
 									end
 									SaveSettings()
 								end
-			
+
 								if isActive then
 									ImGui.PopStyleColor(4)
 								end
-			
+
 								buttonCount = buttonCount + 1
 								if buttonCount % buttonsPerRow ~= 0 then
 									ImGui.SameLine()
@@ -553,6 +556,8 @@ function DrawButtons()
 
 				toggleFogClouds, changed = ImGui.Checkbox("ALL: Volumetrics and Clouds", toggleFogClouds)
 				if changed then
+					userInteracted = true
+					print(IconGlyphs.CityVariant .. " Toggles: Volumetrics and Clouds changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFogClouds)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFogClouds)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFogClouds)
@@ -561,7 +566,6 @@ function DrawButtons()
 					volumetricFog = toggleFogClouds
 					distantFog = toggleFogClouds
 					clouds = toggleFogClouds
-					SaveSettings()
 
 					-- Ensure ALL: Fog is also enabled/disabled
 					toggleFog = toggleFogClouds
@@ -571,19 +575,20 @@ function DrawButtons()
 					volumetricFog = toggleFog
 					distantVolumetricFog = toggleFog
 					distantFog = toggleFog
-					SaveSettings()
 				end
 				ui.tooltip("Toggles all fog and clouds: volumetric, distant volumetric, distant fog planes, and volumetric clouds.")
 
 				toggleFog, changed = ImGui.Checkbox("ALL: Fog", toggleFog)
 				if changed then
+					userInteracted = true
+					print(IconGlyphs.CityVariant .. " Toggles: Fog changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFog)
 					volumetricFog = toggleFog
 					distantVolumetricFog = toggleFog
 					distantFog = toggleFog
-					SaveSettings()
+
 
 					if toggleFog and not toggleFogClouds then
 						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
@@ -592,7 +597,6 @@ function DrawButtons()
 						volumetricFog = true
 						distantVolumetricFog = true
 						distantFog = true
-						SaveSettings()
 					end
 				end
 				ui.tooltip("Toggles all fog types: volumetric, distant volumetric, and distant fog plane.")
@@ -603,16 +607,16 @@ function DrawButtons()
 
 				volumetricFog, changed = ImGui.Checkbox("VFog", volumetricFog)
 				if changed then
+					userInteracted = true
+					print(IconGlyphs.CityVariant .. " Toggles: VFog changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", volumetricFog)
-					SaveSettings()
+
 					if volumetricFog then
 						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
 						distantVolumetricFog = true
-						SaveSettings()
 					else
 						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
 						distantVolumetricFog = false
-						SaveSettings()
 					end
 				end
 				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
@@ -620,66 +624,32 @@ function DrawButtons()
 				ImGui.SameLine(toggleSpacingXValue)
 				distantVolumetricFog, changed = ImGui.Checkbox("Distant VFog", distantVolumetricFog)
 				if changed then
+					userInteracted = true
+					print(IconGlyphs.CityVariant .. " Toggles: Distant Fog changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
-					SaveSettings()
+
 					if distantVolumetricFog and not volumetricFog then
 						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
 						volumetricFog = true
-						SaveSettings()
 					end
 				end
 				ui.tooltip("Toggle distant volumetric fog. Also enables VFog if it's disabled.")
 
 				distantFog, changed = ImGui.Checkbox("Fog", distantFog)
 				if changed then
+					userInteracted = true
+					print(IconGlyphs.CityVariant .. " Toggles: Fog changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", distantFog)
-					SaveSettings()
 				end
 				ui.tooltip("Toggle distant fog plane.")
 				ImGui.SameLine(toggleSpacingXValue)
 				clouds, changed = ImGui.Checkbox("Clouds", clouds)
 				if changed then
+					userInteracted = true
+					print(IconGlyphs.CityVariant .. " Toggles: Clouds changed!")
 					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
-					SaveSettings()
 				end
 				ui.tooltip("Toggle volumetric clouds.")
-
-				-- Update ALL: Fog and ALL: Volumetrics and Clouds based on individual toggles
-				if not volumetricFog and not distantVolumetricFog and not distantFog then
-					toggleFog = false
-					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
-					SaveSettings()
-				end
-
-				if not volumetricFog and not distantVolumetricFog and not distantFog and not clouds then
-					toggleFogClouds = false
-					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
-					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", false)
-					SaveSettings()
-				end
-
-				-- Enable ALL: Fog if all individual fog toggles are enabled
-				if volumetricFog and distantVolumetricFog and distantFog then
-					toggleFog = true
-					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
-					SaveSettings()
-				end
-
-				-- Enable ALL: Volumetrics and Clouds if all individual toggles are enabled
-				if volumetricFog and distantVolumetricFog and distantFog and clouds then
-					toggleFogClouds = true
-					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
-					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
-					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", true)
-					SaveSettings()
-				end
 
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Features:")
@@ -816,7 +786,6 @@ function DrawButtons()
 				if changed then
 					-- do stuff
 				end
-				--ui.tooltip("Requires CET menu to be closed to complete display mode toggle.")
 				ui.tooltip("Currently not working correctly. Use the CET binding hotkey instead.")
 
 				ImGui.Dummy(0, dummySpacingYValue)
@@ -867,6 +836,43 @@ function DrawButtons()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles all volumetrics, clouds, DLSSDPT, bloom, lens flare, weather, screen space rain, chromatic aberration, and film grain.")
+
+				if userInteracted then
+					-- Update ALL: Fog and ALL: Volumetrics and Clouds based on individual toggles
+					if not volumetricFog and not distantVolumetricFog and not distantFog then
+						toggleFog = false
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
+					end
+
+					if not volumetricFog and not distantVolumetricFog and not distantFog and not clouds then
+						toggleFogClouds = false
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", false)
+					end
+
+					-- Enable ALL: Fog if all individual fog toggles are enabled
+					if volumetricFog and distantVolumetricFog and distantFog then
+						toggleFog = true
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
+					end
+
+					-- Enable ALL: Volumetrics and Clouds if all individual toggles are enabled
+					if volumetricFog and distantVolumetricFog and distantFog and clouds then
+						toggleFogClouds = true
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", true)
+					end
+					SaveSettings()
+					userInteracted = false
+				end
 
 				--DrawWeatherControl()
 				ImGui.EndTabItem()
@@ -957,15 +963,19 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message", settings.Current.warningMessages)
+				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message",
+					settings.Current.warningMessages)
 				if changed then
-					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled warning message to " .. tostring(settings.Current.warningMessages))
+					print(IconGlyphs.CityVariant ..
+					" Nova City Tools: Toggled warning message to " .. tostring(settings.Current.warningMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
-				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification", settings.Current.notificationMessages)
+				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification",
+					settings.Current.notificationMessages)
 				if changed then
-					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled notifications to " .. tostring(settings.Current.notificationMessages))
+					print(IconGlyphs.CityVariant ..
+					" Nova City Tools: Toggled notifications to " .. tostring(settings.Current.notificationMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
@@ -990,12 +1000,10 @@ function DrawButtons()
 	end
 end
 
-
 function DrawTimeSliderWindow()
 	if not cetOpen or not timeSliderWindowOpen then
 		return
 	end
-	
 
 	-- Set window size constraints and position
 	ImGui.SetNextWindowSizeConstraints(uiTimeMinWidth, uiTimeMinHeight, width / 100 * 99, uiTimeMaxHeight)
@@ -1054,7 +1062,6 @@ function DrawTimeSliderWindow()
 			end
 		end
 
-
 		ImGui.Dummy(0, 4)
 		-- Add time scale slider
 		ImGui.Separator()
@@ -1081,7 +1088,7 @@ function DrawTimeSliderWindow()
 
 		-- Calculate available width for the slider
 		local availableWidth = ImGui.GetWindowContentRegionWidth() - 2 * glyphButtonWidth -
-		2 * ImGui.GetStyle().ItemSpacing.x - 4
+			2 * ImGui.GetStyle().ItemSpacing.x - 4
 		ImGui.SetNextItemWidth(availableWidth)
 		timeScale, changed = ImGui.SliderFloat("##TimeScale", timeScale, 0.001, 10.0, "%.003f")
 		if changed then
@@ -1198,17 +1205,17 @@ local function sortWeatherStates()
 end
 
 local function sortCategories()
-    table.sort(categories, function(a, b)
-        return a.order < b.order
-    end)
+	table.sort(categories, function(a, b)
+		return a.order < b.order
+	end)
 end
 
 registerForEvent("onInit", function()
-    print(IconGlyphs.CityVariant .. " Nova City Tools: Initializing")
-	
+	print(IconGlyphs.CityVariant .. " Nova City Tools: Initializing")
+
 	LoadSettings()
-    loadWeatherStates()
-    sortWeatherStates()
+	loadWeatherStates()
+	sortWeatherStates()
 	sortCategories()
 	--[[ -- Handle session start
     GameUI.OnSessionStart(function()
@@ -1258,55 +1265,55 @@ registerForEvent("onOverlayClose", function()
 end)
 
 function SaveSettings()
-    local saveData = {
-        transitionDuration = settings.Current.transitionDuration,
-        timeSliderWindowOpen = settings.Current.timeSliderWindowOpen,
-        weatherState = settings.Current.weatherState,
-        warningMessages = settings.Current.warningMessages,
-        notificationMessages = settings.Current.notificationMessages,
-        collapsedCategories = {}
-    }
+	local saveData = {
+		transitionDuration = settings.Current.transitionDuration,
+		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen,
+		weatherState = settings.Current.weatherState,
+		warningMessages = settings.Current.warningMessages,
+		notificationMessages = settings.Current.notificationMessages,
+		collapsedCategories = {}
+	}
 
-    for k, v in pairs(collapsedCategories) do
-        if v then
-            saveData.collapsedCategories[k] = v
-        end
-    end
+	for k, v in pairs(collapsedCategories) do
+		if v then
+			saveData.collapsedCategories[k] = v
+		end
+	end
 
-    local function formatTable(t, indent)
-        local formatted = "{\n"
-        local indentStr = string.rep("    ", indent)
-        local count = 0
-        local total = 0
-        for _ in pairs(t) do total = total + 1 end
-        for k, v in pairs(t) do
-            count = count + 1
-            formatted = formatted .. indentStr .. string.format('"%s": ', k)
-            if type(v) == "table" then
-                formatted = formatted .. formatTable(v, indent + 1)
-            elseif type(v) == "string" then
-                formatted = formatted .. string.format('"%s"', v)
-            else
-                formatted = formatted .. tostring(v)
-            end
-            if count < total then
-                formatted = formatted .. ",\n"
-            else
-                formatted = formatted .. "\n"
-            end
-        end
-        return formatted .. string.rep("    ", indent - 1) .. "}"
-    end
+	local function formatTable(t, indent)
+		local formatted = "{\n"
+		local indentStr = string.rep("    ", indent)
+		local count = 0
+		local total = 0
+		for _ in pairs(t) do total = total + 1 end
+		for k, v in pairs(t) do
+			count = count + 1
+			formatted = formatted .. indentStr .. string.format('"%s": ', k)
+			if type(v) == "table" then
+				formatted = formatted .. formatTable(v, indent + 1)
+			elseif type(v) == "string" then
+				formatted = formatted .. string.format('"%s"', v)
+			else
+				formatted = formatted .. tostring(v)
+			end
+			if count < total then
+				formatted = formatted .. ",\n"
+			else
+				formatted = formatted .. "\n"
+			end
+		end
+		return formatted .. string.rep("    ", indent - 1) .. "}"
+	end
 
-    local file = io.open("settings.json", "w")
-    if file then
-        local formattedJsonString = formatTable(saveData, 1)
-        file:write(formattedJsonString)
-        file:close()
+	local file = io.open("settings.json", "w")
+	if file then
+		local formattedJsonString = formatTable(saveData, 1)
+		file:write(formattedJsonString)
+		file:close()
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings saved")
-    else
-        print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
-    end
+	else
+		print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
+	end
 end
 
 function LoadSettings()
@@ -1329,33 +1336,33 @@ end
 ----------------------------------------
 
 function InvisibleButton(text, active)
-    -- define 4 styles
-    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
-    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, glyphItemSpacingXValue, glyphItemSpacingYValue)
-    ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 0, 0)
-    ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, glyphAlignYValue)
+	-- define 4 styles
+	ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+	ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, glyphItemSpacingXValue, glyphItemSpacingYValue)
+	ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 0, 0)
+	ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, glyphAlignYValue)
 
-    -- define 3 colors (transparent)
-    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0, 0, 0))
-    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0, 0, 0, 0))
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0, 0, 0))
+	-- define 3 colors (transparent)
+	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0, 0, 0))
+	ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0, 0, 0, 0))
+	ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0, 0, 0))
 
-    -- conditional text color
-    if active then
-        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 1, 0.7, 1))
-    end
+	-- conditional text color
+	if active then
+		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 1, 0.7, 1))
+	end
 
-    -- draw useless button
-    ImGui.Button(text, invisibleButtonWidth, invisibleButtonHeight)
+	-- draw useless button
+	ImGui.Button(text, invisibleButtonWidth, invisibleButtonHeight)
 
-    -- drop active color
-    if active then
-        ImGui.PopStyleColor(1)
-    end
+	-- drop active color
+	if active then
+		ImGui.PopStyleColor(1)
+	end
 
-    -- drop 3 colors
-    ImGui.PopStyleColor(3)
+	-- drop 3 colors
+	ImGui.PopStyleColor(3)
 
-    -- drop 4 styles
-    ImGui.PopStyleVar(4)
+	-- drop 4 styles
+	ImGui.PopStyleVar(4)
 end
