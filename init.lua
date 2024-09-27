@@ -1,7 +1,7 @@
 local Cron = require("Cron")
 local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
-local version = "1.7.5"
+local modVersion = "1.7.6"
 local cetOpen = false
 local toggleNRD = false
 local toggleDLSSDPT = true
@@ -33,6 +33,7 @@ local currentWeatherState = nil
 local timeScale = 1.0
 local searchText = ""
 local userInteracted = false
+local collapsedCategories = {}
 
 
 local settings =
@@ -359,8 +360,6 @@ registerForEvent("onUpdate", function()
 	end
 end)
 
-local collapsedCategories = {}
-
 local function anyKeywordMatches(keywords, searchText)
 	for _, keyword in ipairs(keywords) do
 		if string.find(keyword:lower(), searchText:lower()) then
@@ -385,7 +384,7 @@ function DrawButtons()
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
 		resetWindow = false
 	end
-	if ImGui.Begin("Nova City Tools - v" .. version, true, ImGuiWindowFlags.NoScrollbar) then
+	if ImGui.Begin("Nova City Tools - v" .. modVersion, true, ImGuiWindowFlags.NoScrollbar) then
 		-- Reset padding
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
@@ -994,8 +993,14 @@ function DrawButtons()
 				ImGui.Separator()
 				ImGui.Dummy(0, 1)
 
-				-- Make the reset button fit the width of the GUI
+				-- Make the buttons fit the width of the GUI
 				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
+				if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
+					exportDebugFile()
+					print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
+				end
+				ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.")
+
 				if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
 					resetWindow = true
 					debugPrint("Reset GUI size and position.")
@@ -1008,6 +1013,72 @@ function DrawButtons()
 		end
 		ImGui.End()
 	end
+end
+
+function exportDebugFile()
+    -- Check if the player is in menu or game is paused
+    if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
+        return
+    end
+
+	local inVehicle = false
+	if not Game.GetPlayer().mountedVehicle then
+		if inVehicle then
+			inVehicle = false
+		end
+	else
+		if not inVehicle then
+			inVehicle = true
+		end
+	end
+
+    -- Collect data with error handling
+    local data = {
+        modName = "Nova City",
+        modVersion = modVersion,
+        gameVersion = Game.GetSystemRequestsHandler():GetGameVersion() or nil,
+        dateTime = os.date("%m/%d/%Y - %H:%M:%S", os.time()) or nil,
+        weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
+        playerPosition = (function()
+            local pos = Game.GetPlayer():GetWorldPosition()
+            if pos then
+                return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
+            else
+                return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
+            end
+        end)(),
+		inVehicle = inVehicle
+    }
+
+    -- Read existing data from Debug.json
+    local file = io.open("novaCityDebug.json", "r")
+    local debugData = {}
+
+    if file then
+        local content = file:read("*a")
+        debugData = json.decode(content)
+        file:close()
+    end
+
+    -- Insert new data in the same order as defined in 'data'
+    table.insert(debugData, {
+        modName = data.modName,
+        modVersion = data.modVersion,
+        gameVersion = data.gameVersion,
+        dateTime = data.dateTime,
+        weatherState = data.weatherState,
+        playerPosition = data.playerPosition,
+		inVehicle = data.inVehicle
+    })
+
+    -- Write updated data to Debug.json
+    file = io.open("novaCityDebug.json", "w")
+    if file then
+        file:write(json.encode(debugData))
+        file:close()
+    else
+        print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open Debug.json for writing.")
+    end
 end
 
 function DrawTimeSliderWindow()
