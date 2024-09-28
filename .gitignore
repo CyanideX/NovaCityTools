@@ -3,3 +3,5 @@
 db.sqlite3
 settings.json
 settings2.json
+novaCityDebug.json
+toggles.json
