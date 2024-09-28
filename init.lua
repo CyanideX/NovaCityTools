@@ -412,7 +412,7 @@ registerForEvent("onUpdate", function()
 		end)
 	end
 	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-	local newWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
 	if newWeatherState ~= currentWeatherState then
 		currentWeatherState = newWeatherState
 		local localizedState = weatherStateNames[currentWeatherState]
