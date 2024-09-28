@@ -697,7 +697,7 @@ function DrawGUI()
 						if buttonCount % buttonsPerRow ~= 0 then
 							ImGui.NewLine()
 						end
-						ImGui.Dummy(0, dummySpacingYValue) -- Added here
+						ImGui.Dummy(0, dummySpacingYValue)
 					else
 						if not collapsedCategories[category.name] then
 							collapsedCategories[category.name] = true
@@ -1595,7 +1595,7 @@ function SaveToggles()
 		local formattedJsonString = formatTable(saveData, 1)
 		file:write(formattedJsonString)
 		file:close()
-		DebugPrint(IconGlyphs.CityVariant .. " Nova City Tools: Toggles saved")
+		DebugPrint("Toggles saved")
 	else
 		print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
 	end
@@ -1608,7 +1608,7 @@ function LoadToggles()
 		file:close()
 		local loadedToggles = json.decode(content)
 		toggles.Current = loadedToggles.Current
-		DebugPrint(IconGlyphs.CityVariant .. " Nova City Tools: Toggles loaded")
+		DebugPrint("Toggles loaded")
 	elseif not file then
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Toggles file not found")
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default toggles file")
