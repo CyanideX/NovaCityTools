@@ -552,7 +552,7 @@ function DrawGUI()
 										weatherReset = true
 										DebugPrint("Weather reset to default cycles.")
 									else
-										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
+										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 10)
 										settings.Current.weatherState = weatherState
 										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
