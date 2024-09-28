@@ -1449,13 +1449,13 @@ function ShowNotificationMessage(message)
 		GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
 end
 
-local function sortWeatherStates()
+function sortWeatherStates()
 	table.sort(weatherStates, function(a, b)
 		return a[2] < b[2]
 	end)
 end
 
-local function sortCategories()
+function sortCategories()
 	table.sort(categories, function(a, b)
 		return a.order < b.order
 	end)
