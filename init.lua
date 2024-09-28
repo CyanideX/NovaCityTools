@@ -125,7 +125,7 @@ function LoadWeatherStates()
                         end
                     end
                 end
-				DebugPrint("Successfully loaded "  .. filePath)
+				print(IconGlyphs.CityVariant .. " Nova City Tools: Successfully loaded "  .. filePath)
             else
                 print(IconGlyphs.CityVariant .. " Nova City Tools: Failed to decode JSON content from " .. filePath)
             end
@@ -794,7 +794,7 @@ function DrawGUI()
 				toggles.Current.distantFog, changed = ImGui.Checkbox("Fog", toggles.Current.distantFog)
 				if changed then
 					userInteracted = true
-					DebugPrint("Fog changed!")
+					DebugPrint("Fog toggled!")
 					ApplyToggles()
 				end
 				ui.tooltip("Toggle distant fog plane.")
@@ -802,7 +802,7 @@ function DrawGUI()
 				toggles.Current.clouds, changed = ImGui.Checkbox("Clouds", toggles.Current.clouds)
 				if changed then
 					userInteracted = true
-					DebugPrint("Clouds changed!")
+					DebugPrint("Clouds toggled!")
 					ApplyToggles()
 				end
 				ui.tooltip("Toggle volumetric clouds.")
@@ -827,16 +827,19 @@ function DrawGUI()
 				toggles.Current.bloom, changed = ImGui.Checkbox("Bloom", toggles.Current.bloom)
 				if changed then
 					toggles.Current.lensFlares = toggles.Current.bloom
+					DebugPrint("Toggled bloom to " .. tostring(toggles.Current.bloom))
 					ApplyToggles()
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
 				ImGui.SameLine(toggleSpacingXValue)
 				toggles.Current.lensFlares, changed = ImGui.Checkbox("Lens Flares", toggles.Current.lensFlares)
 				if changed then
+					DebugPrint("Toggled lens flare to " .. tostring(toggles.Current.lensFlares))
 					ApplyToggles()
 
 					if toggles.Current.lensFlares and not toggles.Current.bloom then
 						toggles.Current.bloom = true
+						DebugPrint("Toggled bloom to " .. tostring(toggles.Current.bloom))
 						ApplyToggles()
 					end
 				end
@@ -845,15 +848,18 @@ function DrawGUI()
 				toggles.Current.rainMap, changed = ImGui.Checkbox("Weather", toggles.Current.rainMap)
 				if changed then
 					toggles.Current.rain = toggles.Current.rainMap
+					DebugPrint("Toggled weather to " .. tostring(toggles.Current.rainMap))
 					ApplyToggles()
 				end
 				ui.tooltip("Toggles all weather effects such as toggles.Current.rain particles and wet surfaces.")
 				ImGui.SameLine(toggleSpacingXValue)
 				toggles.Current.rain, changed = ImGui.Checkbox("SS Rain", toggles.Current.rain)
 				if changed then
+					DebugPrint("Toggled SS Rain to " .. tostring(toggles.Current.rain))
 					ApplyToggles()
 					if toggles.Current.rain and not toggles.Current.rainMap then
 						toggles.Current.rainMap = true
+						DebugPrint("Toggled weather to " .. tostring(toggles.Current.rainMap))
 						ApplyToggles()
 					end
 				end
@@ -861,18 +867,21 @@ function DrawGUI()
 
 				toggles.Current.chromaticAberration, changed = ImGui.Checkbox("CA", toggles.Current.chromaticAberration)
 				if changed then
+					DebugPrint("Toggled chomatic aberration to " .. tostring(toggles.Current.chromaticAberration))
 					ApplyToggles()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
 				ImGui.SameLine(toggleSpacingXValue)
 				toggles.Current.filmGrain, changed = ImGui.Checkbox("Film Grain", toggles.Current.filmGrain)
 				if changed then
+					DebugPrint("Toggled film grain to " .. tostring(toggles.Current.filmGrain))
 					ApplyToggles()
 				end
 				ui.tooltip("Toggles film grain.")
 
 				toggles.Current.DOF, changed = ImGui.Checkbox("DOF", toggles.Current.DOF)
 				if changed then
+					DebugPrint("Toggled DOF to " .. tostring(toggles.Current.DOF))
 					ApplyToggles()
 				end
 				ui.tooltip("Toggles depth of field.")
@@ -880,6 +889,7 @@ function DrawGUI()
 				toggles.Current.motionBlur, changed = ImGui.Checkbox("Motion Blur", toggles.Current.motionBlur)
 				if changed then
 					ApplyToggles()
+					DebugPrint("Toggled motion blur to " .. tostring(toggles.Current.motionBlur))
 				end
 				ui.tooltip("Toggles motion blur.")
 
