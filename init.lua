@@ -394,13 +394,13 @@ end)
 
 registerForEvent("onUpdate", function()
 	Cron.Update(delta)
-	if hasResetOrForced == true then
+	if hasResetOrForced then
 		local resetorforcedtimer = Cron.After(0.5, function()
 			hasResetOrForced = false
 		end)
 	end
 	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+	local newWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
 	if newWeatherState ~= currentWeatherState then
 		currentWeatherState = newWeatherState
 		local localizedState = weatherStateNames[currentWeatherState]
