@@ -207,29 +207,6 @@
             }
         ]
     },
-    "Creative": {
-        "order": 4,
-        "states": [
-            {
-                "name": "Sky Softbox",
-                "location": "24h_weather_sky_softbox",
-                "DLSSDSeparateParticleColor": false,
-                "weatherType": ["overcast", "bright", "creative", "cloud", "meme"]
-            },
-            {
-                "name": "Blackout",
-                "location": "24h_weather_blackout",
-                "DLSSDSeparateParticleColor": false,
-                "weatherType": ["blackout", "dark", "night"]
-            },
-            {
-                "name": "Showroom",
-                "location": "24h_weather_showroom",
-                "DLSSDSeparateParticleColor": false,
-                "weatherType": ["showroom", "creative", "bright"]
-            }
-        ]
-    },
     "Nova City Alpha States": {
         "order": 3,
         "states": [
@@ -274,6 +251,29 @@
                 "location": "24h_weather_muggy",
                 "DLSSDSeparateParticleColor": false,
                 "weatherType": ["muggy", "humid", "sticky", "hot"]
+            }
+        ]
+    },
+    "Creative": {
+        "order": 4,
+        "states": [
+            {
+                "name": "Sky Softbox",
+                "location": "24h_weather_sky_softbox",
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["overcast", "bright", "creative", "cloud", "meme"]
+            },
+            {
+                "name": "Blackout",
+                "location": "24h_weather_blackout",
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["blackout", "dark", "night"]
+            },
+            {
+                "name": "Showroom",
+                "location": "24h_weather_showroom",
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["showroom", "creative", "bright"]
             }
         ]
     }
