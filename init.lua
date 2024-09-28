@@ -1093,6 +1093,14 @@ function exportDebugFile()
         weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
         gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
 		inVehicle = inVehicle,
+		playerDirection = (function()
+            local dir = Game.GetPlayer():GetWorldOrientation():ToEulerAngles()
+            if dir then
+                return {roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw}
+            else
+                return {roll = 0, pitch = 0, yaw = -180}
+            end
+        end)(),
         playerPosition = (function()
             if pos then
                 return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
@@ -1120,6 +1128,7 @@ function exportDebugFile()
         weatherState = data.weatherState,
         gameTime = data.gameTime,
 		inVehicle = data.inVehicle,
+		playerDirection = data.playerDirection,
         playerPosition = data.playerPosition
     })
 
