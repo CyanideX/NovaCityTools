@@ -1,5 +1,5 @@
 ------------------------------------------------------
--- NovaCityTools v1.7.6
+-- NovaCityTools v1.7.7
 -- 2024 by CyanideX
 -- https://next.nexusmods.com/profile/theCyanideX/mods
 ------------------------------------------------------
@@ -8,7 +8,7 @@ local Cron = require("Cron")
 local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 local modName = "Nova City"
-local modVersion = "1.7.6"
+local modVersion = "1.7.7"
 local cetOpen = false
 local hasResetOrForced = false
 local weatherReset = false
