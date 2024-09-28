@@ -137,6 +137,18 @@ local function loadWeatherStates()
     processFile("weatherStates.json")
 end
 
+function sortWeatherStates()
+	table.sort(weatherStates, function(a, b)
+		return a[2] < b[2]
+	end)
+end
+
+function sortCategories()
+	table.sort(categories, function(a, b)
+		return a.order < b.order
+	end)
+end
+
 function debugPrint(message)
 	if settings.Current.debugOutput then
 		print(IconGlyphs.CityVariant .. " Nova City Tools: " .. message)
@@ -477,8 +489,7 @@ function DrawWeatherControl()
 	if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
 		Game.GetWeatherSystem():ResetWeather(true)
 		settings.Current.weatherState = "None"
-		Game.GetPlayer():SetWarningMessage(
-		"Weather reset to default cycles! \nWeather states will progress automatically.")
+		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 		toggleDLSSDPT = true
 		debugPrint("Weather reset")
@@ -653,8 +664,7 @@ function DrawGUI()
 									if isActive then
 										Game.GetWeatherSystem():ResetWeather(true)
 										settings.Current.weatherState = "None"
-										Game.GetPlayer():SetWarningMessage(
-										"Weather reset to default cycles! \nWeather states will progress automatically.")
+										Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 										toggleDLSSDPT = true
 										weatherReset = true
@@ -662,8 +672,7 @@ function DrawGUI()
 									else
 										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 										settings.Current.weatherState = weatherState
-										Game.GetPlayer():SetWarningMessage("Locked weather state to " ..
-										localization:lower() .. "!")
+										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 										toggleDLSSDPT = enableDLSSDPT
 										debugPrint("Weather locked to selected state.")
@@ -1447,18 +1456,6 @@ function ShowNotificationMessage(message)
 	text.isShown = true
 	Game.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(
 		GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
-end
-
-function sortWeatherStates()
-	table.sort(weatherStates, function(a, b)
-		return a[2] < b[2]
-	end)
-end
-
-function sortCategories()
-	table.sort(categories, function(a, b)
-		return a.order < b.order
-	end)
 end
 
 ----------------------------------------
