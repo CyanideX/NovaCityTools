@@ -1,5 +1,5 @@
 ------------------------------------------------------
--- NovaCityTools v1.7.8
+-- NovaCityTools v1.7.8a
 -- 2024 by CyanideX
 -- https://next.nexusmods.com/profile/theCyanideX/mods
 ------------------------------------------------------
@@ -8,8 +8,31 @@ local Cron = require("Cron")
 local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 local modName = "Nova City"
-local modVersion = "1.7.8"
+local modVersion = "1.7.8a"
 local cetOpen = false
+local toggleNRD = false
+local toggleDLSSDPT = true
+local toggleFog = true
+local toggleFogClouds = true
+local volumetricFog = true
+local distantVolumetricFog = true
+local distantFog = true
+local clouds = true
+local tonemapping = true
+local vehicleCollisions = true
+local lensFlares = true
+local bloom = true
+local rain = true
+local rainMap = true
+local DOF = false
+local chromaticAberration = true
+local filmGrain = true
+local RIS = false
+local motionBlur = false
+local graphics = true
+local stopVehicleSpawning = true
+local vehicleSpawning = true
+local crowdSpawning = true
 local hasResetOrForced = false
 local weatherReset = false
 local resetWindow = false
@@ -43,60 +66,6 @@ local settings =
 	}
 }
 
-local toggles =
-{
-	Current = {
-		toggleNRD = false,
-		toggleDLSSDPT = true,
-		toggleFog = true,
-		toggleFogClouds = true,
-		volumetricFog = true,
-		distantVolumetricFog = true,
-		distantFog = true,
-		clouds = true,
-		tonemapping = true,
-		vehicleCollisions = true,
-		lensFlares = true,
-		bloom = true,
-		rain = true,
-		rainMap = true,
-		DOF = false,
-		chromaticAberration = true,
-		filmGrain = true,
-		RIS = false,
-		motionBlur = false,
-		graphics = true,
-		stopVehicleSpawning = true,
-		vehicleSpawning = true,
-		crowdSpawning = true,
-	},
-	Default = {
-		toggleNRD = false,
-		toggleDLSSDPT = true,
-		toggleFog = true,
-		toggleFogClouds = true,
-		volumetricFog = true,
-		distantVolumetricFog = true,
-		distantFog = true,
-		clouds = true,
-		tonemapping = true,
-		vehicleCollisions = true,
-		lensFlares = true,
-		bloom = true,
-		rain = true,
-		rainMap = true,
-		DOF = false,
-		chromaticAberration = true,
-		filmGrain = true,
-		RIS = false,
-		motionBlur = false,
-		graphics = true,
-		stopVehicleSpawning = true,
-		vehicleSpawning = true,
-		crowdSpawning = true,
-	}
-}
-
 local ui = {
 	tooltip = function(text)
 		if ImGui.IsItemHovered() and text ~= "" then
@@ -107,7 +76,13 @@ local ui = {
 	end
 }
 
-function LoadWeatherStates()
+function debugPrint(message)
+    if settings.Current.debugOutput then
+        print(IconGlyphs.CityVariant .. " Nova City Tools: " .. message)
+    end
+end
+
+local function loadWeatherStates()
     local function processFile(filePath)
         local fileHandle = io.open(filePath, "r")
         if fileHandle then
@@ -125,7 +100,7 @@ function LoadWeatherStates()
                         end
                     end
                 end
-				print(IconGlyphs.CityVariant .. " Nova City Tools: Successfully loaded "  .. filePath)
+				debugPrint("Successfully loaded "  .. filePath)
             else
                 print(IconGlyphs.CityVariant .. " Nova City Tools: Failed to decode JSON content from " .. filePath)
             end
@@ -137,29 +112,11 @@ function LoadWeatherStates()
     processFile("weatherStates.json")
 end
 
-function SortWeatherStates()
-	table.sort(weatherStates, function(a, b)
-		return a[2] < b[2]
-	end)
-end
-
-function SortCategories()
-	table.sort(categories, function(a, b)
-		return a.order < b.order
-	end)
-end
-
-function DebugPrint(message)
-	if settings.Current.debugOutput then
-		print(IconGlyphs.CityVariant .. " Nova City Tools: " .. message)
-	end
-end
-
 ----------------------------------------
 ------------- RES PRESETS --------------
 ----------------------------------------
 
-function SetResolutionPresets(width, height)
+function setResolutionPresets(width, height)
 	local presets = {
 	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34 },
 		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 34, 6,  650, 250, 336, 7.5, 9,  8,  5,  34, 34, 30, 140, 36, 36 },
@@ -210,7 +167,7 @@ end
 ----------------------------------------
 ------------- CET HOTKEYS --------------
 ----------------------------------------
-
+---
 -- Register a CET hotkey to reset weather
 registerHotkey("NCTResetWeather", "Reset Weather", function()
 	Game.GetWeatherSystem():ResetWeather(true)
@@ -219,7 +176,6 @@ registerHotkey("NCTResetWeather", "Reset Weather", function()
 	Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 	GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 	toggleDLSSDPT = true
-	DebugPrint("DLSSD set to " .. tostring(toggleDLSSDPT))
 	SaveSettings()
 	weatherReset = true
 end)
@@ -336,165 +292,29 @@ registerHotkey("NCTHDRToggle", "Toggle HDR Mode", function()
 end)
 
 ----------------------------------------
----------------- MAIN ------------------
-----------------------------------------
-
-registerForEvent("onInit", function()
-	print(IconGlyphs.CityVariant .. " Nova City Tools: Initialized")
-
-	LoadSettings()
-	LoadToggles()
-	LoadWeatherStates()
-	SortWeatherStates()
-	SortCategories()
-	ApplyToggles()
-	--[[ -- Handle session start
-    GameUI.OnSessionStart(function()
-        Cron.After(0.25, function()
-            -- Apply active weather state
-            if settings.Current.weatherState ~= 'None' then
-                Game.GetWeatherSystem():SetWeather(settings.Current.weatherState, settings.transitionTime, 0)
-                Game.GetPlayer():SetWarningMessage("Locked weather state to " .. weatherStateNames[settings.Current.weatherState]:lower() .. "!")
-            end
-        end)
-    end)
-
-    GameUI.OnSessionEnd(function()
-        -- Handle end
-    end) ]]
-
-	-- Handle session start
-	--[[ GameUI.OnSessionStart(function()
-		Cron.After(5.0, function()
-			ApplyToggles()
-		end)
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Toggles Applied!")
-	end) ]]
-end)
-
-registerForEvent("onDraw", function()
-	if timeSliderWindowOpen == true then
-		DrawTimeSliderWindow()
-	end
-	DrawGUI()
-end)
-
-registerForEvent("onOverlayOpen", function()
-	LoadSettings()
-	LoadToggles()
-	cetOpen = true
-	width, height = GetDisplayResolution()
-	SetResolutionPresets(width, height)
-
-	--[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-    local selectedWeatherState = settings.Current.weatherState
-    if selectedWeatherState == 'Locked State' then
-        settings.Current.weatherState = currentWeatherState
-        for _, state in ipairs(weatherStates) do
-            if state[1] == currentWeatherState then
-                settings.Current.weatherState = state[1]
-                break
-            end
-        end
-    end ]]
-end)
-
-registerForEvent("onOverlayClose", function()
-	cetOpen = false
-	SaveSettings()
-	SaveToggles()
-end)
-
-registerForEvent("onUpdate", function()
-	Cron.Update(delta)
-	if hasResetOrForced then
-		local resetorforcedtimer = Cron.After(0.5, function()
-			hasResetOrForced = false
-		end)
-	end
-	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-	if newWeatherState ~= currentWeatherState then
-		currentWeatherState = newWeatherState
-		local localizedState = weatherStateNames[currentWeatherState]
-		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-		-- Only send weather change notifications if the weather has not been reset
-		if hasResetOrForced == false and not weatherReset then
-			if resetorforcedtimer then
-				Cron.Halt(resetorforcedtimer)
-				resetorforcedtimer = nil
-			end
-			if settings.Current.warningMessages then
-				ShowWarningMessage(messageText)
-			end
-			if settings.Current.notificationMessages then
-				ShowNotificationMessage(messageText)
-			end
-			DebugPrint("Weather changed to " .. (tostring(currentWeatherState)))
-		end
-		-- Reset the weather reset flag after the weather change notification has been skipped
-		weatherReset = false
-	end
-end)
-
-local function anyKeywordMatches(keywords, searchText)
-	for _, keyword in ipairs(keywords) do
-		if string.find(keyword:lower(), searchText:lower()) then
-			return true
-		end
-	end
-	return false
-end
-
-----------------------------------------
------------- APPLY TOGGLES -------------
-----------------------------------------
-
-function ApplyToggles()
-	GameOptions.SetBool("Crowd", "Enabled", toggles.Current.crowdSpawning)
-	GameOptions.SetBool("Developer/FeatureToggles", "Bloom", toggles.Current.bloom)
-	GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", toggles.Current.chromaticAberration)
-	GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", toggles.Current.DOF)
-	GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggles.Current.distantFog)
-	GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggles.Current.distantVolumetricFog)
-	GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", toggles.Current.filmGrain)
-	GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", toggles.Current.lensFlares)
-	GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", toggles.Current.motionBlur)
-	GameOptions.SetBool("Developer/FeatureToggles", "RainMap", toggles.Current.rainMap)
-	GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", toggles.Current.rain)
-	GameOptions.SetBool("Developer/FeatureToggles", "Tonemapping", toggles.Current.tonemapping)
-	GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", toggles.Current.clouds)
-	GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggles.Current.volumetricFog)
-	GameOptions.SetBool("RayTracing", "EnableNRD", toggles.Current.toggleNRD)
-	GameOptions.SetBool("RayTracing/Reference", "EnableRIS", toggles.Current.RIS)
-	GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", toggles.Current.toggleDLSSDPT)
-	GameOptions.SetBool("Traffic", "StopSpawn", not toggles.Current.stopVehicleSpawning)
-	GameOptions.SetBool("Vehicle", "vehicleVsVehicleCollisions", toggles.Current.vehicleCollisions)
-	SaveToggles()
-end
-
-----------------------------------------
 ----------- WEATHER CONTROL-------------
 ----------------------------------------
 
 function DrawWeatherControl()
+	--ImGui.Dummy(0, dummySpacingYValue)
+	--ImGui.Separator()
 	ImGui.Text("Weather Control:")
 
 	-- Make the reset button fit the width of the GUI
 	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 
+
 	-- Change button color, hover color, and text color
-	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))       -- Custom button color
+	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
 	ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
-	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))             -- Custom text color
+	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
 	if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
 		Game.GetWeatherSystem():ResetWeather(true)
 		settings.Current.weatherState = "None"
 		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
 		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 		toggleDLSSDPT = true
-		DebugPrint("Weather reset")
-		DebugPrint("DLSSD set to " .. tostring(toggleDLSSDPT))
+		debugPrint("Weather reset")
 		SaveSettings()
 		weatherReset = true
 	end
@@ -525,11 +345,52 @@ function DrawWeatherControl()
 	ImGui.Text(currentWeatherState)
 end
 
+registerForEvent("onUpdate", function()
+	Cron.Update(delta)
+	if hasResetOrForced == true then
+		local resetorforcedtimer = Cron.After(0.5, function()
+			hasResetOrForced = false
+		end)
+	end
+	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+	if newWeatherState ~= currentWeatherState then
+		currentWeatherState = newWeatherState
+		local localizedState = weatherStateNames[currentWeatherState]
+		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+		-- Only send weather change notifications if the weather has not been reset
+		if hasResetOrForced == false and not weatherReset then
+			if resetorforcedtimer then
+				Cron.Halt(resetorforcedtimer)
+				resetorforcedtimer = nil
+			end
+			if settings.Current.warningMessages then
+				ShowWarningMessage(messageText)
+			end
+			if settings.Current.notificationMessages then
+				ShowNotificationMessage(messageText)
+			end
+			debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
+		end
+		-- Reset the weather reset flag after the weather change notification has been skipped
+		weatherReset = false
+	end
+end)
+
+local function anyKeywordMatches(keywords, searchText)
+	for _, keyword in ipairs(keywords) do
+		if string.find(keyword:lower(), searchText:lower()) then
+			return true
+		end
+	end
+	return false
+end
+
 ----------------------------------------
------------- DRAW BUTTONS --------------
+---------------- DRAW ------------------
 ----------------------------------------
 
-function DrawGUI()
+function DrawButtons()
 	-- Check if the CET window is open
 	if not cetOpen then
 		return
@@ -567,7 +428,7 @@ function DrawGUI()
 				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
 				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					DebugPrint("Closing time slider window.")
+					debugPrint("Closing time slider window.")
 					timeSliderWindowOpen = false
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
@@ -577,7 +438,7 @@ function DrawGUI()
 				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
 				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
 				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					DebugPrint("Opening time slider window.")
+					debugPrint("Opening time slider window.")
 					timeSliderWindowOpen = true
 					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
 					SaveSettings()
@@ -670,16 +531,14 @@ function DrawGUI()
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
 										toggleDLSSDPT = true
 										weatherReset = true
-										DebugPrint("Weather reset to default cycles.")
-										DebugPrint("DLSSD set to " .. tostring(toggleDLSSDPT))
+										debugPrint("Weather reset to default cycles.")
 									else
-										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 10)
+										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
 										settings.Current.weatherState = weatherState
 										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
 										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
 										toggleDLSSDPT = enableDLSSDPT
-										DebugPrint("Weather locked to selected state.")
-										DebugPrint("DLSSD set to " .. tostring(toggleDLSSDPT))
+										debugPrint("Weather locked to selected state.")
 									end
 									SaveSettings()
 								end
@@ -697,7 +556,7 @@ function DrawGUI()
 						if buttonCount % buttonsPerRow ~= 0 then
 							ImGui.NewLine()
 						end
-						ImGui.Dummy(0, dummySpacingYValue)
+						ImGui.Dummy(0, dummySpacingYValue) -- Added here
 					else
 						if not collapsedCategories[category.name] then
 							collapsedCategories[category.name] = true
@@ -723,39 +582,50 @@ function DrawGUI()
 				ImGui.Text("Grouped Toggles:")
 				ImGui.Separator()
 
-				toggles.Current.toggleFogClouds, changed = ImGui.Checkbox("ALL: Volumetrics and Clouds",
-					toggles.Current.toggleFogClouds)
+				toggleFogClouds, changed = ImGui.Checkbox("ALL: Volumetrics and Clouds", toggleFogClouds)
 				if changed then
 					userInteracted = true
-					DebugPrint("Volumetrics and Clouds toggled!")
-					toggles.Current.distantVolumetricFog = toggles.Current.toggleFogClouds
-					toggles.Current.volumetricFog = toggles.Current.toggleFogClouds
-					toggles.Current.distantFog = toggles.Current.toggleFogClouds
-					toggles.Current.clouds = toggles.Current.toggleFogClouds
+					debugPrint("Volumetrics and Clouds toggled!")
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFogClouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFogClouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFogClouds)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", toggleFogClouds)
+					distantVolumetricFog = toggleFogClouds
+					volumetricFog = toggleFogClouds
+					distantFog = toggleFogClouds
+					clouds = toggleFogClouds
+
 					-- Ensure ALL: Fog is also enabled/disabled
-					toggles.Current.toggleFog = toggles.Current.toggleFogClouds
-					toggles.Current.volumetricFog = toggles.Current.toggleFog
-					toggles.Current.distantVolumetricFog = toggles.Current.toggleFog
-					toggles.Current.distantFog = toggles.Current.toggleFog
-					ApplyToggles()
+					toggleFog = toggleFogClouds
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFog)
+					volumetricFog = toggleFog
+					distantVolumetricFog = toggleFog
+					distantFog = toggleFog
 				end
 				ui.tooltip("Toggles all fog and clouds: volumetric, distant volumetric, distant fog planes, and volumetric clouds.")
 
-				toggles.Current.toggleFog, changed = ImGui.Checkbox("ALL: Fog", toggles.Current.toggleFog)
+				toggleFog, changed = ImGui.Checkbox("ALL: Fog", toggleFog)
 				if changed then
 					userInteracted = true
-					DebugPrint("Fog toggled!")
-					toggles.Current.volumetricFog = toggles.Current.toggleFog
-					toggles.Current.distantVolumetricFog = toggles.Current.toggleFog
-					toggles.Current.distantFog = toggles.Current.toggleFog
+					debugPrint("Fog toggled!")
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", toggleFog)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", toggleFog)
+					volumetricFog = toggleFog
+					distantVolumetricFog = toggleFog
+					distantFog = toggleFog
 
 
-					if toggles.Current.toggleFog and not toggles.Current.toggleFogClouds then
-						toggles.Current.volumetricFog = true
-						toggles.Current.distantVolumetricFog = true
-						toggles.Current.distantFog = true
+					if toggleFog and not toggleFogClouds then
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
+						volumetricFog = true
+						distantVolumetricFog = true
+						distantFog = true
 					end
-					ApplyToggles()
 				end
 				ui.tooltip("Toggles all fog types: volumetric, distant volumetric, and distant fog plane.")
 
@@ -763,47 +633,49 @@ function DrawGUI()
 				ImGui.Text("Weather:")
 				ImGui.Separator()
 
-				toggles.Current.volumetricFog, changed = ImGui.Checkbox("VFog", toggles.Current.volumetricFog)
+				volumetricFog, changed = ImGui.Checkbox("VFog", volumetricFog)
 				if changed then
 					userInteracted = true
-					DebugPrint("VFog toggled!")
+					debugPrint("VFog toggled!")
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", volumetricFog)
 
-					if toggles.Current.volumetricFog then
-						toggles.Current.distantVolumetricFog = true
+					if volumetricFog then
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						distantVolumetricFog = true
 					else
-						toggles.Current.distantVolumetricFog = false
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+						distantVolumetricFog = false
 					end
-					ApplyToggles()
 				end
 				ui.tooltip("Toggle volumetric fog. Also disables Distant VFog.")
 
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.distantVolumetricFog, changed = ImGui.Checkbox("Distant VFog",
-					toggles.Current.distantVolumetricFog)
+				distantVolumetricFog, changed = ImGui.Checkbox("Distant VFog", distantVolumetricFog)
 				if changed then
 					userInteracted = true
-					DebugPrint("Distant Fog toggled!")
+					debugPrint("Distant Fog toggled!")
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", distantVolumetricFog)
 
-					if toggles.Current.distantVolumetricFog and not toggles.Current.volumetricFog then
-						toggles.Current.volumetricFog = true
+					if distantVolumetricFog and not volumetricFog then
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						volumetricFog = true
 					end
-					ApplyToggles()
 				end
 				ui.tooltip("Toggle distant volumetric fog. Also enables VFog if it's disabled.")
 
-				toggles.Current.distantFog, changed = ImGui.Checkbox("Fog", toggles.Current.distantFog)
+				distantFog, changed = ImGui.Checkbox("Fog", distantFog)
 				if changed then
 					userInteracted = true
-					DebugPrint("Fog toggled!")
-					ApplyToggles()
+					debugPrint("Fog changed!")
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", distantFog)
 				end
 				ui.tooltip("Toggle distant fog plane.")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.clouds, changed = ImGui.Checkbox("Clouds", toggles.Current.clouds)
+				clouds, changed = ImGui.Checkbox("Clouds", clouds)
 				if changed then
 					userInteracted = true
-					DebugPrint("Clouds toggled!")
-					ApplyToggles()
+					debugPrint("Clouds changed!")
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", clouds)
 				end
 				ui.tooltip("Toggle volumetric clouds.")
 
@@ -811,118 +683,124 @@ function DrawGUI()
 				ImGui.Text("Features:")
 				ImGui.Separator()
 
-				toggles.Current.toggleNRD, changed = ImGui.Checkbox("NRD", toggles.Current.toggleNRD)
+				toggleNRD, changed = ImGui.Checkbox("NRD", toggleNRD)
 				if changed then
-					ApplyToggles()
+					GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
+					SaveSettings()
 				end
 				ui.tooltip("Nvidia Realtime Denoiser")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.toggleDLSSDPT, changed = ImGui.Checkbox("DLSSDPT", toggles.Current.toggleDLSSDPT)
+				toggleDLSSDPT, changed = ImGui.Checkbox("DLSSDPT", toggleDLSSDPT)
 				if changed then
-					DebugPrint("DLSSD set to " .. tostring(toggleDLSSDPT))
-					ApplyToggles()
+					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", toggleDLSSDPT)
+					SaveSettings()
 				end
-				ui.tooltip("DLSSD Separate Particle Color - Disabling will reduce \ndistant shimmering but also makes other paricles invisible \nlike toggles.Current.rain and debris particles. Disabling is not recommended. \nManually selecting a weather state will enable or disable \nthis as needed.")
+				ui.tooltip("DLSSD Separate Particle Color - Disabling will reduce \ndistant shimmering but also makes other paricles invisible \nlike rain and debris particles. Disabling is not recommended. \nManually selecting a weather state will enable or disable \nthis as needed.")
 
-				toggles.Current.bloom, changed = ImGui.Checkbox("Bloom", toggles.Current.bloom)
+				bloom, changed = ImGui.Checkbox("Bloom", bloom)
 				if changed then
-					toggles.Current.lensFlares = toggles.Current.bloom
-					DebugPrint("Toggled bloom to " .. tostring(toggles.Current.bloom))
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom)
+					lensFlares = bloom
+					SaveSettings()
 				end
 				ui.tooltip("Toggles bloom (also removes lens flare).")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.lensFlares, changed = ImGui.Checkbox("Lens Flares", toggles.Current.lensFlares)
+				lensFlares, changed = ImGui.Checkbox("Lens Flares", lensFlares)
 				if changed then
-					DebugPrint("Toggled lens flare to " .. tostring(toggles.Current.lensFlares))
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
+					SaveSettings()
 
-					if toggles.Current.lensFlares and not toggles.Current.bloom then
-						toggles.Current.bloom = true
-						DebugPrint("Toggled bloom to " .. tostring(toggles.Current.bloom))
-						ApplyToggles()
+					if lensFlares and not bloom then
+						GameOptions.SetBool("Developer/FeatureToggles", "Bloom", true)
+						bloom = true
+						SaveSettings()
 					end
 				end
 				ui.tooltip("Toggles lens flare effect.")
 
-				toggles.Current.rainMap, changed = ImGui.Checkbox("Weather", toggles.Current.rainMap)
+				rainMap, changed = ImGui.Checkbox("Weather", rainMap)
 				if changed then
-					toggles.Current.rain = toggles.Current.rainMap
-					DebugPrint("Toggled weather to " .. tostring(toggles.Current.rainMap))
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", rainMap)
+					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rainMap)
+					rain = rainMap
+					SaveSettings()
 				end
-				ui.tooltip("Toggles all weather effects such as toggles.Current.rain particles and wet surfaces.")
+				ui.tooltip("Toggles all weather effects such as rain particles and wet surfaces.")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.rain, changed = ImGui.Checkbox("SS Rain", toggles.Current.rain)
+				rain, changed = ImGui.Checkbox("SS Rain", rain)
 				if changed then
-					DebugPrint("Toggled SS Rain to " .. tostring(toggles.Current.rain))
-					ApplyToggles()
-					if toggles.Current.rain and not toggles.Current.rainMap then
-						toggles.Current.rainMap = true
-						DebugPrint("Toggled weather to " .. tostring(toggles.Current.rainMap))
-						ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", rain)
+					SaveSettings()
+
+					if rain and not rainMap then
+						GameOptions.SetBool("Developer/FeatureToggles", "RainMap", true)
+						rainMap = true
+						SaveSettings()
 					end
 				end
-				ui.tooltip("Toggles screenspace toggles.Current.rain effects, removing wet surfaces.")
+				ui.tooltip("Toggles screenspace rain effects, removing wet surfaces.")
 
-				toggles.Current.chromaticAberration, changed = ImGui.Checkbox("CA", toggles.Current.chromaticAberration)
+				chromaticAberration, changed = ImGui.Checkbox("CA", chromaticAberration)
 				if changed then
-					DebugPrint("Toggled chomatic aberration to " .. tostring(toggles.Current.chromaticAberration))
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", chromaticAberration)
+					SaveSettings()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.filmGrain, changed = ImGui.Checkbox("Film Grain", toggles.Current.filmGrain)
+				filmGrain, changed = ImGui.Checkbox("Film Grain", filmGrain)
 				if changed then
-					DebugPrint("Toggled film grain to " .. tostring(toggles.Current.filmGrain))
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", filmGrain)
+					SaveSettings()
 				end
 				ui.tooltip("Toggles film grain.")
 
-				toggles.Current.DOF, changed = ImGui.Checkbox("DOF", toggles.Current.DOF)
+				DOF, changed = ImGui.Checkbox("DOF", DOF)
 				if changed then
-					DebugPrint("Toggled DOF to " .. tostring(toggles.Current.DOF))
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", DOF)
+					SaveSettings()
 				end
 				ui.tooltip("Toggles depth of field.")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggles.Current.motionBlur, changed = ImGui.Checkbox("Motion Blur", toggles.Current.motionBlur)
+				motionBlur, changed = ImGui.Checkbox("Motion Blur", motionBlur)
 				if changed then
-					ApplyToggles()
-					DebugPrint("Toggled motion blur to " .. tostring(toggles.Current.motionBlur))
+					GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", motionBlur)
+					SaveSettings()
 				end
 				ui.tooltip("Toggles motion blur.")
 
-				toggles.Current.RIS, changed = ImGui.Checkbox("RIS", toggles.Current.RIS)
+				RIS, changed = ImGui.Checkbox("RIS", RIS)
 				if changed then
-					ApplyToggles()
+					GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
+					SaveSettings()
 				end
 				ui.tooltip("Toggles Resampled Importance Sampling.")
 
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Utility:")
 				ImGui.Separator()
-				toggles.Current.vehicleCollisions, changed = ImGui.Checkbox("Vehicle Collisions",
-					toggles.Current.vehicleCollisions)
+				vehicleCollisions, changed = ImGui.Checkbox("Vehicle Collisions", vehicleCollisions)
 				if changed then
-					ApplyToggles()
+					GameOptions.SetBool("Vehicle", "vehicleVsVehicleCollisions", vehicleCollisions)
+					SaveSettings()
 				end
-				ui.tooltip(
-				"Toggles vehicle collisions. Great for driving through \n Night City with Nova City Population density!")
-				toggles.Current.crowdSpawning, changed = ImGui.Checkbox("Crowd Spawning", toggles.Current.crowdSpawning)
+				ui.tooltip("Toggles vehicle collisions. Great for driving through \n Night City with Nova City Population density!")
+				crowdSpawning, changed = ImGui.Checkbox("Crowd Spawning", crowdSpawning)
 				if changed then
-					ApplyToggles()
+					GameOptions.SetBool("Crowd", "Enabled", crowdSpawning)
+					SaveSettings()
 				end
 				ui.tooltip("Toggles crowd spawning.")
-				toggles.Current.stopVehicleSpawning, changed = ImGui.Checkbox("Vehicle Spawning", toggles.Current
-					.stopVehicleSpawning)
+				stopVehicleSpawning, changed = ImGui.Checkbox("Vehicle Spawning", stopVehicleSpawning)
 				if changed then
-					if toggles.Current.stopVehicleSpawning then
-						toggles.Current.vehicleSpawning = true
-						ApplyToggles()
+					if stopVehicleSpawning then
+						GameOptions.SetBool("Traffic", "StopSpawn", false)
+						vehicleSpawning = true
+						SaveSettings()
 					else
-						toggles.Current.vehicleSpawning = false
-						ApplyToggles()
+						GameOptions.SetBool("Traffic", "StopSpawn", true)
+						vehicleSpawning = false
+						SaveSettings()
 					end
 				end
 				ui.tooltip("Toggles vehicle spawning.")
@@ -930,91 +808,99 @@ function DrawGUI()
 				--[[ ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Display:")
 				ImGui.Separator()
-			
+
 				-- ImGui toggle button to switch between SDR and HDR
-				toggles.Current.enableHDR, changed = ImGui.Checkbox("HDR", toggles.Current.enableHDR)
+				enableHDR, changed = ImGui.Checkbox("HDR", enableHDR)
 				if changed then
 					-- do stuff
 				end
 				ui.tooltip("Currently not working correctly. Use the CET binding hotkey instead.") ]]
 
 				ImGui.Dummy(0, dummySpacingYValue)
-				ImGui.Text("Useless Toggles:")
+				ImGui.Text("Other:")
 				ImGui.Separator()
-				toggles.Current.tonemapping, changed = ImGui.Checkbox("Tonemapping", toggles.Current.tonemapping)
+				
+				--[[ tonemapping, changed = ImGui.Checkbox("Tonemapping", tonemapping)
 				if changed then
-					ApplyToggles()
+					GameOptions.SetBool("Developer/FeatureToggles", "Tonemapping", tonemapping)
+					SaveSettings()
 				end
-				ui.tooltip("This toggle serves absolutely no purpose and toggling \n it does nothing but make the game look bad and kills \n a puppy each time you do.")
+				ui.tooltip("This toggle serves absolutely no purpose and toggling \n it does nothing but make the game look bad and kills \n a puppy each time you do.") ]]
 
-				toggles.Current.graphics, changed = ImGui.Checkbox("gRaPhiCs", toggles.Current.graphics)
+				graphics, changed = ImGui.Checkbox("Global", graphics)
 				if changed then
-					-- Toggle all volumetrics and toggles.Current.clouds
-					toggles.Current.toggleFogClouds = toggles.Current.graphics
-					toggles.Current.volumetricFog = toggles.Current.graphics
-					toggles.Current.distantVolumetricFog = toggles.Current.graphics
-					toggles.Current.distantFog = toggles.Current.graphics
-					toggles.Current.clouds = toggles.Current.graphics
+					-- Toggle all volumetrics and clouds
+					toggleFogClouds = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", graphics)
+					volumetricFog = graphics
+					distantVolumetricFog = graphics
+					distantFog = graphics
+					clouds = graphics
 
 					-- Toggle DLSSDPT
-					toggles.Current.toggleDLSSDPT = toggles.Current.graphics
+					toggleDLSSDPT = graphics
+					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", graphics)
 
-					-- Toggle toggles.Current.bloom and lens flare
-					toggles.Current.bloom = toggles.Current.graphics
-					toggles.Current.lensFlares = toggles.Current.graphics
+					-- Toggle bloom and lens flare
+					bloom = graphics
+					lensFlares = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", graphics)
 
-					-- Toggle weather and screen space toggles.Current.rain
-					toggles.Current.rainMap = toggles.Current.graphics
-					toggles.Current.rain = toggles.Current.graphics
+					-- Toggle weather and screen space rain
+					rainMap = graphics
+					rain = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", graphics)
 
 					-- Toggle chromatic aberration and film grain
-					toggles.Current.chromaticAberration = toggles.Current.graphics
-					toggles.Current.filmGrain = toggles.Current.graphics
-					toggles.Current.toggleFog = toggles.Current.graphics
+					chromaticAberration = graphics
+					filmGrain = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", graphics)
 
-					ApplyToggles()
+					SaveSettings()
 				end
 				ui.tooltip("Toggles all volumetrics, clouds, DLSSDPT, bloom, lens flare, weather, screen space rain, chromatic aberration, and film grain.")
 
 				if userInteracted then
 					-- Update ALL: Fog and ALL: Volumetrics and Clouds based on individual toggles
-					if not toggles.Current.volumetricFog and not toggles.Current.distantVolumetricFog and not toggles.Current.distantFog then
-						toggles.Current.toggleFog = false
-						ApplyToggles()
+					if not volumetricFog and not distantVolumetricFog and not distantFog then
+						toggleFog = false
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
 					end
 
-					if not toggles.Current.volumetricFog and not toggles.Current.distantVolumetricFog and not toggles.Current.distantFog and not toggles.Current.clouds then
-						toggles.Current.toggleFogClouds = false
-						ApplyToggles()
+					if not volumetricFog and not distantVolumetricFog and not distantFog and not clouds then
+						toggleFogClouds = false
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", false)
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", false)
 					end
 
 					-- Enable ALL: Fog if all individual fog toggles are enabled
-					if toggles.Current.volumetricFog and toggles.Current.distantVolumetricFog and toggles.Current.distantFog then
-						toggles.Current.toggleFog = true
-						ApplyToggles()
+					if volumetricFog and distantVolumetricFog and distantFog then
+						toggleFog = true
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
 					end
 
 					-- Enable ALL: Volumetrics and Clouds if all individual toggles are enabled
-					if toggles.Current.volumetricFog and toggles.Current.distantVolumetricFog and toggles.Current.distantFog and toggles.Current.clouds then
-						toggles.Current.toggleFogClouds = true
-						ApplyToggles()
+					if volumetricFog and distantVolumetricFog and distantFog and clouds then
+						toggleFogClouds = true
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantVolFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "DistantFog", true)
+						GameOptions.SetBool("Developer/FeatureToggles", "VolumetricClouds", true)
 					end
+					SaveSettings()
 					userInteracted = false
-				end
-
-				ImGui.Dummy(0, dummySpacingYValue)
-				ImGui.Separator()
-				ImGui.Dummy(0, dummySpacingYValue)
-
-				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
-				if ImGui.Button("Reset Toggles", resetButtonWidth, buttonHeight) then
-					-- Default setting code
-					for key, value in pairs(toggles.Default) do
-						toggles.Current[key] = value
-					end
-
-					ApplyToggles()
-					DebugPrint("Reset toggles to default.")
 				end
 
 				--DrawWeatherControl()
@@ -1073,7 +959,7 @@ function DrawGUI()
 				ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - 10)
 				ImGui.Text(tostring(settings.Current.transitionDuration) .. "s")
 				ImGui.Separator()
-				ImGui.Dummy(0, dummySpacingYValue)
+				ImGui.Dummy(0, dummySpacingYValue + 10)
 
 				-- Define the preset durations
 				local durations = { 0, 5, 10, 15, 30 }
@@ -1104,19 +990,17 @@ function DrawGUI()
 				ImGui.Dummy(0, dummySpacingYValue + 10)
 				ImGui.Text("Weather state notifications:")
 				ImGui.Separator()
-				ImGui.Dummy(0, dummySpacingYValue)
+				ImGui.Dummy(0, dummySpacingYValue + 10)
 
-				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message",
-					settings.Current.warningMessages)
+				settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message", settings.Current.warningMessages)
 				if changed then
-					DebugPrint("Toggled warning message to " .. tostring(settings.Current.warningMessages))
+					debugPrint("Toggled warning message to " .. tostring(settings.Current.warningMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show warning message when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
-				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification",
-					settings.Current.notificationMessages)
+				settings.Current.notificationMessages, changed = ImGui.Checkbox("Notification", settings.Current.notificationMessages)
 				if changed then
-					DebugPrint("Toggled notifications to " .. tostring(settings.Current.notificationMessages))
+					debugPrint("Toggled notifications to " .. tostring(settings.Current.notificationMessages))
 					SaveSettings()
 				end
 				ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
@@ -1131,7 +1015,7 @@ function DrawGUI()
 					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled debug output to " .. tostring(settings.Current.debugOutput))
 					SaveSettings()
 				end
-
+					
 				ImGui.Dummy(0, dummySpacingYValue)
 
 				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
@@ -1139,7 +1023,7 @@ function DrawGUI()
 				if not Game.GetSystemRequestsHandler():IsPreGame() and not Game.GetSystemRequestsHandler():IsGamePaused() then
 					ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
 					if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
-						ExportDebugFile()
+						exportDebugFile()
 						print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
 					end
 					ImGui.PopStyleColor()
@@ -1162,7 +1046,7 @@ function DrawGUI()
 
 				if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
 					resetWindow = true
-					DebugPrint(IconGlyphs.CityVariant .. " Nova City Tools: Reset GUI size and position.")
+					debugPrint("Reset GUI size and position.")
 				end
 				ui.tooltip("Reset GUI to default position and size.")
 				--DrawWeatherControl()
@@ -1178,16 +1062,16 @@ end
 ------------- EXPORT DEBUG -------------
 ----------------------------------------
 
-function ExportDebugFile()
-	-- Check if the player is in menu or game is paused
-	if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
-		return
-	end
-
+function exportDebugFile()
+    -- Check if the player is in menu or game is paused
+    if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
+        return
+    end
+	
 	local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
 	local inVehicle = false
 	local file = io.open("novaCityDebug.json", "r")
-	local debugData = {}
+    local debugData = {}
 	local selectedWeatherState = settings.Current.weatherState
 	if selectedWeatherState == "None" then
 		selectedWeatherState = "Default Cycles"
@@ -1195,75 +1079,74 @@ function ExportDebugFile()
 		selectedWeatherState = "Locked State"
 	end
 
-	if not Game.GetPlayer().mountedVehicle then
-		if inVehicle then
-			inVehicle = false
-		end
-	else
-		if not inVehicle then
-			inVehicle = true
-		end
-	end
+    if not Game.GetPlayer().mountedVehicle then
+        if inVehicle then
+            inVehicle = false
+        end
+    else
+        if not inVehicle then
+            inVehicle = true
+        end
+    end
 
-	-- Collect data with error handling
-	local data = {
+    -- Collect data with error handling
+    local data = {
 		modName = tostring(modName),
-		modVersion = tostring(modVersion) or nil,
-		gameVersion = Game.GetSystemRequestsHandler():GetGameVersion() or nil,
-		dateTime = os.date("%m/%d/%Y - %H:%M:%S", os.time()) or nil,
+        modVersion = tostring(modVersion) or nil,
+        gameVersion = Game.GetSystemRequestsHandler():GetGameVersion() or nil,
+        dateTime = os.date("%m/%d/%Y - %H:%M:%S", os.time()) or nil,
 		weatherCycleMode = tostring(selectedWeatherState),
 		localizedState = tostring(weatherStateNames[currentWeatherState]),
-		weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or
-		nil,
-		gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
+        weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
+        gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
 		inVehicle = inVehicle,
 		playerDirection = (function()
-			local dir = Game.GetPlayer():GetWorldOrientation():ToEulerAngles()
-			if dir then
-				return { roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw }
-			else
-				return { roll = 0, pitch = 0, yaw = -180 }
-			end
-		end)(),
-		playerPosition = (function()
-			if pos then
-				return { x = pos.x, y = pos.y, z = pos.z, w = 1.0 }
-			else
-				return { x = 0.0, y = 0.0, z = 0.0, w = 1.0 }
-			end
-		end)()
-	}
+            local dir = Game.GetPlayer():GetWorldOrientation():ToEulerAngles()
+            if dir then
+                return {roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw}
+            else
+                return {roll = 0, pitch = 0, yaw = -180}
+            end
+        end)(),
+        playerPosition = (function()
+            if pos then
+                return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
+            else
+                return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
+            end
+        end)()
+    }
 
-	-- Read existing data from Debug.json
-	if file then
-		local content = file:read("*a")
-		debugData = json.decode(content)
-		file:close()
-	end
+    -- Read existing data from Debug.json
+    if file then
+        local content = file:read("*a")
+        debugData = json.decode(content)
+        file:close()
+    end
 
-	-- Insert new data in the same order as defined in 'data'
-	table.insert(debugData, {
+    -- Insert new data in the same order as defined in 'data'
+    table.insert(debugData, {
 		modName = data.modName,
 		modVersion = data.modVersion,
-		gameVersion = data.gameVersion,
-		dateTime = data.dateTime,
+        gameVersion = data.gameVersion,
+        dateTime = data.dateTime,
 		weatherCycleMode = data.weatherCycleMode,
 		localizedState = data.localizedState,
-		weatherState = data.weatherState,
-		gameTime = data.gameTime,
+        weatherState = data.weatherState,
+        gameTime = data.gameTime,
 		inVehicle = data.inVehicle,
 		playerDirection = data.playerDirection,
-		playerPosition = data.playerPosition
-	})
+        playerPosition = data.playerPosition
+    })
 
-	-- Write updated data to Debug.json
-	file = io.open("novaCityDebug.json", "w")
-	if file then
-		file:write(json.encode(debugData))
-		file:close()
-	else
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open Debug.json for writing")
-	end
+    -- Write updated data to Debug.json
+    file = io.open("novaCityDebug.json", "w")
+    if file then
+        file:write(json.encode(debugData))
+        file:close()
+    else
+        print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open Debug.json for writing")
+    end
 end
 
 ----------------------------------------
@@ -1472,6 +1355,72 @@ function ShowNotificationMessage(message)
 		GetAllBlackboardDefs().UI_Notifications.OnscreenMessage, ToVariant(text), true)
 end
 
+local function sortWeatherStates()
+	table.sort(weatherStates, function(a, b)
+		return a[2] < b[2]
+	end)
+end
+
+local function sortCategories()
+	table.sort(categories, function(a, b)
+		return a.order < b.order
+	end)
+end
+
+registerForEvent("onInit", function()
+	print(IconGlyphs.CityVariant .. " Nova City Tools: Initialized")
+
+	LoadSettings()
+	loadWeatherStates()
+	sortWeatherStates()
+	sortCategories()
+	--[[ -- Handle session start
+    GameUI.OnSessionStart(function()
+        Cron.After(0.25, function()
+            -- Apply active weather state
+            if settings.Current.weatherState ~= 'None' then
+                Game.GetWeatherSystem():SetWeather(settings.Current.weatherState, settings.transitionTime, 0)
+                Game.GetPlayer():SetWarningMessage("Locked weather state to " .. weatherStateNames[settings.Current.weatherState]:lower() .. "!")
+            end
+        end)
+    end)
+
+    GameUI.OnSessionEnd(function()
+        -- Handle end
+    end) ]]
+end)
+
+registerForEvent("onDraw", function()
+	if timeSliderWindowOpen == true then
+		DrawTimeSliderWindow()
+	end
+	DrawButtons()
+end)
+
+registerForEvent("onOverlayOpen", function()
+	LoadSettings()
+	cetOpen = true
+	width, height = GetDisplayResolution()
+	setResolutionPresets(width, height)
+
+	--[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+    local selectedWeatherState = settings.Current.weatherState
+    if selectedWeatherState == 'Locked State' then
+        settings.Current.weatherState = currentWeatherState
+        for _, state in ipairs(weatherStates) do
+            if state[1] == currentWeatherState then
+                settings.Current.weatherState = state[1]
+                break
+            end
+        end
+    end ]]
+end)
+
+registerForEvent("onOverlayClose", function()
+	cetOpen = false
+	SaveSettings()
+end)
+
 ----------------------------------------
 -------------- SAVE/LOAD ---------------
 ----------------------------------------
@@ -1483,7 +1432,7 @@ function SaveSettings()
 		weatherState = settings.Current.weatherState,
 		warningMessages = settings.Current.warningMessages,
 		notificationMessages = settings.Current.notificationMessages,
-		debugOutput = settings.Current.debugOutput, -- Added debugOutput
+		debugOutput = settings.Current.debugOutput,  -- Added debugOutput
 		collapsedCategories = {}
 	}
 
@@ -1523,7 +1472,7 @@ function SaveSettings()
 		local formattedJsonString = formatTable(saveData, 1)
 		file:write(formattedJsonString)
 		file:close()
-		DebugPrint("Settings saved")
+		debugPrint("Settings saved")
 	else
 		print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
 	end
@@ -1542,86 +1491,6 @@ function LoadSettings()
 	elseif not file then
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings file not found")
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default settings file")
-		return
-	end
-end
-
-function SaveToggles()
-	local saveData = {
-		Current = {
-			toggleNRD = toggles.Current.toggleNRD,
-			toggleDLSSDPT = toggles.Current.toggleDLSSDPT,
-			toggleFog = toggles.Current.toggleFog,
-			toggleFogClouds = toggles.Current.toggleFogClouds,
-			volumetricFog = toggles.Current.volumetricFog,
-			distantVolumetricFog = toggles.Current.distantVolumetricFog,
-			distantFog = toggles.Current.distantFog,
-			clouds = toggles.Current.clouds,
-			tonemapping = toggles.Current.tonemapping,
-			vehicleCollisions = toggles.Current.vehicleCollisions,
-			lensFlares = toggles.Current.lensFlares,
-			bloom = toggles.Current.bloom,
-			rain = toggles.Current.rain,
-			rainMap = toggles.Current.rainMap,
-			DOF = toggles.Current.DOF,
-			chromaticAberration = toggles.Current.chromaticAberration,
-			filmGrain = toggles.Current.filmGrain,
-			RIS = toggles.Current.RIS,
-			motionBlur = toggles.Current.motionBlur,
-			graphics = toggles.Current.graphics,
-			stopVehicleSpawning = toggles.Current.stopVehicleSpawning,
-			vehicleSpawning = toggles.Current.vehicleSpawning,
-			crowdSpawning = toggles.Current.crowdSpawning,
-		}
-	}
-
-	local function formatTable(t, indent)
-		local formatted = "{\n"
-		local indentStr = string.rep("    ", indent)
-		local count = 0
-		local total = 0
-		for _ in pairs(t) do total = total + 1 end
-		for k, v in pairs(t) do
-			count = count + 1
-			formatted = formatted .. indentStr .. string.format('"%s": ', k)
-			if type(v) == "table" then
-				formatted = formatted .. formatTable(v, indent + 1)
-			elseif type(v) == "string" then
-				formatted = formatted .. string.format('"%s"', v)
-			else
-				formatted = formatted .. tostring(v)
-			end
-			if count < total then
-				formatted = formatted .. ",\n"
-			else
-				formatted = formatted .. "\n"
-			end
-		end
-		return formatted .. string.rep("    ", indent - 1) .. "}"
-	end
-
-	local file = io.open("toggles.json", "w")
-	if file then
-		local formattedJsonString = formatTable(saveData, 1)
-		file:write(formattedJsonString)
-		file:close()
-		DebugPrint("Toggles saved")
-	else
-		print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
-	end
-end
-
-function LoadToggles()
-	local file = io.open("toggles.json", "r")
-	if file then
-		local content = file:read("*all")
-		file:close()
-		local loadedToggles = json.decode(content)
-		toggles.Current = loadedToggles.Current
-		DebugPrint("Toggles loaded")
-	elseif not file then
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Toggles file not found")
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default toggles file")
 		return
 	end
 end
