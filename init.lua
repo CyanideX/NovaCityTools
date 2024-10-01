@@ -24,12 +24,13 @@ local toggleDLSSDPT = true
 local rain = true
 local rainMap = true
 
-local bloom = false
+local bloom = true
 local lensFlares = false
-local chromaticAberration = false
-local filmGrain = false
-local DOF = false
-local motionBlur = false
+local chromaticAberration = true
+local filmGrain = true
+local dof = true
+local motionBlur = true
+local motionBlurIndex = 2
 local RIS = false
 local toggleNRD = false
 
@@ -128,7 +129,7 @@ local function sortCategories()
 	end)
 end
 
-local function PrintUserSettings()
+--[[ local function PrintUserSettings()
 	print(GameOptions.GetBool("RayTracing", "EnableNRD"))
 	print(GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares"))
 	print(GameOptions.GetBool("Developer/FeatureToggles", "Bloom"))
@@ -137,34 +138,43 @@ local function PrintUserSettings()
 	print(GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain"))
 	print(GameOptions.GetBool("RayTracing/Reference", "EnableRIS"))
 	print(GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur"))
-end
+end]]
 
-local function UpdateUserSettings()
-	if GameOptions.GetBool("RayTracing", "EnableNRD") ~= toggleNRD then
+--[[ local function UpdateUserSettings()
+	if tostring(GameOptions.GetBool("RayTracing", "EnableNRD")) ~= toggleNRD then
 		toggleNRD = GameOptions.GetBool("RayTracing", "EnableNRD")
 	end
-	if GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares") ~= lensFlares then
+	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares")) ~= lensFlares then
 		lensFlares = GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares")
 	end
-	if GameOptions.GetBool("Developer/FeatureToggles") ~= bloom then
+	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "Bloom")) ~= bloom then
 		bloom = GameOptions.GetBool("Developer/FeatureToggles", "Bloom")
 	end
-	if GameOptions.GetBool("Developer/FeatureToggles", "DepthOfField") ~= DOF then
+	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "DepthOfField")) ~= DOF then
 		DOF = GameOptions.GetBool("Developer/FeatureToggles", "DepthOfField")
 	end
-	if GameOptions.GetBool("Developer/FeatureToggles", "ChromaticAberration") ~= chromaticAberration then
+	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "ChromaticAberration")) ~= chromaticAberration then
 		chromaticAberration = GameOptions.GetBool("Developer/FeatureToggles", "ChromaticAberration")
 	end
-	if GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain") ~= filmGrain then
+	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain")) ~= filmGrain then
 		filmGrain = GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain")
 	end
-	if GameOptions.GetBool("RayTracing/Reference", "EnableRIS") ~= RIS then
+	if tostring(GameOptions.GetBool("RayTracing/Reference", "EnableRIS")) ~= RIS then
 		RIS = GameOptions.GetBool("RayTracing/Reference", "EnableRIS")
 	end
-	if GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur") ~= motionBlur then
+	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur")) ~= motionBlur then
 		motionBlur = GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur")
 	end
-end 
+end ]]
+
+local function UpdateUserSettings()
+	filmGrain = Game.GetSettingsSystem():GetVar('/graphics/basic', 'FilmGrain'):GetValue()
+	chromaticAberration = Game.GetSettingsSystem():GetVar('/graphics/basic', 'ChromaticAberration'):GetValue()
+	dof = Game.GetSettingsSystem():GetVar('/graphics/basic', 'DepthOfField'):GetValue()
+	lensFlares = Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):GetValue()
+	motionBlurIndex = Game.GetSettingsSystem():GetVar('/graphics/basic', 'MotionBlur'):GetIndex()
+	motionBlur = motionBlurIndex ~= 0
+end
 
 ----------------------------------------
 ----------------- MAIN -----------------
@@ -177,9 +187,6 @@ registerForEvent("onInit", function()
 	loadWeatherStates()
 	sortWeatherStates()
 	sortCategories()
-	
-	UpdateUserSettings()
-	PrintUserSettings()
 
 
     GameUI.OnSessionStart(function()
@@ -207,6 +214,7 @@ registerForEvent("onDraw", function()
 	if timeSliderWindowOpen == true then
 		DrawTimeSliderWindow()
 	end
+	UpdateUserSettings()
 	DrawButtons()
 end)
 
@@ -216,8 +224,7 @@ registerForEvent("onOverlayOpen", function()
 	width, height = GetDisplayResolution()
 	SetResolutionPresets(width, height)
 
-	UpdateUserSettings()
-	PrintUserSettings()
+	--PrintUserSettings()
 
 	--[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
     local selectedWeatherState = settings.Current.weatherState
@@ -235,6 +242,7 @@ end)
 registerForEvent("onOverlayClose", function()
 	cetOpen = false
 	SaveSettings()
+	Game.GetSystemRequestsHandler():UnpauseGame()
 end)
 
 function debugPrint(message)
@@ -849,40 +857,55 @@ function DrawButtons()
 				end
 				ui.tooltip("Toggles screenspace rain effects, removing wet surfaces.")
 
+				bloom, changed = ImGui.Checkbox("Bloom", bloom)
+				if changed then
+					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom and lensFlares)
+					Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(bloom and lensFlares)
+					Game.GetSettingsSystem():ConfirmChanges()
+					SaveSettings()
+				end
+				ui.tooltip("Toggles bloom (also disables lens flare).")
+
 				----------------------------------------
 				---------- OPTIONAL TOGGLES ------------
 				----------------------------------------
 				
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.Text("Optional:")
-				ui.tooltip("All options show as disabled by default but may be set differently in your game settings.\nThey can be toggled and their state will be reflected in game.")
+				ui.tooltip("Optional toggles will load your in-game settings and adjust and save them when toggled.")
 				ImGui.Separator()
 				
-				bloom, changed = ImGui.Checkbox("Bloom", bloom)
-				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
-					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom)
-					lensFlares = bloom
-					SaveSettings()
-				end
-				ui.tooltip("Toggles bloom (also removes lens flare).")
-				ImGui.SameLine(toggleSpacingXValue)
-				lensFlares, changed = ImGui.Checkbox("Lens Flares", lensFlares)
-				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
-					SaveSettings()
+			
+				--ImGui.SameLine(toggleSpacingXValue)
+                lensFlares, changed = ImGui.Checkbox("Lens Flares", lensFlares)
+                if changed then
+                    GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
+                    Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(lensFlares)
+                    Game.GetSettingsSystem():ConfirmChanges()
+                    SaveSettings()
 
-					if lensFlares and not bloom then
-						GameOptions.SetBool("Developer/FeatureToggles", "Bloom", true)
-						bloom = true
-						SaveSettings()
-					end
-				end
-				ui.tooltip("Toggles lens flare effect.")
+                    Game.GetSystemRequestsHandler():PauseGame()
+                    Cron.After(0.1, function()
+                        Game.GetSystemRequestsHandler():UnpauseGame()
+                    end)
+                
+                    if lensFlares and not bloom then
+                        GameOptions.SetBool("Developer/FeatureToggles", "Bloom", true)
+                        bloom = true
+                        Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(bloom)
+                        Game.GetSettingsSystem():ConfirmChanges()
+                        SaveSettings()
+                    end
+                end
+                ui.tooltip("Toggles lens flare effect.")
+				
 
 				chromaticAberration, changed = ImGui.Checkbox("CA", chromaticAberration)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", chromaticAberration)
+					Game.GetSettingsSystem():GetVar('/graphics/basic', 'ChromaticAberration'):SetValue(chromaticAberration)
+					Game.GetSettingsSystem():ConfirmChanges()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles chromatic aberration.")
@@ -890,13 +913,17 @@ function DrawButtons()
 				filmGrain, changed = ImGui.Checkbox("Film Grain", filmGrain)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", filmGrain)
+					Game.GetSettingsSystem():GetVar('/graphics/basic', 'FilmGrain'):SetValue(filmGrain)
+					Game.GetSettingsSystem():ConfirmChanges()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles film grain.")
 
-				DOF, changed = ImGui.Checkbox("DOF", DOF)
+				dof, changed = ImGui.Checkbox("DOF", dof)
 				if changed then
-					GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", DOF)
+					GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", dof)
+					Game.GetSettingsSystem():GetVar('/graphics/basic', 'DepthOfField'):SetValue(dof)
+					Game.GetSettingsSystem():ConfirmChanges()
 					SaveSettings()
 				end
 				ui.tooltip("Toggles depth of field.")
@@ -904,23 +931,37 @@ function DrawButtons()
 				motionBlur, changed = ImGui.Checkbox("Motion Blur", motionBlur)
 				if changed then
 					GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", motionBlur)
+					motionBlurIndex = motionBlur and 2 or 0
+					Game.GetSettingsSystem():GetVar('/graphics/basic', 'MotionBlur'):SetIndex(motionBlurIndex)
+					Game.GetSettingsSystem():ConfirmChanges()
 					SaveSettings()
+					-- Update user settings after changes
+    				UpdateUserSettings()
 				end
 				ui.tooltip("Toggles motion blur.")
 
-				RIS, changed = ImGui.Checkbox("RIS", RIS)
-				if changed then
-					GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
-					SaveSettings()
+				if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
+					-- RIS Checkbox
+					RIS, changed = ImGui.Checkbox("RIS", RIS)
+					if changed then
+						GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
+						SaveSettings()
+					end
+					ui.tooltip("Toggles Resampled Importance Sampling.")
+				else
 				end
-				ui.tooltip("Toggles Resampled Importance Sampling.")
 				ImGui.SameLine(toggleSpacingXValue)
-				toggleNRD, changed = ImGui.Checkbox("NRD", toggleNRD)
-				if changed then
-					GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
-					SaveSettings()
+				if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
+					-- NRD Checkbox
+					toggleNRD, changed = ImGui.Checkbox("NRD", toggleNRD)
+					if changed then
+						GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
+						SaveSettings()
+					end
+					ui.tooltip("Nvidia Realtime Denoiser")
+				else
+					ImGui.Dummy(0, dummySpacingYValue)
 				end
-				ui.tooltip("Nvidia Realtime Denoiser")
 
 				----------------------------------------
 				----------- UTILITY TOGGLES ------------
@@ -1000,9 +1041,10 @@ function DrawButtons()
 
 					-- Toggle bloom and lens flare
 					bloom = graphics
-					lensFlares = graphics
 					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", graphics)
-					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", graphics)
+
+					--[[ lensFlares = graphics
+					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", graphics) ]]
 
 					-- Toggle weather and screen space rain
 					rainMap = graphics
@@ -1011,14 +1053,14 @@ function DrawButtons()
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", graphics)
 
 					-- Toggle chromatic aberration and film grain
-					chromaticAberration = graphics
+					--[[ chromaticAberration = graphics
 					filmGrain = graphics
 					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", graphics)
-					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", graphics)
+					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", graphics) ]]
 
 					SaveSettings()
 				end
-				ui.tooltip("Toggles all volumetrics, clouds, DLSSDPT, bloom, lens flare, weather, screen space rain, chromatic aberration, and film grain.")
+				ui.tooltip("Toggles all volumetrics, clouds, DLSSDPT, bloom, weather, screen space rain.")
 
 				if userInteracted then
 					-- Update ALL: Fog and ALL: Volumetrics and Clouds based on individual toggles
