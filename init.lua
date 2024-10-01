@@ -129,44 +129,6 @@ local function sortCategories()
 	end)
 end
 
---[[ local function PrintUserSettings()
-	print(GameOptions.GetBool("RayTracing", "EnableNRD"))
-	print(GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares"))
-	print(GameOptions.GetBool("Developer/FeatureToggles", "Bloom"))
-	print(GameOptions.GetBool("Developer/FeatureToggles", "DepthOfField"))
-	print(GameOptions.GetBool("Developer/FeatureToggles", "ChromaticAberration"))
-	print(GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain"))
-	print(GameOptions.GetBool("RayTracing/Reference", "EnableRIS"))
-	print(GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur"))
-end]]
-
---[[ local function UpdateUserSettings()
-	if tostring(GameOptions.GetBool("RayTracing", "EnableNRD")) ~= toggleNRD then
-		toggleNRD = GameOptions.GetBool("RayTracing", "EnableNRD")
-	end
-	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares")) ~= lensFlares then
-		lensFlares = GameOptions.GetBool("Developer/FeatureToggles", "ImageBasedFlares")
-	end
-	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "Bloom")) ~= bloom then
-		bloom = GameOptions.GetBool("Developer/FeatureToggles", "Bloom")
-	end
-	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "DepthOfField")) ~= DOF then
-		DOF = GameOptions.GetBool("Developer/FeatureToggles", "DepthOfField")
-	end
-	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "ChromaticAberration")) ~= chromaticAberration then
-		chromaticAberration = GameOptions.GetBool("Developer/FeatureToggles", "ChromaticAberration")
-	end
-	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain")) ~= filmGrain then
-		filmGrain = GameOptions.GetBool("Developer/FeatureToggles", "FilmGrain")
-	end
-	if tostring(GameOptions.GetBool("RayTracing/Reference", "EnableRIS")) ~= RIS then
-		RIS = GameOptions.GetBool("RayTracing/Reference", "EnableRIS")
-	end
-	if tostring(GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur")) ~= motionBlur then
-		motionBlur = GameOptions.GetBool("Developer/FeatureToggles", "MotionBlur")
-	end
-end ]]
-
 local function UpdateUserSettings()
 	filmGrain = Game.GetSettingsSystem():GetVar('/graphics/basic', 'FilmGrain'):GetValue()
 	chromaticAberration = Game.GetSettingsSystem():GetVar('/graphics/basic', 'ChromaticAberration'):GetValue()
@@ -184,16 +146,32 @@ registerForEvent("onInit", function()
 	print(IconGlyphs.CityVariant .. " Nova City Tools: Initialized")
 
 	LoadSettings()
+
 	loadWeatherStates()
 	sortWeatherStates()
 	sortCategories()
+	
+	ObserveAfter("inkISystemRequestsHandler", "RequestSaveUserSettings", function(this)
+		if hasChangedAnySetting then
+			
+			local timer = Cron.After(0.1, function()
+				Game.GetSystemRequestsHandler():UnpauseGame()
+				hasChangedAnySetting = false
+			end)
+		end
+	end)
 
+	ObserveAfter("UserSettings", "NeedsConfirmation", function(this, wrappedMethod)
+        if not changedAnySetting or Game.GetSettingsSystem():NeedsRestartToApply() then return end
+        Game.GetSettingsSystem():ConfirmChanges()
+        Game.GetSystemRequestsHandler():RequestSaveUserSettings()
+    end)
 
-    GameUI.OnSessionStart(function()
+   --[[  GameUI.OnSessionStart(function()
         Cron.After(2.0, function()
 			--UpdateUserSettings()
         end)
-    end)
+    end) ]]
 
    --[[  GameUI.OnSessionStart(function()
         Cron.After(0.25, function()
@@ -205,9 +183,9 @@ registerForEvent("onInit", function()
         end)
     end) ]]
 
-    GameUI.OnSessionEnd(function()
+    --[[ GameUI.OnSessionEnd(function()
         -- Handle end
-    end)
+    end) ]]
 end)
 
 registerForEvent("onDraw", function()
@@ -223,8 +201,7 @@ registerForEvent("onOverlayOpen", function()
 	LoadSettings()
 	width, height = GetDisplayResolution()
 	SetResolutionPresets(width, height)
-
-	--PrintUserSettings()
+	changedAnySetting = false
 
 	--[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
     local selectedWeatherState = settings.Current.weatherState
@@ -885,12 +862,13 @@ function DrawButtons()
                     Game.GetSettingsSystem():ConfirmChanges()
                     SaveSettings()
 
-                    Game.GetSystemRequestsHandler():PauseGame()
-                    Cron.After(0.1, function()
-                        Game.GetSystemRequestsHandler():UnpauseGame()
-                    end)
-                
-                    if lensFlares and not bloom then
+                    Game.GetSettingsSystem():ConfirmChanges()
+					local timer = Cron.After(0.1, function()
+						Game.GetSystemRequestsHandler():RequestSaveUserSettings()
+						changedAnySetting = true
+					end)
+					
+					if lensFlares and not bloom then
                         GameOptions.SetBool("Developer/FeatureToggles", "Bloom", true)
                         bloom = true
                         Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(bloom)
@@ -898,8 +876,7 @@ function DrawButtons()
                         SaveSettings()
                     end
                 end
-                ui.tooltip("Toggles lens flare effect.")
-				
+                ui.tooltip("Toggles lens flare effect.")			
 
 				chromaticAberration, changed = ImGui.Checkbox("CA", chromaticAberration)
 				if changed then
@@ -1039,24 +1016,15 @@ function DrawButtons()
 					toggleDLSSDPT = graphics
 					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", graphics)
 
-					-- Toggle bloom and lens flare
+					-- Toggle bloom
 					bloom = graphics
 					GameOptions.SetBool("Developer/FeatureToggles", "Bloom", graphics)
-
-					--[[ lensFlares = graphics
-					GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", graphics) ]]
 
 					-- Toggle weather and screen space rain
 					rainMap = graphics
 					rain = graphics
 					GameOptions.SetBool("Developer/FeatureToggles", "RainMap", graphics)
 					GameOptions.SetBool("Developer/FeatureToggles", "ScreenSpaceRain", graphics)
-
-					-- Toggle chromatic aberration and film grain
-					--[[ chromaticAberration = graphics
-					filmGrain = graphics
-					GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", graphics)
-					GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", graphics) ]]
 
 					SaveSettings()
 				end
@@ -1599,7 +1567,7 @@ function SaveSettings()
 		local formattedJsonString = formatTable(saveData, 1)
 		file:write(formattedJsonString)
 		file:close()
-		debugPrint("Settings saved")
+		debugPrint("Settings saved successfully")
 	else
 		print(IconGlyphs.CityVariant .. " Nova City Tools: ERROR - Unable to open file for writing")
 	end
@@ -1614,7 +1582,7 @@ function LoadSettings()
 		settings.Current = loadedSettings
 		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
 		collapsedCategories = loadedSettings.collapsedCategories or {}
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded")
+		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded successfully")
 	elseif not file then
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings file not found")
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default settings file")
