@@ -9,7 +9,7 @@ local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 
 local modName = "Nova City"
-local modVersion = "1.8.0a"
+local modVersion = "1.8.0"
 
 local cetOpen = false
 
@@ -1261,6 +1261,8 @@ function DrawButtons()
 					debugPrint("Reset GUI size and position.")
 				end
 				ui.tooltip("Reset GUI to default position and size.")
+
+				--ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				--DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
@@ -1570,6 +1572,7 @@ end
 
 function SaveSettings()
 	local saveData = {
+		modVersion = modVersion,
 		transitionDuration = settings.Current.transitionDuration,
 		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen,
 		weatherState = settings.Current.weatherState,
@@ -1624,21 +1627,38 @@ end
 
 function LoadSettings()
 	local file = io.open("settings.json", "r")
+	local saveNeeded = false
+
 	if file then
 		local content = file:read("*all")
 		file:close()
 		local loadedSettings = json.decode(content)
+		
+		-- Check for missing parameters and set defaults if necessary
+		for key, value in pairs(settings.Default) do
+			if loadedSettings[key] == nil then
+				loadedSettings[key] = value
+				saveNeeded = true
+			end
+		end
+
 		settings.Current = loadedSettings
 		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
 		collapsedCategories = loadedSettings.collapsedCategories or {}
-		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded successfully")
-	elseif not file then
+
+		if saveNeeded then
+			-- Erase and rewrite settings.json with updated values
+			SaveSettings()
+			print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded and updated successfully")
+		else
+			print(IconGlyphs.CityVariant .. " Nova City Tools: Settings loaded successfully")
+		end
+	else
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Settings file not found")
 		print(IconGlyphs.CityVariant .. " Nova City Tools: Creating default settings file")
-		return
+		SaveSettings()
 	end
 end
-
 
 ----------------------------------------
 ------------- styling stuff ------------
