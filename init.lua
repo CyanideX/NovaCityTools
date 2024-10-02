@@ -1729,6 +1729,19 @@ function LoadSettings()
 			end
 		end
 
+		-- Save a backup if modVersion is different or settings are missing
+		if loadedSettings.modVersion ~= modVersion or saveNeeded then
+			local backupFileName = "settings_backup.json"
+			if loadedSettings.modVersion then
+				backupFileName = "settings_backup_" .. loadedSettings.modVersion .. ".json"
+			end
+			local backupFile = io.open(backupFileName, "w")
+			if backupFile then
+				backupFile:write(content)
+				backupFile:close()
+			end
+		end
+
 		settings.Current = loadedSettings
 		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
 		collapsedCategories = loadedSettings.collapsedCategories or {}
