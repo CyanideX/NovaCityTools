@@ -1,5 +1,5 @@
 ------------------------------------------------------
--- NovaCityTools v1.8.8a
+-- NovaCityTools v1.8.0a
 -- 2024 by CyanideX
 -- https://next.nexusmods.com/profile/theCyanideX/mods
 ------------------------------------------------------
@@ -9,7 +9,7 @@ local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 
 local modName = "Nova City"
-local modVersion = "1.8.8a"
+local modVersion = "1.8.0a"
 
 local cetOpen = false
 

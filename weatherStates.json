@@ -176,6 +176,12 @@
                 "weatherType": ["overcast", "cloudy", "gray"]
             },
             {
+                "name": "Overcast Light",
+                "location": "24h_weather_overcast_light",
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["overcast", "cloudy", "light", "gray"]
+            },
+            {
                 "name": "Courier Clouds",
                 "location": "24h_weather_courier_clouds",
                 "DLSSDSeparateParticleColor": true,
