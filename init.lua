@@ -12,6 +12,7 @@ local modName = "Nova City"
 local modVersion = "1.8.0"
 
 local cetOpen = false
+local guiFlags
 
 local toggleFog = true
 local toggleFogClouds = true
@@ -67,6 +68,7 @@ local settings =
 		notificationMessages = true,
 		autoApplyWeather = false,
 		debugOutput = false,
+		scrollbarEnabled = false,
 	},
 	Default = {
 		weatherState = "None",
@@ -76,6 +78,7 @@ local settings =
 		notificationMessages = true,
 		autoApplyWeather = false,
 		debugOutput = false,
+		scrollbarEnabled = false,
 	}
 }
 
@@ -532,10 +535,16 @@ function DrawButtons()
 		return
 	end
 
-	-- Change scrollbar color and size
-	ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
-	ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
-	ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
+	if settings.Current.scrollbarEnabled then
+		-- Change scrollbar color and size
+		ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
+		ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
+		ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
+	
+		guiFlags = ImGuiWindowFlags.AlwaysUseWindowPadding
+	else
+		guiFlags = ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding
+	end
 
 	-- Set window size constraints
 	--ImGui.SetNextWindowSizeConstraints(uiMinWidth, 896, width / 100 * 50, 896) -- Locked vertical height to accommodate weather control
@@ -640,8 +649,17 @@ function DrawButtons()
 				----------------------------------------
 				
 				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
+
+				if settings.Current.scrollbarEnabled then
+					-- Change scrollbar color and size
+					ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
+					ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
+					ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
+				else
+					
+				end
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.AlwaysUseWindowPadding) then
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
 
 					for _, category in ipairs(categories) do
 						local isCollapsed = collapsedCategories[category.name] or false
@@ -744,7 +762,7 @@ function DrawButtons()
 				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
 				ImGui.Dummy(0, dummySpacingYValue)
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.AlwaysUseWindowPadding) then
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
 
 					ImGui.Text("Grouped Toggles:")
 					ImGui.Separator()
@@ -1146,7 +1164,7 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.AlwaysUseWindowPadding) then
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
 
 					-- Convert the current game time to minutes past midnight
 					local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -1190,7 +1208,7 @@ function DrawButtons()
 					ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - 10)
 					ImGui.Text(tostring(settings.Current.transitionDuration) .. "s")
 					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue + 10)
+					ImGui.Dummy(0, dummySpacingYValue/4)
 
 					-- Define the preset durations
 					local durations = { 0, 5, 10, 15, 30 }
@@ -1218,10 +1236,10 @@ function DrawButtons()
 
 					ImGui.NewLine() -- Move to the next line after the last button
 
-					ImGui.Dummy(0, dummySpacingYValue + 10)
+					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Weather state notifications:")
 					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue + 10)
+					ImGui.Dummy(0, dummySpacingYValue/4)
 
 					settings.Current.warningMessages, changed = ImGui.Checkbox("Warning Message", settings.Current.warningMessages)
 					if changed then
@@ -1236,10 +1254,10 @@ function DrawButtons()
 					end
 					ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
-					ImGui.Dummy(0, dummySpacingYValue + 10)
+					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Debug:")
 					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Dummy(0, dummySpacingYValue/4)
 
 					settings.Current.debugOutput, changed = ImGui.Checkbox("Debug Output", settings.Current.debugOutput)
 					if changed then
@@ -1252,8 +1270,6 @@ function DrawButtons()
 						debugPrint("Weather auto-apply on start set to " .. tostring(settings.Current.autoApplyWeather))
 						SaveSettings()
 					end
-
-					ImGui.Dummy(0, dummySpacingYValue)
 
 					local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 
@@ -1278,6 +1294,17 @@ function DrawButtons()
 					end
 
 					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Text("GUI:")
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue/4)
+
+					settings.Current.scrollbarEnabled, changed = ImGui.Checkbox("Scrollbar", settings.Current.scrollbarEnabled)
+					if changed then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled scrollbar to " .. tostring(settings.Current.scrollbarEnabled))
+						SaveSettings()
+					end
+
+					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue)
 
@@ -1299,6 +1326,11 @@ function DrawButtons()
 			ImGui.EndTabBar()
 		end
 		ImGui.End()
+	end
+
+	if settings.Current.scrollbarEnabled then
+		ImGui.PopStyleColor(2)
+		ImGui.PopStyleVar()
 	end
 end
 
@@ -1610,6 +1642,7 @@ function SaveSettings()
 		notificationMessages = settings.Current.notificationMessages,
 		autoApplyWeather = settings.Current.autoApplyWeather,
 		debugOutput = settings.Current.debugOutput,
+		scrollbarEnabled = settings.Current.scrollbarEnabled,
 		collapsedCategories = {}
 	}
 
