@@ -69,6 +69,7 @@ local settings =
 		autoApplyWeather = false,
 		debugOutput = false,
 		scrollbarEnabled = false,
+		tooltipsEnabled = true,
 	},
 	Default = {
 		weatherState = "None",
@@ -79,12 +80,13 @@ local settings =
 		autoApplyWeather = false,
 		debugOutput = false,
 		scrollbarEnabled = false,
+		tooltipsEnabled = true,
 	}
 }
 
 local ui = {
-	tooltip = function(text)
-		if ImGui.IsItemHovered() and text ~= "" then
+	tooltip = function(text, alwaysShow)
+		if (alwaysShow or settings.Current.tooltipsEnabled) and ImGui.IsItemHovered() and text ~= "" then
 			ImGui.BeginTooltip()
 			ImGui.SetTooltip(text)
 			ImGui.EndTooltip()
@@ -472,7 +474,7 @@ function DrawWeatherControl()
     end
     -- Revert to original color
     ImGui.PopStyleColor(3)
-	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
+	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.", true)
 
     local selectedWeatherState = settings.Current.weatherState
     if selectedWeatherState == "None" then
@@ -634,7 +636,7 @@ function DrawButtons()
 					searchIcon = IconGlyphs.MagnifyClose
 				else
 					searchIcon = IconGlyphs.Magnify
-					ui.tooltip("Search for a weather state by typing in this field.\nUse keywords like 'wet', 'hot', 'bright', to search by properties.")
+					ui.tooltip("Search for a weather state by typing in this field.\nUse keywords like 'wet', 'hot', 'bright', to search by properties.", true)
 				end
 				ImGui.PopStyleVar()
 
@@ -762,7 +764,7 @@ function DrawButtons()
 				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
 				ImGui.Dummy(0, dummySpacingYValue)
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
+				if ImGui.BeginChild("Toggles", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
 
 					ImGui.Text("Grouped Toggles:")
 					ImGui.Separator()
@@ -1141,11 +1143,15 @@ function DrawButtons()
 				end
 				ImGui.EndChild()
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
-				ImGui.PopStyleColor()
+				
 
 				DrawWeatherControl()
 				ImGui.EndTabItem()
+
+				ImGui.PopStyleColor()
+				ImGui.PopStyleVar(2)
 			end
+			ImGui.PopStyleVar(2)
 
 			-- Reset padding
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
@@ -1164,7 +1170,7 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
+				if ImGui.BeginChild("Misc", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
 
 					-- Convert the current game time to minutes past midnight
 					local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -1255,6 +1261,18 @@ function DrawButtons()
 					ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
 					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Text("Features:")
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue/4)
+
+					settings.Current.autoApplyWeather, changed = ImGui.Checkbox("Auto-Apply Weather", settings.Current.autoApplyWeather)
+					if changed then
+						debugPrint("Weather auto-apply on start set to " .. tostring(settings.Current.autoApplyWeather))
+						SaveSettings()
+					end
+					ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
+
+					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Debug:")
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue/4)
@@ -1262,12 +1280,6 @@ function DrawButtons()
 					settings.Current.debugOutput, changed = ImGui.Checkbox("Debug Output", settings.Current.debugOutput)
 					if changed then
 						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled debug output to " .. tostring(settings.Current.debugOutput))
-						SaveSettings()
-					end
-					
-					settings.Current.autoApplyWeather, changed = ImGui.Checkbox("Auto-Apply Weather", settings.Current.autoApplyWeather)
-					if changed then
-						debugPrint("Weather auto-apply on start set to " .. tostring(settings.Current.autoApplyWeather))
 						SaveSettings()
 					end
 
@@ -1280,7 +1292,7 @@ function DrawButtons()
 							print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
 						end
 						ImGui.PopStyleColor()
-						ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.")
+						ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
 					else
 						ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
 						ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
@@ -1290,7 +1302,7 @@ function DrawButtons()
 							print(IconGlyphs.CityVariant .. " Nova City Tools: Cannot export debug file while in menu")
 						end
 						ImGui.PopStyleColor(4)
-						ui.tooltip("Cannot export debug file while in menu")
+						ui.tooltip("DISABLED: Cannot export debug file while in menu!\n\nExport debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
 					end
 
 					ImGui.Dummy(0, dummySpacingYValue)
@@ -1301,6 +1313,12 @@ function DrawButtons()
 					settings.Current.scrollbarEnabled, changed = ImGui.Checkbox("Scrollbar", settings.Current.scrollbarEnabled)
 					if changed then
 						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled scrollbar to " .. tostring(settings.Current.scrollbarEnabled))
+						SaveSettings()
+					end
+
+					settings.Current.tooltipsEnabled, changed = ImGui.Checkbox("Tooltips", settings.Current.tooltipsEnabled)
+					if changed then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled tooltips to " .. tostring(settings.Current.tooltipsEnabled))
 						SaveSettings()
 					end
 
@@ -1316,13 +1334,18 @@ function DrawButtons()
 
 				end
 				ImGui.EndChild()
+
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				ImGui.PopStyleColor(1)
 
 				--ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				DrawWeatherControl()
+
+				ImGui.PopStyleVar(2)
 				ImGui.EndTabItem()
 			end
+			ImGui.PopStyleVar(2)
+
 			ImGui.EndTabBar()
 		end
 		ImGui.End()
@@ -1643,6 +1666,7 @@ function SaveSettings()
 		autoApplyWeather = settings.Current.autoApplyWeather,
 		debugOutput = settings.Current.debugOutput,
 		scrollbarEnabled = settings.Current.scrollbarEnabled,
+		tooltipsEnabled = settings.Current.tooltipsEnabled,
 		collapsedCategories = {}
 	}
 
