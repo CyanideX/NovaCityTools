@@ -1,5 +1,5 @@
 ------------------------------------------------------
--- NovaCityTools v1.8.0a
+-- NovaCityTools
 -- 2024 by CyanideX
 -- https://next.nexusmods.com/profile/theCyanideX/mods
 ------------------------------------------------------
@@ -65,6 +65,7 @@ local settings =
 		timeSliderWindowOpen = false,
 		warningMessages = true,
 		notificationMessages = true,
+		autoApplyWeather = false,
 		debugOutput = false,
 	},
 	Default = {
@@ -73,6 +74,7 @@ local settings =
 		timeSliderWindowOpen = false,
 		warningMessages = true,
 		notificationMessages = true,
+		autoApplyWeather = false,
 		debugOutput = false,
 	}
 }
@@ -167,21 +169,24 @@ registerForEvent("onInit", function()
         Game.GetSystemRequestsHandler():RequestSaveUserSettings()
     end)
 
-   --[[  GameUI.OnSessionStart(function()
-        Cron.After(2.0, function()
-			--UpdateUserSettings()
-        end)
-    end) ]]
-
-   --[[  GameUI.OnSessionStart(function()
-        Cron.After(0.25, function()
-            -- Apply active weather state
-            if settings.Current.weatherState ~= 'None' then
-                Game.GetWeatherSystem():SetWeather(settings.Current.weatherState, settings.transitionTime, 0)
-                Game.GetPlayer():SetWarningMessage("Locked weather state to " .. weatherStateNames[settings.Current.weatherState]:lower() .. "!")
-            end
-        end)
-    end) ]]
+	GameUI.OnSessionStart(function()
+		Cron.After(0.25, function()
+			if settings.Current.autoApplyWeather and settings.Current.weatherState ~= "None" then
+				Game.GetWeatherSystem():SetWeather(settings.Current.weatherState, settings.Current.transitionDuration, 0)
+				Game.GetPlayer():SetWarningMessage("Auto-applied " .. weatherStateNames[settings.Current.weatherState]:lower() .. "!")
+				debugPrint("Auto-applied weather state: " .. settings.Current.weatherState)
+			else
+				local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+				if currentWeatherState ~= settings.Current.weatherState then
+					settings.Current.weatherState = "None"
+					-- Assuming there's a function to set the active state button
+					SetActiveStateButton("None")
+					GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+					debugPrint("Auto-apply weather is disabled. Weather state set to None.")
+				end
+			end
+		end)
+	end)
 
     --[[ GameUI.OnSessionEnd(function()
         -- Handle end
@@ -199,27 +204,58 @@ end)
 registerForEvent("onOverlayOpen", function()
 	cetOpen = true
 	LoadSettings()
+
 	width, height = GetDisplayResolution()
 	SetResolutionPresets(width, height)
-	changedAnySetting = false
 
-	--[[  local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-    local selectedWeatherState = settings.Current.weatherState
-    if selectedWeatherState == 'Locked State' then
-        settings.Current.weatherState = currentWeatherState
-        for _, state in ipairs(weatherStates) do
-            if state[1] == currentWeatherState then
-                settings.Current.weatherState = state[1]
-                break
-            end
-        end
-    end ]]
+	local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+	if currentWeatherState ~= settings.Current.weatherState then
+		settings.Current.weatherState = "None"
+		-- Assuming there's a function to set the active state button
+		SetActiveStateButton("None")
+		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+		debugPrint("Auto-apply weather is disabled. Weather state set to None.")
+	end
+
+	changedAnySetting = false
 end)
 
 registerForEvent("onOverlayClose", function()
 	cetOpen = false
 	SaveSettings()
 	Game.GetSystemRequestsHandler():UnpauseGame()
+end)
+
+registerForEvent("onUpdate", function(delta)
+	Cron.Update(delta)
+	if hasResetOrForced == true then
+		local resetorforcedtimer = Cron.After(0.5, function()
+			hasResetOrForced = false
+		end)
+	end
+	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+	if newWeatherState ~= currentWeatherState then
+		currentWeatherState = newWeatherState
+		local localizedState = weatherStateNames[currentWeatherState]
+		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+		-- Only send weather change notifications if the weather has not been reset
+		if hasResetOrForced == false and not weatherReset then
+			if resetorforcedtimer then
+				Cron.Halt(resetorforcedtimer)
+				resetorforcedtimer = nil
+			end
+			if settings.Current.warningMessages then
+				ShowWarningMessage(messageText)
+			end
+			if settings.Current.notificationMessages then
+				ShowNotificationMessage(messageText)
+			end
+			debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
+		end
+		-- Reset the weather reset flag after the weather change notification has been skipped
+		weatherReset = false
+	end
 end)
 
 function debugPrint(message)
@@ -236,7 +272,7 @@ function SetResolutionPresets(width, height)
 	local presets = {
 	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34 },
 		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 34, 6,  650, 250, 336, 7.5, 9,  8,  5,  34, 34, 30, 140, 36, 36 },
-		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  272, 29, 34, 4,  500, 219, 298, 7.5, 8,  8,  3,  32, 32, 18, 125, 34, 36 },
+		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 29, 34, 4,  500, 219, 298, 7.5, 8,  8,  3,  32, 32, 18, 125, 34, 36 },
 		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 },
 		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 }
 	}
@@ -412,84 +448,74 @@ end)
 ----------------------------------------
 
 function DrawWeatherControl()
-	ImGui.Text("Weather Control:")
+    ImGui.Text("Weather Control:")
 
-	-- Make the reset button fit the width of the GUI
-	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
+    -- Make the reset button fit the width of the GUI
+    local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 
-
-	-- Change button color, hover color, and text color
-	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
-	ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
-	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
-	if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
-		Game.GetWeatherSystem():ResetWeather(true)
-		settings.Current.weatherState = "None"
-		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
-		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-		toggleDLSSDPT = true
-		debugPrint("Weather reset")
-		SaveSettings()
-		weatherReset = true
-	end
-	-- Revert to original color
-	ImGui.PopStyleColor(3)
-
+    -- Change button color, hover color, and text color
+    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
+    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
+    if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
+        Game.GetWeatherSystem():ResetWeather(true)
+        settings.Current.weatherState = "None"
+        Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+        GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+        toggleDLSSDPT = true
+        debugPrint("Weather reset")
+        SaveSettings()
+        weatherReset = true
+    end
+    -- Revert to original color
+    ImGui.PopStyleColor(3)
 	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.")
 
-	local selectedWeatherState = settings.Current.weatherState
-	if selectedWeatherState == "None" then
-		selectedWeatherState = "Default Cycles"
-	else
-		selectedWeatherState = "Locked State"
-	end
-	ImGui.Text("Mode:  " .. selectedWeatherState)
-	ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
+    local selectedWeatherState = settings.Current.weatherState
+    if selectedWeatherState == "None" then
+        selectedWeatherState = "Default Cycles"
+    else
+        selectedWeatherState = "Locked State"
+    end
+    ImGui.Text("Mode:  " .. selectedWeatherState)
+    ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
 
-	ImGui.Text("State:")
-	ImGui.SameLine()
+    ImGui.Text("State:")
+    ImGui.SameLine()
 
-	local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-	for _, state in ipairs(weatherStates) do
-		if state[1] == currentWeatherState then
-			currentWeatherState = state[2]
-			break
-		end
-	end
-	ImGui.Text(currentWeatherState)
+    local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+    for _, state in ipairs(weatherStates) do
+        if state[1] == currentWeatherState then
+            currentWeatherState = state[2]
+            break
+        end
+    end
+    ImGui.Text(currentWeatherState)
+
+    -- Auto Apply button
+    local isActive = settings.Current.autoApplyWeather
+    if isActive then
+        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+    else
+        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
+    end
+    if ImGui.Button("Auto Apply", resetButtonWidth, buttonHeight) then
+        settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
+        debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
+    end
+	ImGui.PopStyleColor(4)
+	ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
 end
 
-registerForEvent("onUpdate", function()
-	Cron.Update(delta)
-	if hasResetOrForced == true then
-		local resetorforcedtimer = Cron.After(0.5, function()
-			hasResetOrForced = false
-		end)
-	end
-	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-	if newWeatherState ~= currentWeatherState then
-		currentWeatherState = newWeatherState
-		local localizedState = weatherStateNames[currentWeatherState]
-		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-		-- Only send weather change notifications if the weather has not been reset
-		if hasResetOrForced == false and not weatherReset then
-			if resetorforcedtimer then
-				Cron.Halt(resetorforcedtimer)
-				resetorforcedtimer = nil
-			end
-			if settings.Current.warningMessages then
-				ShowWarningMessage(messageText)
-			end
-			if settings.Current.notificationMessages then
-				ShowNotificationMessage(messageText)
-			end
-			debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
-		end
-		-- Reset the weather reset flag after the weather change notification has been skipped
-		weatherReset = false
-	end
-end)
+----------------------------------------
+----------------- GUI ------------------
+----------------------------------------
 
 function AnyKeywordMatches(keywords, searchText)
 	for _, keyword in ipairs(keywords) do
@@ -500,10 +526,6 @@ function AnyKeywordMatches(keywords, searchText)
 	return false
 end
 
-----------------------------------------
----------------- DRAW ------------------
-----------------------------------------
-
 function DrawButtons()
 	-- Check if the CET window is open
 	if not cetOpen then
@@ -511,7 +533,8 @@ function DrawButtons()
 	end
 
 	-- Set window size constraints
-	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 10, width / 100 * 50, height / 100 * 90)
+	--ImGui.SetNextWindowSizeConstraints(uiMinWidth, 896, width / 100 * 50, 896) -- Locked vertical height to accommodate weather control
+	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 286, width / 100 * 47, height / 100 * 94)
 	if resetWindow then
 		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
 		ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
@@ -604,82 +627,101 @@ function DrawButtons()
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
-				for _, category in ipairs(categories) do
-					local isCollapsed = collapsedCategories[category.name] or false
-					ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
-					ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetColorU32(0, 0, 0, 0))
-					ImGui.PushStyleColor(ImGuiCol.HeaderActive, ImGui.GetColorU32(0, 0, 0, 0))
-					if ImGui.CollapsingHeader(category.name .. " ", isCollapsed and ImGuiTreeNodeFlags.None or ImGuiTreeNodeFlags.DefaultOpen) then
-						if collapsedCategories[category.name] then
-							collapsedCategories[category.name] = false
-							SaveSettings()
-						end
-						ImGui.Dummy(0, dummySpacingYValue)
-						local windowWidth = ImGui.GetWindowWidth()
-						local buttonsPerRow = math.floor(windowWidth / buttonWidth)
-						local buttonCount = 0
-						for _, state in ipairs(weatherStates) do
-							local weatherState = state[1]
-							local localization = state[2]
-							local stateCategory = state[3]
-							local enableDLSSDPT = state[4]
-							local weatherType = state[5]
-							if stateCategory == category.name and (searchText == "" or string.find(localization:lower(), searchText:lower()) or (weatherType and AnyKeywordMatches(weatherType, searchText))) then
-								local isActive = settings.Current.weatherState == weatherState
-								if isActive then
-									ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-									ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
-									ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
-									ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-								else
-									ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
-									ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
-									ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
-									ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
-								end
-								if ImGui.Button(localization, buttonWidth, buttonHeight) then
+
+
+
+				----------------------------------------
+				------------- CHILD GUI ----------------
+				----------------------------------------
+
+
+
+				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.085, 0.09, 0.10, 1)) -- Set your desired color here
+				
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
+
+					for _, category in ipairs(categories) do
+						local isCollapsed = collapsedCategories[category.name] or false
+						ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
+						ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetColorU32(0, 0, 0, 0))
+						ImGui.PushStyleColor(ImGuiCol.HeaderActive, ImGui.GetColorU32(0, 0, 0, 0))
+						if ImGui.CollapsingHeader(category.name .. " ", isCollapsed and ImGuiTreeNodeFlags.None or ImGuiTreeNodeFlags.DefaultOpen) then
+							if collapsedCategories[category.name] then
+								collapsedCategories[category.name] = false
+								SaveSettings()
+							end
+							ImGui.Dummy(0, dummySpacingYValue)
+							local windowWidth = ImGui.GetWindowWidth()
+							local buttonsPerRow = math.floor(windowWidth / buttonWidth)
+							local buttonCount = 0
+							for _, state in ipairs(weatherStates) do
+								local weatherState = state[1]
+								local localization = state[2]
+								local stateCategory = state[3]
+								local enableDLSSDPT = state[4]
+								local weatherType = state[5]
+								if stateCategory == category.name and (searchText == "" or string.find(localization:lower(), searchText:lower()) or (weatherType and AnyKeywordMatches(weatherType, searchText))) then
+									local isActive = settings.Current.weatherState == weatherState
 									if isActive then
-										Game.GetWeatherSystem():ResetWeather(true)
-										settings.Current.weatherState = "None"
-										Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
-										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-										toggleDLSSDPT = true
-										weatherReset = true
-										debugPrint("Weather reset to default cycles.")
+										ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+										ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+										ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+										ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
 									else
-										Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
-										settings.Current.weatherState = weatherState
-										Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
-										GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
-										toggleDLSSDPT = enableDLSSDPT
-										debugPrint("Weather locked to selected state.")
+										ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+										ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+										ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+										ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
 									end
-									SaveSettings()
-								end
+									if ImGui.Button(localization, buttonWidth, buttonHeight) then
+										if isActive then
+											Game.GetWeatherSystem():ResetWeather(true)
+											settings.Current.weatherState = "None"
+											Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+											GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+											toggleDLSSDPT = true
+											weatherReset = true
+											debugPrint("Weather reset to default cycles.")
+										else
+											Game.GetWeatherSystem():SetWeather(weatherState, settings.transitionTime, 0)
+											settings.Current.weatherState = weatherState
+											Game.GetPlayer():SetWarningMessage("Locked weather state to " .. localization:lower() .. "!")
+											GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", enableDLSSDPT)
+											toggleDLSSDPT = enableDLSSDPT
+											debugPrint("Weather locked to selected state.")
+										end
+										SaveSettings()
+									end
 
-								if isActive then
-									ImGui.PopStyleColor(4)
-								end
+									if isActive then
+										ImGui.PopStyleColor(4)
+									end
 
-								buttonCount = buttonCount + 1
-								if buttonCount % buttonsPerRow ~= 0 then
-									ImGui.SameLine()
+									buttonCount = buttonCount + 1
+									if buttonCount % buttonsPerRow ~= 0 then
+										ImGui.SameLine()
+									end
 								end
 							end
+							if buttonCount % buttonsPerRow ~= 0 then
+								ImGui.NewLine()
+							end
+							ImGui.Dummy(0, dummySpacingYValue) -- Added here
+						else
+							if not collapsedCategories[category.name] then
+								collapsedCategories[category.name] = true
+								SaveSettings()
+							end
 						end
-						if buttonCount % buttonsPerRow ~= 0 then
-							ImGui.NewLine()
-						end
-						ImGui.Dummy(0, dummySpacingYValue) -- Added here
-					else
-						if not collapsedCategories[category.name] then
-							collapsedCategories[category.name] = true
-							SaveSettings()
-						end
+						ImGui.PopStyleColor(3)
+						ImGui.Separator()
 					end
-					ImGui.PopStyleColor(3)
-					ImGui.Separator()
+
 				end
+				ImGui.EndChild()
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
+				ImGui.PopStyleColor()
+
 				DrawWeatherControl()
 				ImGui.EndTabItem()
 			end
@@ -1179,7 +1221,13 @@ function DrawButtons()
 					print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled debug output to " .. tostring(settings.Current.debugOutput))
 					SaveSettings()
 				end
-					
+				
+				settings.Current.autoApplyWeather, changed = ImGui.Checkbox("Auto-Apply Weather", settings.Current.autoApplyWeather)
+				if changed then
+					debugPrint("Weather auto-apply on start set to " .. tostring(settings.Current.autoApplyWeather))
+					SaveSettings()
+				end
+
 				ImGui.Dummy(0, dummySpacingYValue)
 
 				local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
@@ -1255,28 +1303,28 @@ function ExportDebugFile()
 
     -- Collect data with error handling
     local data = {
-		modName = tostring(modName),
+        modName = tostring(modName),
         modVersion = tostring(modVersion) or nil,
         gameVersion = Game.GetSystemRequestsHandler():GetGameVersion() or nil,
         dateTime = os.date("%m/%d/%Y - %H:%M:%S", os.time()) or nil,
-		weatherCycleMode = tostring(selectedWeatherState),
-		localizedState = tostring(weatherStateNames[currentWeatherState]),
+        weatherCycleMode = tostring(selectedWeatherState),
+        localizedState = tostring(weatherStateNames[currentWeatherState]),
         weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
         gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
-		inVehicle = inVehicle,
-		playerDirection = (function()
+        inVehicle = tostring(inVehicle),
+        playerDirection = (function()
             local dir = Game.GetPlayer():GetWorldOrientation():ToEulerAngles()
             if dir then
-                return {roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw}
+                return "{roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw}"
             else
-                return {roll = 0, pitch = 0, yaw = -180}
+                return "{roll = 0, pitch = 0, yaw = -180}"
             end
         end)(),
         playerPosition = (function()
             if pos then
-                return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
+                return "{x = pos.x, y = pos.y, z = pos.z, w = 1.0}"
             else
-                return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
+                return "{x = 0.0, y = 0.0, z = 0.0, w = 1.0}"
             end
         end)()
     }
@@ -1527,6 +1575,7 @@ function SaveSettings()
 		weatherState = settings.Current.weatherState,
 		warningMessages = settings.Current.warningMessages,
 		notificationMessages = settings.Current.notificationMessages,
+		autoApplyWeather = settings.Current.autoApplyWeather,
 		debugOutput = settings.Current.debugOutput,
 		collapsedCategories = {}
 	}
@@ -1589,6 +1638,7 @@ function LoadSettings()
 		return
 	end
 end
+
 
 ----------------------------------------
 ------------- styling stuff ------------
