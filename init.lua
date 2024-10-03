@@ -137,11 +137,12 @@ local function sortCategories()
 end
 
 local function UpdateUserSettings()
-	filmGrain = Game.GetSettingsSystem():GetVar('/graphics/basic', 'FilmGrain'):GetValue()
-	chromaticAberration = Game.GetSettingsSystem():GetVar('/graphics/basic', 'ChromaticAberration'):GetValue()
-	dof = Game.GetSettingsSystem():GetVar('/graphics/basic', 'DepthOfField'):GetValue()
-	lensFlares = Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):GetValue()
-	motionBlurIndex = Game.GetSettingsSystem():GetVar('/graphics/basic', 'MotionBlur'):GetIndex()
+	rayReconstruction = Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):GetValue()
+	filmGrain = Game.GetSettingsSystem():GetVar("/graphics/basic", "FilmGrain"):GetValue()
+	chromaticAberration = Game.GetSettingsSystem():GetVar("/graphics/basic", "ChromaticAberration"):GetValue()
+	dof = Game.GetSettingsSystem():GetVar("/graphics/basic", "DepthOfField"):GetValue()
+	lensFlares = Game.GetSettingsSystem():GetVar("/graphics/basic", "LensFlares"):GetValue()
+	motionBlurIndex = Game.GetSettingsSystem():GetVar("/graphics/basic", "MotionBlur"):GetIndex()
 	motionBlur = motionBlurIndex ~= 0
 end
 
@@ -949,8 +950,8 @@ function DrawButtons()
 							SaveSettings()
 						end
 					end
-					ui.tooltip("Toggles lens flare effect.")			
-
+					ui.tooltip("Toggles lens flare effect.")
+					
 					chromaticAberration, changed = ImGui.Checkbox("CA", chromaticAberration)
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", chromaticAberration)
@@ -991,6 +992,26 @@ function DrawButtons()
 					ui.tooltip("Toggles motion blur.")
 
 					if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
+						rayReconstruction, changed = ImGui.Checkbox("Ray Reconstruction", rayReconstruction)
+						if changed then
+							
+							Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(rayReconstruction)
+							Game.GetSettingsSystem():ConfirmChanges()
+							SaveSettings()
+
+							Game.GetSettingsSystem():ConfirmChanges()
+							local timer = Cron.After(0.1, function()
+								Game.GetSystemRequestsHandler():RequestSaveUserSettings()
+								changedAnySetting = true
+							end)
+							
+							if toggleNRD then
+								toggleNRD = false
+								GameOptions.SetBool("RayTracing", "EnableNRD", false)
+								SaveSettings()
+							end
+						end
+						ui.tooltip("Toggles ray reconstruction.")
 						-- RIS Checkbox
 						RIS, changed = ImGui.Checkbox("RIS", RIS)
 						if changed then
@@ -998,10 +1019,7 @@ function DrawButtons()
 							SaveSettings()
 						end
 						ui.tooltip("Toggles Resampled Importance Sampling.")
-					else
-					end
-					ImGui.SameLine(toggleSpacingXValue)
-					if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
+						ImGui.SameLine(toggleSpacingXValue)
 						-- NRD Checkbox
 						toggleNRD, changed = ImGui.Checkbox("NRD", toggleNRD)
 						if changed then
