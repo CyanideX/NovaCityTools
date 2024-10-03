@@ -1473,16 +1473,16 @@ function ExportDebugFile()
         playerDirection = (function()
             local dir = Game.GetPlayer():GetWorldOrientation():ToEulerAngles()
             if dir then
-                return "{roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw}"
+                return {roll = dir.roll, pitch = dir.pitch, yaw = dir.yaw}
             else
-                return "{roll = 0, pitch = 0, yaw = -180}"
+                return {roll = 0, pitch = 0, yaw = -180}
             end
         end)(),
         playerPosition = (function()
             if pos then
-                return "{x = pos.x, y = pos.y, z = pos.z, w = 1.0}"
+                return {x = pos.x, y = pos.y, z = pos.z, w = 1.0}
             else
-                return "{x = 0.0, y = 0.0, z = 0.0, w = 1.0}"
+                return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
             end
         end)()
     }
