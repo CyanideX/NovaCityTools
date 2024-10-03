@@ -914,7 +914,7 @@ function DrawButtons()
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "Bloom", bloom)
 						GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", bloom and lensFlares)
-						Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(bloom and lensFlares)
+						Game.GetSettingsSystem():GetVar("/graphics/basic", "LensFlares"):SetValue(bloom and lensFlares)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
 					end
@@ -934,7 +934,7 @@ function DrawButtons()
 					lensFlares, changed = ImGui.Checkbox("Lens Flare", lensFlares)
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
-						Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(lensFlares)
+						Game.GetSettingsSystem():GetVar("/graphics/basic", "LensFlares"):SetValue(lensFlares)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
 
@@ -947,7 +947,7 @@ function DrawButtons()
 						if lensFlares and not bloom then
 							GameOptions.SetBool("Developer/FeatureToggles", "Bloom", true)
 							bloom = true
-							Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(bloom)
+							Game.GetSettingsSystem():GetVar("/graphics/basic", "LensFlares"):SetValue(bloom)
 							Game.GetSettingsSystem():ConfirmChanges()
 							SaveSettings()
 						end
@@ -965,7 +965,7 @@ function DrawButtons()
 					chromaticAberration, changed = ImGui.Checkbox("CA", chromaticAberration)
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "ChromaticAberration", chromaticAberration)
-						Game.GetSettingsSystem():GetVar('/graphics/basic', 'ChromaticAberration'):SetValue(chromaticAberration)
+						Game.GetSettingsSystem():GetVar("/graphics/basic", "ChromaticAberration"):SetValue(chromaticAberration)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
 						changedAnySetting = true
@@ -975,7 +975,7 @@ function DrawButtons()
 					filmGrain, changed = ImGui.Checkbox("Film Grain", filmGrain)
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "FilmGrain", filmGrain)
-						Game.GetSettingsSystem():GetVar('/graphics/basic', 'FilmGrain'):SetValue(filmGrain)
+						Game.GetSettingsSystem():GetVar("/graphics/basic", "FilmGrain"):SetValue(filmGrain)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
 						changedAnySetting = true
@@ -985,7 +985,7 @@ function DrawButtons()
 					dof, changed = ImGui.Checkbox("DOF", dof)
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "DepthOfField", dof)
-						Game.GetSettingsSystem():GetVar('/graphics/basic', 'DepthOfField'):SetValue(dof)
+						Game.GetSettingsSystem():GetVar("/graphics/basic", "DepthOfField"):SetValue(dof)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
 						changedAnySetting = true
@@ -996,7 +996,7 @@ function DrawButtons()
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "MotionBlur", motionBlur)
 						motionBlurIndex = motionBlur and 2 or 0
-						Game.GetSettingsSystem():GetVar('/graphics/basic', 'MotionBlur'):SetIndex(motionBlurIndex)
+						Game.GetSettingsSystem():GetVar("/graphics/basic", "MotionBlur"):SetIndex(motionBlurIndex)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
 						changedAnySetting = true
