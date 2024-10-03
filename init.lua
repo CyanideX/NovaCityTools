@@ -162,11 +162,10 @@ registerForEvent("onInit", function()
 	sortCategories()
 	
 	ObserveAfter("inkISystemRequestsHandler", "RequestSaveUserSettings", function(this)
-		if hasChangedAnySetting then
-			
+		if changedAnySetting then
 			local timer = Cron.After(0.1, function()
 				Game.GetSystemRequestsHandler():UnpauseGame()
-				hasChangedAnySetting = false
+				changedAnySetting = false
 			end)
 		end
 	end)
@@ -968,6 +967,7 @@ function DrawButtons()
 						Game.GetSettingsSystem():GetVar('/graphics/basic', 'ChromaticAberration'):SetValue(chromaticAberration)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
+						changedAnySetting = true
 					end
 					ui.tooltip("Toggles chromatic aberration.")
 					ImGui.SameLine(toggleSpacingXValue)
@@ -977,6 +977,7 @@ function DrawButtons()
 						Game.GetSettingsSystem():GetVar('/graphics/basic', 'FilmGrain'):SetValue(filmGrain)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
+						changedAnySetting = true
 					end
 					ui.tooltip("Toggles film grain.")
 
@@ -986,6 +987,7 @@ function DrawButtons()
 						Game.GetSettingsSystem():GetVar('/graphics/basic', 'DepthOfField'):SetValue(dof)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
+						changedAnySetting = true
 					end
 					ui.tooltip("Toggles depth of field.")
 					ImGui.SameLine(toggleSpacingXValue)
@@ -996,6 +998,7 @@ function DrawButtons()
 						Game.GetSettingsSystem():GetVar('/graphics/basic', 'MotionBlur'):SetIndex(motionBlurIndex)
 						Game.GetSettingsSystem():ConfirmChanges()
 						SaveSettings()
+						changedAnySetting = true
 						-- Update user settings after changes
 						UpdateUserSettings()
 					end
