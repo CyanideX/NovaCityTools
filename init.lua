@@ -647,13 +647,10 @@ function DrawButtons()
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
-
-
-
 				----------------------------------------
 				------------- CHILD GUI ----------------
 				----------------------------------------
-				
+
 				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
 
 				if settings.Current.scrollbarEnabled then
@@ -662,7 +659,7 @@ function DrawButtons()
 					ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
 					ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
 				else
-					
+
 				end
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
 				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
@@ -746,10 +743,12 @@ function DrawButtons()
 
 				end
 				ImGui.EndChild()
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				ImGui.PopStyleColor()
 
+				--Floating weather control panel
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				DrawWeatherControl()
+
 				ImGui.EndTabItem()
 			end
 
@@ -1068,9 +1067,8 @@ function DrawButtons()
 							ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.2))
 							ImGui.Text("Enable PT to see other toggles.")
 							ImGui.PopStyleColor()
-							--ImGui.Dummy(0, dummySpacingYValue)
 						else
-							
+
 						end
 					end
 
@@ -1107,31 +1105,13 @@ function DrawButtons()
 					end
 					ui.tooltip("Toggles vehicle spawning.")
 
-					--[[ ImGui.Dummy(0, dummySpacingYValue)
-					ImGui.Text("Display:")
-					ImGui.Separator()
-
-					-- ImGui toggle button to switch between SDR and HDR
-					enableHDR, changed = ImGui.Checkbox("HDR", enableHDR)
-					if changed then
-						-- do stuff
-					end
-					ui.tooltip("Currently not working correctly. Use the CET binding hotkey instead.") ]]
-
 					----------------------------------------
 					------------ OTHER TOGGLES -------------
 					----------------------------------------
-					
+
 					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Other:")
 					ImGui.Separator()
-					
-					--[[ tonemapping, changed = ImGui.Checkbox("Tonemapping", tonemapping)
-					if changed then
-						GameOptions.SetBool("Developer/FeatureToggles", "Tonemapping", tonemapping)
-						SaveSettings()
-					end
-					ui.tooltip("This toggle serves absolutely no purpose and toggling \n it does nothing but make the game look bad and kills \n a puppy each time you do.") ]]
 
 					graphics, changed = ImGui.Checkbox("Global", graphics)
 					if changed then
@@ -1203,10 +1183,11 @@ function DrawButtons()
 
 				end
 				ImGui.EndChild()
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
-				
 
+				--Floating weather control panel
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				DrawWeatherControl()
+
 				ImGui.EndTabItem()
 
 				ImGui.PopStyleColor()
@@ -1425,11 +1406,10 @@ function DrawButtons()
 
 				end
 				ImGui.EndChild()
+				ImGui.PopStyleColor()
 
+				--Floating weather control panel
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
-				ImGui.PopStyleColor(1)
-
-				--ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
 				DrawWeatherControl()
 
 				ImGui.PopStyleVar(2)
