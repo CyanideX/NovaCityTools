@@ -9,7 +9,7 @@ local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 
 local modName = "Nova City"
-local modVersion = "1.8.0"
+local modVersion = "1.8.1"
 
 local cetOpen = false
 local guiFlags
@@ -337,6 +337,7 @@ registerHotkey("NCTResetWeather", "Reset Weather", function()
 	toggleDLSSDPT = true
 	SaveSettings()
 	weatherReset = true
+	settings.Current.autoApplyWeather = false
 end)
 
 -- Register a CET hotkey to toggle freeze time
@@ -473,6 +474,7 @@ function DrawWeatherControl()
         debugPrint("Weather reset")
         SaveSettings()
         weatherReset = true
+		settings.Current.autoApplyWeather = false
     end
     -- Revert to original color
     ImGui.PopStyleColor(3)
