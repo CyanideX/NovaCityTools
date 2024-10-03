@@ -994,24 +994,31 @@ function DrawButtons()
 					if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
 						rayReconstruction, changed = ImGui.Checkbox("Ray Reconstruction", rayReconstruction)
 						if changed then
+
+							if toggleNRD then
+								toggleNRD = false
+								GameOptions.SetBool("RayTracing", "EnableNRD", false)
+								SaveSettings()
+							else
+								local timer = Cron.After(2.5, function()
+									toggleNRD = false
+									GameOptions.SetBool("RayTracing", "EnableNRD", false)
+									SaveSettings()
+								end)
+							end
 							
 							Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(rayReconstruction)
 							Game.GetSettingsSystem():ConfirmChanges()
 							SaveSettings()
 
 							Game.GetSettingsSystem():ConfirmChanges()
-							local timer = Cron.After(0.1, function()
+							local timer = Cron.After(2.0, function()
 								Game.GetSystemRequestsHandler():RequestSaveUserSettings()
 								changedAnySetting = true
 							end)
-							
-							if toggleNRD then
-								toggleNRD = false
-								GameOptions.SetBool("RayTracing", "EnableNRD", false)
-								SaveSettings()
-							end
+
 						end
-						ui.tooltip("Toggles ray reconstruction.")
+						ui.tooltip("Toggles ray reconstruction.\nMAY CAUSE CRASH TO DESKTOP.")
 						-- RIS Checkbox
 						RIS, changed = ImGui.Checkbox("RIS", RIS)
 						if changed then
@@ -1025,6 +1032,17 @@ function DrawButtons()
 						if changed then
 							GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
 							SaveSettings()
+
+							local timer = Cron.After(1.0, function()
+								Game.GetSystemRequestsHandler():RequestSaveUserSettings()
+								changedAnySetting = true
+								if rayReconstruction then
+									rayReconstruction = false
+									Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(rayReconstruction)
+									rayReconstruction = false
+									SaveSettings()
+								end
+							end)
 						end
 						ui.tooltip("Nvidia Realtime Denoiser")
 					else
