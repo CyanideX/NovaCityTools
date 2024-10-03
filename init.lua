@@ -70,6 +70,7 @@ local settings =
 		debugOutput = false,
 		scrollbarEnabled = false,
 		tooltipsEnabled = true,
+		advancedToggles = false,
 	},
 	Default = {
 		weatherState = "None",
@@ -81,6 +82,7 @@ local settings =
 		debugOutput = false,
 		scrollbarEnabled = false,
 		tooltipsEnabled = true,
+		advancedToggles = false,
 	}
 }
 
@@ -278,7 +280,7 @@ function SetResolutionPresets(width, height)
 	local presets = {
 	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34 },
 		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 34, 6,  650, 250, 336, 7.5, 9,  8,  5,  34, 34, 30, 140, 36, 36 },
-		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 29, 34, 4,  500, 219, 298, 7.5, 8,  8,  3,  32, 32, 18, 125, 34, 36 },
+		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 29, 34, 4,  500, 219, 298, 7.5, 8,  8,  3,  32, 32, 18, 130, 34, 36 },
 		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 },
 		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 }
 	}
@@ -929,7 +931,7 @@ function DrawButtons()
 					
 				
 					--ImGui.SameLine(toggleSpacingXValue)
-					lensFlares, changed = ImGui.Checkbox("Lens Flares", lensFlares)
+					lensFlares, changed = ImGui.Checkbox("Lens Flare", lensFlares)
 					if changed then
 						GameOptions.SetBool("Developer/FeatureToggles", "ImageBasedFlares", lensFlares)
 						Game.GetSettingsSystem():GetVar('/graphics/basic', 'LensFlares'):SetValue(lensFlares)
@@ -951,6 +953,14 @@ function DrawButtons()
 						end
 					end
 					ui.tooltip("Toggles lens flare effect.")
+					ImGui.SameLine(toggleSpacingXValue)
+					-- RIS Checkbox
+					RIS, changed = ImGui.Checkbox("RIS", RIS)
+					if changed then
+						GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
+						SaveSettings()
+					end
+					ui.tooltip("Toggles Resampled Importance Sampling.")
 					
 					chromaticAberration, changed = ImGui.Checkbox("CA", chromaticAberration)
 					if changed then
@@ -991,8 +1001,17 @@ function DrawButtons()
 					end
 					ui.tooltip("Toggles motion blur.")
 
-					if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
-						rayReconstruction, changed = ImGui.Checkbox("Ray Reconstruction", rayReconstruction)
+					if settings.Current.advancedToggles and tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
+						
+						ImGui.Dummy(0, dummySpacingYValue)
+						ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.7))
+						ImGui.Text("Advanced:")
+						ImGui.PopStyleColor()
+						ui.tooltip("May cause CTDs on lower end systems.")
+						ImGui.Dummy(0, 4)
+
+						-- RR Checkbox
+						rayReconstruction, changed = ImGui.Checkbox("RR", rayReconstruction)
 						if changed then
 
 							if toggleNRD then
@@ -1018,35 +1037,36 @@ function DrawButtons()
 							end)
 
 						end
-						ui.tooltip("Toggles ray reconstruction.\nMAY CAUSE CRASH TO DESKTOP.")
-						-- RIS Checkbox
-						RIS, changed = ImGui.Checkbox("RIS", RIS)
-						if changed then
-							GameOptions.SetBool("RayTracing/Reference", "EnableRIS", RIS)
-							SaveSettings()
-						end
-						ui.tooltip("Toggles Resampled Importance Sampling.")
-						ImGui.SameLine(toggleSpacingXValue)
+						ui.tooltip("Toggles ray reconstruction.\nMAY CAUSE CRASH TO DESKTOP.", true)
+						ImGui.SameLine(toggleSpacingXValue )
 						-- NRD Checkbox
 						toggleNRD, changed = ImGui.Checkbox("NRD", toggleNRD)
 						if changed then
 							GameOptions.SetBool("RayTracing", "EnableNRD", toggleNRD)
 							SaveSettings()
+							UpdateUserSettings()
 
-							local timer = Cron.After(1.0, function()
-								Game.GetSystemRequestsHandler():RequestSaveUserSettings()
-								changedAnySetting = true
+							local timer = Cron.After(2.0, function()
+								
 								if rayReconstruction then
 									rayReconstruction = false
 									Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(rayReconstruction)
-									rayReconstruction = false
+									Game.GetSystemRequestsHandler():RequestSaveUserSettings()
+									changedAnySetting = true
 									SaveSettings()
 								end
 							end)
 						end
-						ui.tooltip("Nvidia Realtime Denoiser")
+						ui.tooltip("Toggles Nvidia Realtime Denoiser.\nMAY CAUSE CRASH TO DESKTOP.", true)
 					else
-						ImGui.Dummy(0, dummySpacingYValue)
+						if tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) ~= "true" then
+							ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.2))
+							ImGui.Text("Enable PT to see other toggles.")
+							ImGui.PopStyleColor()
+							--ImGui.Dummy(0, dummySpacingYValue)
+						else
+							
+						end
 					end
 
 					----------------------------------------
@@ -1308,17 +1328,42 @@ function DrawButtons()
 					end
 					ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
 
+					----------------------------------------
+					-------------- GUI TOGGLES -------------
+					----------------------------------------
+					
+					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Text("GUI:")
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue/4)
+
+					settings.Current.scrollbarEnabled, changed = ImGui.Checkbox("Scrollbar", settings.Current.scrollbarEnabled)
+					if changed then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled scrollbar to " .. tostring(settings.Current.scrollbarEnabled))
+						SaveSettings()
+					end
+
+					settings.Current.tooltipsEnabled, changed = ImGui.Checkbox("Tooltips", settings.Current.tooltipsEnabled)
+					if changed then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled tooltips to " .. tostring(settings.Current.tooltipsEnabled))
+						SaveSettings()
+					end
+
+					----------------------------------------
+					------------- DEBUG TOGGLES ------------
+					----------------------------------------
+					
 					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Debug:")
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue/4)
 
-					settings.Current.debugOutput, changed = ImGui.Checkbox("Debug Output", settings.Current.debugOutput)
+					settings.Current.debugOutput, changed = ImGui.Checkbox("Debug Console Output", settings.Current.debugOutput)
 					if changed then
 						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled debug output to " .. tostring(settings.Current.debugOutput))
 						SaveSettings()
 					end
-
+					ImGui.Dummy(0, dummySpacingYValue/4)
 					local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 
 					if not Game.GetSystemRequestsHandler():IsPreGame() and not Game.GetSystemRequestsHandler():IsGamePaused() then
@@ -1341,32 +1386,37 @@ function DrawButtons()
 						ui.tooltip("DISABLED: Cannot export debug file while in menu!\n\nExport debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
 					end
 
+					----------------------------------------
+					------------- DEBUG TOGGLES ------------
+					----------------------------------------
+					
 					ImGui.Dummy(0, dummySpacingYValue)
-					ImGui.Text("GUI:")
+					ImGui.Text("Experimental:")
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue/4)
 
-					settings.Current.scrollbarEnabled, changed = ImGui.Checkbox("Scrollbar", settings.Current.scrollbarEnabled)
+					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles", settings.Current.advancedToggles)
 					if changed then
-						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled scrollbar to " .. tostring(settings.Current.scrollbarEnabled))
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
 						SaveSettings()
 					end
+					ui.tooltip("Enables toggles for RR, NRD, and adds a rest GUI button.", true)
 
-					settings.Current.tooltipsEnabled, changed = ImGui.Checkbox("Tooltips", settings.Current.tooltipsEnabled)
-					if changed then
-						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled tooltips to " .. tostring(settings.Current.tooltipsEnabled))
-						SaveSettings()
+					----------------------------------------
+					--------------- RESET GUI --------------
+					----------------------------------------
+
+					if settings.Current.advancedToggles then
+						ImGui.Dummy(0, dummySpacingYValue)
+						ImGui.Separator()
+						ImGui.Dummy(0, dummySpacingYValue)
+
+						if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
+							resetWindow = true
+							debugPrint("Reset GUI size and position.")
+						end
+						ui.tooltip("Reset GUI to default position and size.")
 					end
-
-					ImGui.Dummy(0, dummySpacingYValue)
-					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue)
-
-					if ImGui.Button("Reset GUI", resetButtonWidth, buttonHeight) then
-						resetWindow = true
-						debugPrint("Reset GUI size and position.")
-					end
-					ui.tooltip("Reset GUI to default position and size.")
 
 				end
 				ImGui.EndChild()
@@ -1703,6 +1753,7 @@ function SaveSettings()
 		debugOutput = settings.Current.debugOutput,
 		scrollbarEnabled = settings.Current.scrollbarEnabled,
 		tooltipsEnabled = settings.Current.tooltipsEnabled,
+		advancedToggles = settings.Current.advancedToggles,
 		collapsedCategories = {}
 	}
 
