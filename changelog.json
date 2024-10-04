@@ -1,0 +1,62 @@
+{
+    "1.7.3": {
+        "Updates": [
+            {
+                "update1": "Cool thing old"
+            }
+        ],
+        "Removals": [
+            {
+                "removed1": "Removed weather state",
+                "removed2": "Removed another cooler thing... sorry"
+            }
+        ],
+        "Other": [
+            {
+                "other1": "Other things",
+                "other2": "One more other thing"
+            }
+        ]
+    },
+    "1.7.8": {
+        "Updates": [
+            {
+                "update1": "Cool thing old",
+                "update2": "Another cooler thing"
+            }
+        ],
+        "Additions": [
+            {
+                "new1": "Added weather state",
+                "new2": "Added another cooler thing"
+            }
+        ]
+    },
+    "1.8.1": {
+        "Updates": [
+            {
+                "update1": "Cool thing 1",
+                "update2": "Another cool thing 2",
+                "update3": "Last cool thing 3"
+            }
+        ],
+        "Fixes": [
+            {
+                "fix1": "Did this and that 1",
+                "fix2": "Did this and that and the next thing 2"
+            }
+        ],
+        "Features": [
+            {
+                "feature1": "Added this new button 1",
+                "feature2": "Something else 2"
+            }
+        ],
+        "Other": [
+            {
+                "other1": "More bugs 1",
+                "other2": "Less bugs 2"
+            }
+        ]
+    }
+}
