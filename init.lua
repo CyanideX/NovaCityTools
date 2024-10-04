@@ -51,6 +51,7 @@ local timeScale = 1.0
 local searchText = ""
 local userInteracted = false
 
+local previousWeatherState = nil
 local currentWeatherState = nil
 local weatherStates = {}
 local weatherStateNames = {}
@@ -243,6 +244,7 @@ registerForEvent("onUpdate", function(delta)
 	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
 	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
 	if newWeatherState ~= currentWeatherState then
+		previousWeatherState = currentWeatherState
 		currentWeatherState = newWeatherState
 		local localizedState = weatherStateNames[currentWeatherState]
 		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
@@ -1461,6 +1463,7 @@ function ExportDebugFile()
         weatherCycleMode = tostring(selectedWeatherState),
         localizedState = tostring(weatherStateNames[currentWeatherState]),
         weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
+        previousWeatherState = previousWeatherState,
         gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
         inVehicle = tostring(inVehicle),
         playerDirection = (function()
@@ -1496,6 +1499,7 @@ function ExportDebugFile()
 		weatherCycleMode = data.weatherCycleMode,
 		localizedState = data.localizedState,
         weatherState = data.weatherState,
+        previousWeatherState = data.previousWeatherState,
         gameTime = data.gameTime,
 		inVehicle = data.inVehicle,
 		playerDirection = data.playerDirection,
