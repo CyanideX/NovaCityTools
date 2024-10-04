@@ -1,212 +1,516 @@
 {
+    "1.8.1-beta": {
+        "1": {
+            "category": "GENERAL",
+            "items": [
+                "Adjusted general weather probabilties",
+                "Reduced clear weather state probabilties",
+                "Increased rain/fog state probabilities"
+            ]
+        },
+        "2": {
+            "category": "FEATURES",
+            "items": [
+                "Track previous weather state and export in debug",
+                "Added weather state history to debug export (up to 10)",
+                "Add changelog popup to show newest updates (you're lookin' at it)",
+                "Randomized time and weather buttons"
+            ]
+        },
+        "3": {
+            "category": "FIXES",
+            "items": [
+                "Fixed mislabeled and missing settings flags",
+                "Disable auto-apply on weather reset",
+                "Debug export formatting for player direction and position",
+                "Minor toggle timers changes to avoid CTD"
+            ]
+        }
+    },
     "1.8.0-beta": {
-        "Updates": [
-            {
-                "update1": "GUI refresh. New look, new features!",
-                "update2": "User settings should now properly load and save without crashing.",
-                "update3": "Move CTD-prone toggles under advanced settings.",
-                "update4": "Previous version settings are backed up when updating to newer versions.",
-                "update5": "Added auto-apply weather toggle."
-            }
-        ],
-        "Fixes": [
-            {
-                "fix1": "Adjusted exposure in vehicle FPP.",
-                "fix2": "Overall skylight brightness and saturation tweaks.",
-                "fix3": "Add new state to rotation and fixed broken transitions between certain states/ adjusted probability."
-            }
-        ],
-        "Features": [
-            {
-                "feature1": "OVERCAST LIGHT: Lighter version of the overcast state, closer to 1.6.0.",
-                "feature2": "Included the previously misspelled backup ini file (blank) to override previous versions for users that don't remove old files."
-            }
-        ]
+        "1": {
+            "category": "UTIL",
+            "items": [
+                "GUI refresh. New look, new features!",
+                "User settings should now properly load and save without crashing.",
+                "Move CTD-prone toggles under advanced settings.",
+                "Previous version settings are backed up when updating to newer versions.",
+                "Added auto-apply weather toggle."
+            ]
+        },
+        "2": {
+            "category": "OVERCAST",
+            "items": [
+                "Adjusted exposure in vehicle FPP.",
+                "Overall skylight brightness and saturation tweaks."
+            ]
+        },
+        "3": {
+            "category": "GENERAL",
+            "items": [
+                "Add new overcast light state to rotation",
+                "Fixed broken transitions between certain states/ adjusted probability."
+            ]
+        },
+        "4": {
+            "category": "INI",
+            "items": [
+                "Included the previously misspelled backup ini file (blank) to override previous versions"
+            ]
+        },
+        "5": {
+            "category": "NEW",
+            "items": [
+                "OVERCAST-LIGHT: Lighter version of the overcast state, closer to 1.6.0."
+            ]
+        }
     },
     "1.7.8.1-beta": {
-        "Fixes": [
-            {
-                "fix1": "Removed conflicting backup ini file."
-            }
-        ]
+        "1": {
+            "category": "INI",
+            "items": [
+                "Removed conflicting backup ini file."
+            ]
+        }
     },
     "1.7.8-beta": {
-        "Updates": [
-            {
-                "update1": "Reverted to standard toggle menu format. Does not load or save toggle settings.",
-                "update2": "Rearranged toggles and adjusted GUI formatting."
-            }
-        ],
-        "Fixes": [
-            {
-                "fix1": "Removed several ini params."
-            }
-        ]
+        "1": {
+            "category": "UTIL",
+            "items": [
+                "Reverted to standard toggle menu format. Does not load or save toggle settings.",
+                "Rearranged toggles and adjusted GUI formatting."
+            ]
+        },
+        "2": {
+            "category": "INI",
+            "items": [
+                "Removed several ini params."
+            ]
+        }
     },
     "1.7.7-beta": {
-        "Updates": [
-            {
-                "update1": "Added debug export button (use this to generate a debug file when you run into issues - share this exported file in your bug reports!)",
-                "update2": "Made toggle states save their states and added a defaults button."
-            }
-        ],
-        "Fixes": [
-            {
-                "fix1": "Fixed broken notification toggles."
-            }
-        ]
+        "1": {
+            "category": "HOTFIX",
+            "items": [
+                "Fixed broken notification toggles."
+            ]
+        }
     },
     "1.7.6-beta": {
-        "Updates": [
-            {
-                "update1": "Added debug export button (use this to generate a debug file when you run into issues - share this exported file in your bug reports!)",
-                "update2": "Made toggle states save their states and added a defaults button."
-            }
-        ]
+        "1": {
+            "category": "UTIL",
+            "items": [
+                "Added debug export button (use this to generate a debug file when you run into issues)",
+                "Made toggle states save their states and added a defaults button."
+            ]
+        }
     },
     "1.7.5-beta": {
-        "Fixes": [
-            {
-                "fix1": "Fixed broken loadSettings function that caused message popups to reenable when opening CET menu."
-            }
-        ]
+        "1": {
+            "category": "UTIL",
+            "items": [
+                "Fixed broken loadSettings function that caused message popups to reenable when opening CET menu."
+            ]
+        }
     },
     "1.7.4-beta": {
-        "Updates": [
-            {
-                "update1": "Adjusted transition duration and probabilities (still in beta debugging mode) and updated master env version."
-            }
-        ],
-        "Fixes": [
-            {
-                "fix1": "Remove broken rain effect and replaced it with new variant.",
-                "fix2": "Adjusted volumetric lighting, exposure, and clouds.",
-                "fix3": "Reduced wind."
-            }
-        ],
-        "Features": [
-            {
-                "feature1": "Now loads weather states from json file for easier localization and player customization.",
-                "feature2": "Added collapsible category headers and added new categories.",
-                "feature3": "New colored reset button and other formatting updates.",
-                "feature4": "Added search bar to CET menu with keyword search.",
-                "feature5": "Debug toggle."
-            }
-        ]
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Adjusted transition duration and probabilities and updated master env version."
+            ]
+        },
+        "2": {
+            "category": "LIGHT RAIN",
+            "items": [
+                "Remove broken rain effect and replaced it with new variant.",
+                "Adjusted volumetric lighting, exposure, and clouds."
+            ]
+        },
+        "3": {
+            "category": "STORM",
+            "items": [
+                "Reduced wind."
+            ]
+        },
+        "4": {
+            "category": "UTIL",
+            "items": [
+                "Now loads weather states from json file for easier localization and player customization.",
+                "Added collapsible category headers and added new categories.",
+                "New colored reset button and other formatting updates.",
+                "Added search bar to CET menu with keyword search.",
+                "Debug toggle."
+            ]
+        }
     },
     "1.7.3-beta": {
-        "Fixes": [
-            {
-                "fix1": "Restored vanilla values for global illumination and actually saved them this time."
-            }
-        ]
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Restored vanilla values for global illumination and actually saved them this time."
+            ]
+        }
     },
     "1.7.2-beta": {
-        "Fixes": [
-            {
-                "fix1": "Removed unused weather states from the master env, bumping master version to v003.",
-                "fix2": "Restored default global illumination areaParameters to fix lighting in non-PT modes.",
-                "fix3": "Fixed (hopefully) Nova City Tools CET menu buttons to effectively activate weather states."
-            }
-        ]
-    },
-    "1.7.1-beta-vr": {
-        "Fixes": [
-            {
-                "fix1": "Replaces rainy state effects with the vanilla rain to use with other rain mods. Drizzle states still retain their variants."
-            }
-        ]
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Removed unused weather states from the master env, bumping master version to v003.",
+                "Restored default global illumination areaParameters to fix lighting in non-PT modes.",
+                "Fixed (hopefully) Nova City Tools CET menu buttons to effectively activate weather states."
+            ]
+        }
     },
     "1.7.1-beta": {
-        "Updates": [
-            {
-                "update1": "Dynamic resolution presets to fit various displays.",
-                "update2": "Cleaned up weather states, removing duplicate area parameters.",
-                "update3": "Switched to custom env master and modified streaming world to avoid conflicts."
-            }
-        ],
-        "Fixes": [
-            {
-                "fix1": "Extended night duration. Nights now start getting dark at 7pm are darker until 5am (for most states).",
-                "fix2": "More exposure & auto exposure adjustments (should fix overexposure when driving in first person).",
-                "fix3": "Fixed simple density fog that caused mirrors to look grey.",
-                "fix4": "Rain card brightness reduced.",
-                "fix5": "Changed moon texture.",
-                "fix6": "Custom weather effects for more states.",
-                "fix7": "Probability and transition adjustments between states."
-            }
-        ],
-        "Features": [
-            {
-                "feature1": "Selected weather states now show active button color.",
-                "feature2": "Added new toggles tab.",
-                "feature3": "Automatically toggle DLSSDSeparateParticleColor depending on state.",
-                "feature4": "Added current weather state and mode status to the GUI.",
-                "feature5": "Added misc settings tab with time of day / time scale slider.",
-                "feature6": "Transition duration presets.",
-                "feature7": "Added weather state notifications and toggles.",
-                "feature8": "Added CET hotkeys to control timescale.",
-                "feature9": "Added CET hotkey to toggle HDR.",
-                "feature10": "Sort weather buttons alphabetically."
-            }
-        ]
+        "1": {
+            "category": "GENERAL",
+            "items": [
+                "Dynamic resolution presets to fit various displays.",
+                "Cleaned up weather states, removing duplicate area parameters.",
+                "Switched to custom env master and modified streaming world to avoid conflicts."
+            ]
+        },
+        "2": {
+            "category": "GLOBAL",
+            "items": [
+                "Extended night duration. Nights now start getting dark at 7pm are darker until 5am (for most states).",
+                "More exposure & auto exposure adjustments (should fix overexposure when driving in first person).",
+                "Fixed simple density fog that caused mirrors to look grey.",
+                "Rain card brightness reduced.",
+                "Changed moon texture.",
+                "Custom weather effects for more states.",
+                "Probability and transition adjustments between states."
+            ]
+        },
+        "3": {
+            "category": "UTIL",
+            "items": [
+                "Selected weather states now show active button color.",
+                "Added new toggles tab.",
+                "Automatically toggle DLSSDSeparateParticleColor depending on state.",
+                "Added current weather state and mode status to the GUI.",
+                "Added misc settings tab with time of day / time scale slider.",
+                "Transition duration presets.",
+                "Added weather state notifications and toggles.",
+                "Added CET hotkeys to control timescale.",
+                "Added CET hotkey to toggle HDR.",
+                "Sort weather buttons alphabetically."
+            ]
+        }
     },
     "1.7.0-beta": {
-        "Fixes": [
-            {
-                "fix1": "Fixed auto exposure when in vehicles.",
-                "fix2": "Fine tuned exposure threshold for a moodier look.",
-                "fix3": "Skylight adjustments.",
-                "fix4": "Cirrus cloud exposure and color changes.",
-                "fix5": "Reduced exposure at noon.",
-                "fix6": "Complete lighting overhaul, exposure changes, custom rain, fog density increase.",
-                "fix7": "Fog density adjustments, exposure changes.",
-                "fix8": "Exposure changes.",
-                "fix9": "Exposure changes, new rain, sky color changes.",
-                "fix10": "New particles. Fixed volfog density. Cloud adjustments and sky light reduction.",
-                "fix11": "Reduced fog intensity, reduce exposure levels at night, increase cloud density, vol fog absorption lowered, distant fog pushed back.",
-                "fix12": "Night exposure adjustments, volumetric fog increase at night.",
-                "fix13": "Reduced afternoon exposure, increased cloud density, reduced evening cloud ambient light."
-            }
-        ],
-        "Features": [
-            {
-                "feature1": "Added the early stages of a new weather state.",
-                "feature2": "Added the early stages of a new weather state."
-            }
-        ]
+        "1": {
+            "category": "SANDSTORM",
+            "items": [
+                "Fixed auto exposure when in vehicles."
+            ]
+        },
+        "2": {
+            "category": "FOG",
+            "items": [
+                "Fine tuned exposure threshold for a moodier look."
+            ]
+        },
+        "3": {
+            "category": "HUMID",
+            "items": [
+                "Skylight adjustments."
+            ]
+        },
+        "4": {
+            "category": "CLEAR",
+            "items": [
+                "Cirrus cloud exposure and color changes."
+            ]
+        },
+        "5": {
+            "category": "SOFTBOX",
+            "items": [
+                "Reduced exposure at noon."
+            ]
+        },
+        "6": {
+            "category": "STORM",
+            "items": [
+                "Complete lighting overhaul, exposure changes, custom rain, fog density increase."
+            ]
+        },
+        "7": {
+            "category": "MIST",
+            "items": [
+                "Fog density adjustments, exposure changes."
+            ]
+        },
+        "8": {
+            "category": "SUNNY",
+            "items": [
+                "Exposure changes."
+            ]
+        },
+        "9": {
+            "category": "RAIN ALT 1",
+            "items": [
+                "Exposure changes, new rain, sky color changes."
+            ]
+        },
+        "10": {
+            "category": "RAIN",
+            "items": [
+                "New particles. Fixed volfog density. Cloud adjustments and sky light reduction."
+            ]
+        },
+        "11": {
+            "category": "DOWNPOUR",
+            "items": [
+                "Reduced fog intensity",
+                "Reduce exposure levels at night",
+                "Increase cloud density",
+                "Vol fog absorption lowered",
+                "Distant fog pushed back"
+            ]
+        },
+        "12": {
+            "category": "HAZE",
+            "items": [
+                "Night exposure adjustments, volumetric fog increase at night."
+            ]
+        },
+        "13": {
+            "category": "HEAVY CLOUDS",
+            "items": [
+                "Reduced afternoon exposure, increased cloud density, reduced evening cloud ambient light."
+            ]
+        },
+        "14": {
+            "category": "NEW",
+            "items": [
+                "ARID: Added the early stages of a new weather state.",
+                "MUGGY: Added the early stages of a new weather state."
+            ]
+        }
     },
     "1.6.0-beta": {
-        "Updates": [
-            {
-                "update1": "Updated CET addon weather states and added all current states to the dropdown menu.",
-                "update2": "Reorganized the weather states and added new 'Creative' states category that aren't included in rotation."
-            }
-        ],
-        "Fixes": [
-            {
-                "fix1": "Overhauled particles. New, unique particles for various states.",
-                "fix2": "Fixed fogHeightFalloff for some states which had been causing rain card masking issues.",
-                "fix3": "Added new light rain / mist particles.",
-                "fix4": "Adjusted rain intensity parameters.",
-                "fix5": "Added heat haze particles (WIP).",
-                "fix6": "Adjusted particle intensity.",
-                "fix7": "Reduced moon glow.",
-                "fix8": "Minor cloud changes.",
-                "fix9": "Reduced lens flares at night.",
-                "fix10": "Fixed this state! Finally working as intended.",
-                "fix11": "New custom rain particles.",
-                "fix12": "Adjusted rain parameters for more visible ground drops."
-            }
-        ],
-        "Features": [
-            {
-                "feature1": "Added the early stages of a new weather state (a heavy WIP).",
-                "feature2": "Added the early stages of a new weather state based on Courier Clouds.",
-                "feature3": "Added the early stages of a new weather state (a heavy WIP).",
-                "feature4": "Added the early stages of a new weather state (particles WIP).",
-                "feature5": "Added new creative weather state that is always night."
-            }
-        ]
+        "1": {
+            "category": "UTIL",
+            "items": [
+                "Updated CET addon weather states and added all current states to the dropdown menu.",
+                "Reorganized the weather states and added new 'Creative' states category that aren't included in rotation."
+            ]
+        },
+        "2": {
+            "category": "GLOBAL",
+            "items": [
+                "Overhauled particles. New, unique particles for various states.",
+                "Fixed fogHeightFalloff for some states which had been causing rain card masking issues."
+            ]
+        },
+        "3": {
+            "category": "FOG WET",
+            "items": [
+                "Added new light rain / mist particles.",
+                "Adjusted rain intensity parameters."
+            ]
+        },
+        "4": {
+            "category": "HUMID",
+            "items": [
+                "Added heat haze particles (WIP)."
+            ]
+        },
+        "5": {
+            "category": "DROUGHT",
+            "items": [
+                "Adjusted particle intensity."
+            ]
+        },
+        "6": {
+            "category": "SUNNY",
+            "items": [
+                "Reduced moon glow.",
+                "Minor cloud changes."
+            ]
+        },
+        "7": {
+            "category": "HAZE",
+            "items": [
+                "Reduced lens flares at night."
+            ]
+        },
+        "8": {
+            "category": "DRIZZLE LIGHT",
+            "items": [
+                "Fixed this state! Finally working as intended.",
+                "New custom rain particles.",
+                "Adjusted rain parameters for more visible ground drops."
+            ]
+        },
+        "9": {
+            "category": "NEW",
+            "items": [
+                "DISTANT STORM: Added the early stages of a new weather state (a heavy WIP).",
+                "DENSE CLOUDS: Added the early stages of a new weather state based on Courier Clouds.",
+                "DRIZZLE HEAVY: Added the early stages of a new weather state (a heavy WIP).",
+                "DOWNPOUR: Added the early stages of a new weather state (particles WIP).",
+                "BLACKOUT: Added new creative weather state that is always night."
+            ]
+        }
+    },
+    "1.5.0-beta": {
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Exposure & auto exposure adjustments to light clouds, cloudy, heavy clouds, overcast, windy, smog, and drizzle."
+            ]
+        },
+        "2": {
+            "category": "WINDY",
+            "items": [
+                "Fixed (hopefully) wind particles so they will no longer appear indoors."
+            ]
+        },
+        "3": {
+            "category": "SUNNY WINDY",
+            "items": [
+                "Added new particle textures."
+            ]
+        },
+        "4": {
+            "category": "STORM",
+            "items": [
+                "New rain particle/effects."
+            ]
+        }
+    },
+    "1.4.0-beta": {
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Exposure & auto exposure adjustments to bright weather states (should fix sun blindness when driving in first person)."
+            ]
+        },
+        "2": {
+            "category": "HAZE",
+            "items": [
+                "Light shaft intensity increased."
+            ]
+        },
+        "3": {
+            "category": "DROUGHT",
+            "items": [
+                "Reduce sunset intensity."
+            ]
+        }
+    },
+    "1.3.1-beta": {
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Stopped cirrus clouds from floating off into space during transitions.",
+                "New cirrus cloud texture to reduce tiling.",
+                "Reduced rain drop intensity on surfaces in some weather states."
+            ]
+        },
+        "2": {
+            "category": "HOTFIX",
+            "items": [
+                "Reverted sunny weather min exposure (accidentally kept some test values in there -- whoops!)."
+            ]
+        }
+    },
+    "1.2.0-beta": {
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Reduced surface moisture for hot dry states."
+            ]
+        },
+        "2": {
+            "category": "SOFTBOX",
+            "items": [
+                "Removed grain, chromatic aberration and flares / boosted sharpening for the ultimate YouTuber look."
+            ]
+        },
+        "3": {
+            "category": "HEAVY CLOUDS",
+            "items": [
+                "Fixed raindrops appearing without rain."
+            ]
+        },
+        "4": {
+            "category": "OVERCAST",
+            "items": [
+                "Fixed raindrops appearing without rain."
+            ]
+        },
+        "5": {
+            "category": "STORM",
+            "items": [
+                "Adjusted wind strength."
+            ]
+        }
+    },
+    "1.1.0-beta": {
+        "1": {
+            "category": "SANDSTORM",
+            "items": [
+                "Fixed particles."
+            ]
+        },
+        "2": {
+            "category": "SUNNY",
+            "items": [
+                "Reduced surface moisture in the evening."
+            ]
+        },
+        "3": {
+            "category": "MIST",
+            "items": [
+                "Reduced surface moisture overall.",
+                "Slight blur increase.",
+                "Reduced skydome color during dawn and dusk.",
+                "Adjusted sky exposure impact."
+            ]
+        },
+        "4": {
+            "category": "DRIZZLE",
+            "items": [
+                "Adjusted rain intensity curve.",
+                "Adjusted cloud ambient intensity and cloud density/coverage in the afternoon.",
+                "Minor lighting adjustments to exposure and sun light intensity.",
+                "Overhauled rain intensity curve."
+            ]
+        },
+        "5": {
+            "category": "INI",
+            "items": [
+                "Forced volumetric clouds."
+            ]
+        }
+    },
+    "1.0.1-beta": {
+        "1": {
+            "category": "GENERAL",
+            "items": [
+                "Renamed the archive: DELETE YOUR OLD ONE!",
+                "Removed Lighting state from the CET tool (it was broken anyway).",
+                "Removed DLSS/RT entries from the INI to avoid issues with certain hardware."
+            ]
+        },
+        "2": {
+            "category": "CLEAR",
+            "items": [
+                "Increased skydome brightness in the afternoon.",
+                "Adjusted exposure center importance."
+            ]
+        }
+    },
+    "1.0.0-beta": {
+        "1": {
+            "category": "INITIAL",
+            "items": [
+                "Initial beta release."
+            ]
+        }
     }
 }
