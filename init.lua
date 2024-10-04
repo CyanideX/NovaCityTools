@@ -1487,11 +1487,13 @@ function DrawButtons()
 					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Experimental:")
 					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue/4)
+					ImGui.Dummy(0, dummySpacingYValue / 4)
 
-					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles", settings.Current.advancedToggles)
+					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles",
+						settings.Current.advancedToggles)
 					if changed then
-						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
+						print(IconGlyphs.CityVariant ..
+						" Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
 						SaveSettings()
 					end
 					ui.tooltip("Enables toggles for RR, NRD, and adds a rest GUI button.", true)
@@ -1512,6 +1514,21 @@ function DrawButtons()
 						ui.tooltip("Reset GUI to default position and size.")
 					end
 
+					----------------------------------------
+					--------------- CHANGELOG --------------
+					----------------------------------------
+
+					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue)
+
+					if ImGui.Button("View Changelogs", resetButtonWidth, buttonHeight) then
+						isNewVersion = true
+						updateWindowDismissed = false
+						DrawUpdateWindow()
+					end
+					ui.tooltip("Open changelog window")
+					ImGui.Dummy(0, dummySpacingYValue)
 				end
 				ImGui.EndChild()
 				ImGui.PopStyleColor()
