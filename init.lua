@@ -605,7 +605,7 @@ function DrawUpdateWindow()
         end
         ui.tooltip("After dismissing, changelogs will not be shown again until the next update.\n\nYou can always view changelogs later in the Misc tab.", true)
 
-        ImGui.SetWindowFontScale(1)
+        ImGui.SetWindowFontScale(defaultFontScale)
 
         ImGui.End()
     end
@@ -1550,14 +1550,20 @@ function DrawButtons()
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue)
 
-					if ImGui.Button("Weather", resetButtonWidth / 2.17, buttonHeight) then
+					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
+					ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 12, glyphItemSpacingYValue)
+					ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 0, 0)
+					ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.55, glyphAlignYValue)
+
+
+					if ImGui.Button(IconGlyphs.WeatherPartlyCloudy, resetButtonWidth / 4 - 7, buttonHeight + 5) then
 						local randomWeather = getRandomWeatherState()
 						Game.GetWeatherSystem():SetWeather(randomWeather, 0, 0)
 						debugPrint("Random weather state applied: " .. randomWeather)
 					end
 					ui.tooltip("Set random weather state")
 					ImGui.SameLine()
-					if ImGui.Button("Time", resetButtonWidth / 2, buttonHeight) then
+					if ImGui.Button(IconGlyphs.Clock, resetButtonWidth / 4 - 7, buttonHeight + 5) then
 						local randomTime = getRandomTime()
 						local hours = math.floor(randomTime / 60)
 						local mins = randomTime % 60
@@ -1565,8 +1571,8 @@ function DrawButtons()
 						debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
 					end
 					ui.tooltip("Set random time")
-
-					if ImGui.Button("Mix my shit up!", resetButtonWidth, buttonHeight) then
+					ImGui.SameLine()
+					if ImGui.Button(IconGlyphs.WeatherPartlyCloudy .. " / " .. IconGlyphs.Clock, resetButtonWidth / 2 - 10, buttonHeight + 5) then
 						local randomWeather = getRandomWeatherState()
 						Game.GetWeatherSystem():SetWeather(randomWeather, 0, 0)
 						debugPrint("Random weather state applied: " .. randomWeather)
@@ -1578,6 +1584,7 @@ function DrawButtons()
 						debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
 					end
 					ui.tooltip("Randomize both weather and time!")
+					ImGui.PopStyleVar(4)
 
 					----------------------------------------
 					--------------- RESET GUI --------------
@@ -1610,6 +1617,7 @@ function DrawButtons()
 					end
 					ui.tooltip("Open changelog window")
 					ImGui.Dummy(0, dummySpacingYValue)
+
 				end
 				ImGui.EndChild()
 				ImGui.PopStyleColor()
@@ -1625,6 +1633,9 @@ function DrawButtons()
 
 			ImGui.EndTabBar()
 		end
+
+		ImGui.SetWindowFontScale(defaultFontScale)
+
 		ImGui.End()
 	end
 
@@ -1901,6 +1912,7 @@ function DrawTimeSliderWindow()
 		ui.tooltip("Freeze time (toggle)")
 
 		ImGui.PopStyleVar(3)
+		ImGui.SetWindowFontScale(defaultFontScale)
 
 		ImGui.End()
 	end
