@@ -10,6 +10,10 @@ local GameSettings = require("GameSettings")
 
 local modName = "Nova City"
 local modVersion = "1.8.1"
+local changelog = {}
+
+local isNewVersion = false
+local updateWindowDismissed = false
 
 local cetOpen = false
 local guiFlags
@@ -128,6 +132,27 @@ local function loadWeatherStates()
     processFile("weatherStates.json")
 end
 
+local function loadChangelog()
+    local function processFile(filePath)
+        local fileHandle = io.open(filePath, "r")
+        if fileHandle then
+            local content = fileHandle:read("*a")
+            fileHandle:close()
+            local success, data = pcall(json.decode, content)
+            if success and data then
+                changelog = data
+                debugPrint("Successfully loaded " .. filePath)
+            else
+                print(IconGlyphs.CityVariant .. " Nova City Tools: Failed to decode JSON content from " .. filePath)
+            end
+        else
+            print(IconGlyphs.CityVariant .. " Nova City Tools: No file found at " .. filePath)
+        end
+    end
+    -- Load changelog from changelog.json
+    processFile("changelog.json")
+end
+
 local function sortWeatherStates()
 	table.sort(weatherStates, function(a, b)
 		return a[2] < b[2]
@@ -169,6 +194,7 @@ registerForEvent("onInit", function()
 	loadWeatherStates()
 	sortWeatherStates()
 	sortCategories()
+	loadChangelog()
 	
 	ObserveAfter("inkISystemRequestsHandler", "RequestSaveUserSettings", function(this)
 		if changedAnySetting then
@@ -215,6 +241,7 @@ registerForEvent("onDraw", function()
 	end
 	UpdateUserSettings()
 	DrawButtons()
+	DrawUpdateWindow()
 end)
 
 registerForEvent("onOverlayOpen", function()
@@ -461,6 +488,83 @@ registerHotkey("NCTHDRToggle", "Toggle HDR Mode", function()
 			displayOptions[hdrMode]))
 	end
 end)
+
+----------------------------------------
+------------- UPDATE MODAL -------------
+----------------------------------------
+
+local function GetCenteredPosition(width, height)
+	local displayWidth, displayHeight = GetDisplayResolution()
+	local posX = (displayWidth - width) / 2
+	local posY = (displayHeight - height) / 2
+	return posX, posY
+end
+
+-- Function to sort versions in descending order
+local function sortVersionsDescending(versions)
+    table.sort(versions, function(a, b) return a > b end)
+end
+
+-- Add function to draw the update GUI window
+function DrawUpdateWindow()
+    if isNewVersion and not updateWindowDismissed then
+        local windowWidth, windowHeight = 500, 600 -- Set the desired window size
+        local posX, posY = GetCenteredPosition(windowWidth, windowHeight)
+        ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always)
+        
+        ImGui.Begin("Nova City Changelog", ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
+        ImGui.Dummy(0, dummySpacingYValue)
+        ImGui.Text("Nova City has been updated to version " .. modVersion .. ".")
+        ImGui.Dummy(0, dummySpacingYValue)
+
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
+
+        if settings.Current.scrollbarEnabled then
+            -- Change scrollbar color and size
+            ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
+            ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
+            ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
+        end
+        
+        if ImGui.BeginChild("Changelog", ImGui.GetContentRegionAvail(), - 65, false, guiFlags) then
+            -- Collect all versions and sort them in descending order
+            local versions = {}
+            for version, _ in pairs(changelog) do
+                table.insert(versions, version)
+            end
+            sortVersionsDescending(versions)
+
+            -- Display sorted changelog
+            for _, version in ipairs(versions) do
+                local changes = changelog[version]
+				ImGui.Dummy(0, 6)
+                ImGui.Text("Version " .. version)
+				ImGui.Dummy(0, 6)
+                for category, items in pairs(changes) do
+                    ImGui.Text(category .. ":")
+                    for _, item in ipairs(items) do
+                        for key, value in pairs(item) do
+                            ImGui.BulletText(value)
+                        end
+						ImGui.Dummy(0, 8)
+                    end
+                end
+                ImGui.Separator()
+            end
+        end
+        ImGui.EndChild()
+        ImGui.PopStyleColor()
+
+        ImGui.Dummy(0, 50)
+        ImGui.SetCursorPosY(windowHeight - 60) -- Position the button at the bottom
+        ImGui.SetCursorPosX((windowWidth - 100) / 2) -- Center the button horizontally
+        if ImGui.Button("Dismiss", buttonWidth, buttonHeight * 1.5) then
+            updateWindowDismissed = true
+        end
+        ImGui.End()
+    end
+end
 
 ----------------------------------------
 ----------- WEATHER CONTROL-------------
@@ -1820,6 +1924,7 @@ function LoadSettings()
 				backupFile:write(content)
 				backupFile:close()
 			end
+			isNewVersion = true -- Set the flag for new version
 		end
 
 		settings.Current = loadedSettings
