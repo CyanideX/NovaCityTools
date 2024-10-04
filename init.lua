@@ -53,6 +53,7 @@ local userInteracted = false
 
 local previousWeatherState = nil
 local currentWeatherState = nil
+local weatherStateHistory = {}
 local weatherStates = {}
 local weatherStateNames = {}
 local weatherTypeKeywords = {}
@@ -149,6 +150,13 @@ local function UpdateUserSettings()
 	motionBlur = motionBlurIndex ~= 0
 end
 
+local function updateWeatherStateHistory(newState)
+    table.insert(weatherStateHistory, 1, newState)
+    if #weatherStateHistory > 10 then
+        table.remove(weatherStateHistory)
+    end
+end
+
 ----------------------------------------
 ----------------- MAIN -----------------
 ----------------------------------------
@@ -235,36 +243,37 @@ registerForEvent("onOverlayClose", function()
 end)
 
 registerForEvent("onUpdate", function(delta)
-	Cron.Update(delta)
-	if hasResetOrForced == true then
-		local resetorforcedtimer = Cron.After(0.5, function()
-			hasResetOrForced = false
-		end)
-	end
-	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-	if newWeatherState ~= currentWeatherState then
-		previousWeatherState = currentWeatherState
-		currentWeatherState = newWeatherState
-		local localizedState = weatherStateNames[currentWeatherState]
-		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-		-- Only send weather change notifications if the weather has not been reset
-		if hasResetOrForced == false and not weatherReset then
-			if resetorforcedtimer then
-				Cron.Halt(resetorforcedtimer)
-				resetorforcedtimer = nil
-			end
-			if settings.Current.warningMessages then
-				ShowWarningMessage(messageText)
-			end
-			if settings.Current.notificationMessages then
-				ShowNotificationMessage(messageText)
-			end
-			debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
-		end
-		-- Reset the weather reset flag after the weather change notification has been skipped
-		weatherReset = false
-	end
+    Cron.Update(delta)
+    if hasResetOrForced == true then
+        local resetorforcedtimer = Cron.After(0.5, function()
+            hasResetOrForced = false
+        end)
+    end
+    if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+    local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+    if newWeatherState ~= currentWeatherState then
+        previousWeatherState = currentWeatherState
+        currentWeatherState = newWeatherState
+        updateWeatherStateHistory(currentWeatherState)
+        local localizedState = weatherStateNames[currentWeatherState]
+        local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+        -- Only send weather change notifications if the weather has not been reset
+        if hasResetOrForced == false and not weatherReset then
+            if resetorforcedtimer then
+                Cron.Halt(resetorforcedtimer)
+                resetorforcedtimer = nil
+            end
+            if settings.Current.warningMessages then
+                ShowWarningMessage(messageText)
+            end
+            if settings.Current.notificationMessages then
+                ShowNotificationMessage(messageText)
+            end
+            debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
+        end
+        -- Reset the weather reset flag after the weather change notification has been skipped
+        weatherReset = false
+    end
 end)
 
 function debugPrint(message)
@@ -1433,16 +1442,16 @@ function ExportDebugFile()
         return
     end
 	
-	local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
-	local inVehicle = false
-	local file = io.open("novaCityDebug.json", "r")
+    local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
+    local inVehicle = false
+    local file = io.open("novaCityDebug.json", "r")
     local debugData = {}
-	local selectedWeatherState = settings.Current.weatherState
-	if selectedWeatherState == "None" then
-		selectedWeatherState = "Default Cycles"
-	else
-		selectedWeatherState = "Locked State"
-	end
+    local selectedWeatherState = settings.Current.weatherState
+    if selectedWeatherState == "None" then
+        selectedWeatherState = "Default Cycles"
+    else
+        selectedWeatherState = "Locked State"
+    end
 
     if not Game.GetPlayer().mountedVehicle then
         if inVehicle then
@@ -1464,6 +1473,7 @@ function ExportDebugFile()
         localizedState = tostring(weatherStateNames[currentWeatherState]),
         weatherState = (Game.GetWeatherSystem():GetWeatherState() and Game.GetWeatherSystem():GetWeatherState().name.value) or nil,
         previousWeatherState = previousWeatherState,
+        weatherStateHistory = weatherStateHistory,
         gameTime = tostring(Game.GetTimeSystem():GetGameTime():ToString()),
         inVehicle = tostring(inVehicle),
         playerDirection = (function()
@@ -1492,17 +1502,18 @@ function ExportDebugFile()
 
     -- Insert new data in the same order as defined in 'data'
     table.insert(debugData, {
-		modName = data.modName,
-		modVersion = data.modVersion,
+        modName = data.modName,
+        modVersion = data.modVersion,
         gameVersion = data.gameVersion,
         dateTime = data.dateTime,
-		weatherCycleMode = data.weatherCycleMode,
-		localizedState = data.localizedState,
+        weatherCycleMode = data.weatherCycleMode,
+        localizedState = data.localizedState,
         weatherState = data.weatherState,
         previousWeatherState = data.previousWeatherState,
+        weatherStateHistory = data.weatherStateHistory,
         gameTime = data.gameTime,
-		inVehicle = data.inVehicle,
-		playerDirection = data.playerDirection,
+        inVehicle = data.inVehicle,
+        playerDirection = data.playerDirection,
         playerPosition = data.playerPosition
     })
 
