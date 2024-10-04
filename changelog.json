@@ -23,7 +23,8 @@
                 "Fixed mislabeled and missing settings flags",
                 "Disable auto-apply on weather reset",
                 "Debug export formatting for player direction and position",
-                "Minor toggle timers changes to avoid CTD"
+                "Minor toggle timers changes to avoid CTD",
+                "Remove unpause trigger when closing CET overlay"
             ]
         }
     },
