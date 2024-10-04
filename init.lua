@@ -519,14 +519,13 @@ function DrawUpdateWindow()
     if isNewVersion and cetOpen and not updateWindowDismissed then
 
         local windowWidth, windowHeight = GetDisplayResolution()
-        local posX, posY = GetCenteredPosition(windowWidth / 2, windowHeight / 2)
+        local posX, posY = GetCenteredPosition(windowWidth / 2.5, windowHeight / 2)
         ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
-        ImGui.SetNextWindowSize(windowWidth / 2, windowHeight / 2, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(windowWidth / 2.5, windowHeight / 2, ImGuiCond.Always)
         
         ImGui.Begin("Nova City Changelog", ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
         ImGui.Dummy(0, dummySpacingYValue)
 
-        ImGui.SetWindowFontScale(customFontScale)
 
         ImGui.Text("Nova City has been updated to version " .. modVersion .. ".")
         ImGui.Dummy(0, dummySpacingYValue)
@@ -538,7 +537,24 @@ function DrawUpdateWindow()
             ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
             ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
         end
-        
+
+        -- New child window for important notices
+        if ImGui.BeginChild("Important Notices", ImGui.GetContentRegionAvail(), windowHeight / 30, false, guiFlags) then
+			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 0.1, 0.1, 1))
+            ImGui.Text("IMPORTANT: Please use the new 'Export Debug File' button found at the bottom of the GUI when reporting issues!")
+        end
+        ImGui.EndChild()
+        ImGui.PopStyleColor()
+
+        ImGui.Dummy(0, dummySpacingYValue)
+
+		
+
+		ImGui.Text("Changelogs:")
+        ImGui.Dummy(0, dummySpacingYValue)
+
+		ImGui.SetWindowFontScale(customFontScale)
+
         if ImGui.BeginChild("Changelog", ImGui.GetContentRegionAvail(), - 65, false, guiFlags) then
 
             local versions = {}
@@ -568,7 +584,7 @@ function DrawUpdateWindow()
 
             if showPastVersions then
                 for i = 2, #versions do
-					ImGui.Separator()
+                    ImGui.Separator()
                     local version = versions[i]
                     local changes = changelog[version]
                     ImGui.Dummy(0, 6)
@@ -595,7 +611,7 @@ function DrawUpdateWindow()
 
         ImGui.Dummy(0, 50)
         
-        local buttonPosX = (windowWidth / 2 - buttonWidth * 2) / 2
+        local buttonPosX = (windowWidth / 2.5 - buttonWidth * 2) / 2
         local buttonPosY = windowHeight / 2 - 55
         ImGui.SetCursorPos(buttonPosX, buttonPosY)
         showPastVersions, changed = ImGui.Checkbox("Show All", showPastVersions)
