@@ -1006,7 +1006,6 @@ function DrawButtons()
 					ui.tooltip("Toggles motion blur.")
 
 					if settings.Current.advancedToggles and tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
-						
 						ImGui.Dummy(0, dummySpacingYValue)
 						ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.7))
 						ImGui.Text("Advanced:")
@@ -1017,32 +1016,28 @@ function DrawButtons()
 						-- RR Checkbox
 						rayReconstruction, changed = ImGui.Checkbox("RR", rayReconstruction)
 						if changed then
-
 							if toggleNRD then
 								toggleNRD = false
 								GameOptions.SetBool("RayTracing", "EnableNRD", false)
-								SaveSettings()
 							else
-								local timer = Cron.After(2.5, function()
+								Cron.After(2.5, function()
 									toggleNRD = false
 									GameOptions.SetBool("RayTracing", "EnableNRD", false)
-									SaveSettings()
 								end)
 							end
-							
+
 							Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(rayReconstruction)
 							Game.GetSettingsSystem():ConfirmChanges()
 							SaveSettings()
 
-							Game.GetSettingsSystem():ConfirmChanges()
-							local timer = Cron.After(2.0, function()
+							Cron.After(2.0, function()
 								Game.GetSystemRequestsHandler():RequestSaveUserSettings()
 								changedAnySetting = true
 							end)
-
 						end
 						ui.tooltip("Toggles ray reconstruction.\nMAY CAUSE CRASH TO DESKTOP.", true)
-						ImGui.SameLine(toggleSpacingXValue )
+						ImGui.SameLine(toggleSpacingXValue)
+
 						-- NRD Checkbox
 						toggleNRD, changed = ImGui.Checkbox("NRD", toggleNRD)
 						if changed then
@@ -1050,16 +1045,16 @@ function DrawButtons()
 							SaveSettings()
 							UpdateUserSettings()
 
-							local timer = Cron.After(2.0, function()
-								
-								if rayReconstruction then
+							if rayReconstruction then
+								Cron.After(2.0, function()
 									rayReconstruction = false
-									Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(rayReconstruction)
+									Game.GetSettingsSystem():GetVar("/graphics/presets", "DLSS_D"):SetValue(
+									rayReconstruction)
 									Game.GetSystemRequestsHandler():RequestSaveUserSettings()
 									changedAnySetting = true
 									SaveSettings()
-								end
-							end)
+								end)
+							end
 						end
 						ui.tooltip("Toggles Nvidia Realtime Denoiser.\nMAY CAUSE CRASH TO DESKTOP.", true)
 					else
@@ -1067,8 +1062,6 @@ function DrawButtons()
 							ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.2))
 							ImGui.Text("Enable PT to see other toggles.")
 							ImGui.PopStyleColor()
-						else
-
 						end
 					end
 
