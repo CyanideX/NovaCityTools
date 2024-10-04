@@ -516,17 +516,17 @@ end
 
 -- Add function to draw the update GUI window
 function DrawUpdateWindow()
-    if isNewVersion and not updateWindowDismissed then
-		
-        local windowWidth, windowHeight = 500, 600
-        local posX, posY = GetCenteredPosition(windowWidth, windowHeight)
+    if isNewVersion and cetOpen and not updateWindowDismissed then
+
+        local windowWidth, windowHeight = GetDisplayResolution()
+        local posX, posY = GetCenteredPosition(windowWidth / 2, windowHeight / 2)
         ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
-        ImGui.SetNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(windowWidth / 2, windowHeight / 2, ImGuiCond.Always)
         
         ImGui.Begin("Nova City Changelog", ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
         ImGui.Dummy(0, dummySpacingYValue)
 
-		ImGui.SetWindowFontScale(customFontScale)
+        ImGui.SetWindowFontScale(customFontScale)
 
         ImGui.Text("Nova City has been updated to version " .. modVersion .. ".")
         ImGui.Dummy(0, dummySpacingYValue)
@@ -550,36 +550,43 @@ function DrawUpdateWindow()
             local latestVersion = versions[1]
             local changes = changelog[latestVersion]
             ImGui.Dummy(0, 6)
-            ImGui.Text("Version " .. latestVersion)
+            ImGui.Text(latestVersion)
             ImGui.Dummy(0, 6)
-            for category, items in pairs(changes) do
-                ImGui.Text(category .. ":")
-                for _, item in ipairs(items) do
-                    for key, value in pairs(item) do
-                        ImGui.BulletText(value)
-                    end
-                    ImGui.Dummy(0, 8)
-                end
+            local sortedCategories = {}
+            for id, categoryData in pairs(changes) do
+                table.insert(sortedCategories, {id = id, data = categoryData})
             end
-            ImGui.Separator()
+            table.sort(sortedCategories, function(a, b) return tonumber(a.id) < tonumber(b.id) end)
+            for _, category in ipairs(sortedCategories) do
+                ImGui.Text(category.data.category .. ":")
+                for _, item in ipairs(category.data.items) do
+                    ImGui.BulletText(item)
+                end
+                ImGui.Dummy(0, 8)
+            end
+            --ImGui.Separator()
 
             if showPastVersions then
                 for i = 2, #versions do
+					ImGui.Separator()
                     local version = versions[i]
                     local changes = changelog[version]
                     ImGui.Dummy(0, 6)
-                    ImGui.Text("Version " .. version)
+                    ImGui.Text(version)
                     ImGui.Dummy(0, 6)
-                    for category, items in pairs(changes) do
-                        ImGui.Text(category .. ":")
-                        for _, item in ipairs(items) do
-                            for key, value in pairs(item) do
-                                ImGui.BulletText(value)
-                            end
-                            ImGui.Dummy(0, 8)
-                        end
+                    local sortedCategories = {}
+                    for id, categoryData in pairs(changes) do
+                        table.insert(sortedCategories, {id = id, data = categoryData})
                     end
-                    ImGui.Separator()
+                    table.sort(sortedCategories, function(a, b) return tonumber(a.id) < tonumber(b.id) end)
+                    for _, category in ipairs(sortedCategories) do
+                        ImGui.Text(category.data.category .. ":")
+                        for _, item in ipairs(category.data.items) do
+                            ImGui.BulletText(item)
+                        end
+                        ImGui.Dummy(0, 8)
+                    end
+                    --ImGui.Separator()
                 end
             end
         end
@@ -588,15 +595,17 @@ function DrawUpdateWindow()
 
         ImGui.Dummy(0, 50)
         
-		ImGui.SetCursorPosY(windowHeight - 60)
-        ImGui.SetCursorPosX((windowWidth - 100) / 3)
-		showPastVersions, changed = ImGui.Checkbox("Show All    ", showPastVersions)
-		ImGui.SameLine()
-        if ImGui.Button("Dismiss", buttonWidth, buttonHeight * 1.4) then
+        local buttonPosX = (windowWidth / 2 - buttonWidth * 2) / 2
+        local buttonPosY = windowHeight / 2 - 55
+        ImGui.SetCursorPos(buttonPosX, buttonPosY)
+        showPastVersions, changed = ImGui.Checkbox("Show All", showPastVersions)
+        ImGui.SameLine()
+        if ImGui.Button("Dismiss", buttonWidth, buttonHeight) then
             updateWindowDismissed = true
         end
+        ui.tooltip("After dismissing, changelogs will not be shown again until the next update.\n\nYou can always view changelogs later in the Misc tab.", true)
 
-		ImGui.SetWindowFontScale(1)
+        ImGui.SetWindowFontScale(1)
 
         ImGui.End()
     end
