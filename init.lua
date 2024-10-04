@@ -14,6 +14,7 @@ local changelog = {}
 
 local isNewVersion = false
 local updateWindowDismissed = false
+local showPastVersions = false
 
 local cetOpen = false
 local guiFlags
@@ -180,6 +181,14 @@ local function updateWeatherStateHistory(newState)
     if #weatherStateHistory > 10 then
         table.remove(weatherStateHistory)
     end
+end
+
+local function getRandomWeatherState()
+    return weatherStates[math.random(#weatherStates)][1]
+end
+
+local function getRandomTime()
+    return math.random(0, 1440) -- Random minute in a 24-hour period
 end
 
 ----------------------------------------
@@ -508,60 +517,87 @@ end
 -- Add function to draw the update GUI window
 function DrawUpdateWindow()
     if isNewVersion and not updateWindowDismissed then
-        local windowWidth, windowHeight = 500, 600 -- Set the desired window size
+		
+        local windowWidth, windowHeight = 500, 600
         local posX, posY = GetCenteredPosition(windowWidth, windowHeight)
         ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
         ImGui.SetNextWindowSize(windowWidth, windowHeight, ImGuiCond.Always)
         
         ImGui.Begin("Nova City Changelog", ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
         ImGui.Dummy(0, dummySpacingYValue)
+
+		ImGui.SetWindowFontScale(customFontScale)
+
         ImGui.Text("Nova City has been updated to version " .. modVersion .. ".")
         ImGui.Dummy(0, dummySpacingYValue)
 
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045))
 
         if settings.Current.scrollbarEnabled then
-            -- Change scrollbar color and size
             ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
             ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
             ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
         end
         
         if ImGui.BeginChild("Changelog", ImGui.GetContentRegionAvail(), - 65, false, guiFlags) then
-            -- Collect all versions and sort them in descending order
+
             local versions = {}
             for version, _ in pairs(changelog) do
                 table.insert(versions, version)
             end
             sortVersionsDescending(versions)
 
-            -- Display sorted changelog
-            for _, version in ipairs(versions) do
-                local changes = changelog[version]
-				ImGui.Dummy(0, 6)
-                ImGui.Text("Version " .. version)
-				ImGui.Dummy(0, 6)
-                for category, items in pairs(changes) do
-                    ImGui.Text(category .. ":")
-                    for _, item in ipairs(items) do
-                        for key, value in pairs(item) do
-                            ImGui.BulletText(value)
-                        end
-						ImGui.Dummy(0, 8)
+            local latestVersion = versions[1]
+            local changes = changelog[latestVersion]
+            ImGui.Dummy(0, 6)
+            ImGui.Text("Version " .. latestVersion)
+            ImGui.Dummy(0, 6)
+            for category, items in pairs(changes) do
+                ImGui.Text(category .. ":")
+                for _, item in ipairs(items) do
+                    for key, value in pairs(item) do
+                        ImGui.BulletText(value)
                     end
+                    ImGui.Dummy(0, 8)
                 end
-                ImGui.Separator()
+            end
+            ImGui.Separator()
+
+            if showPastVersions then
+                for i = 2, #versions do
+                    local version = versions[i]
+                    local changes = changelog[version]
+                    ImGui.Dummy(0, 6)
+                    ImGui.Text("Version " .. version)
+                    ImGui.Dummy(0, 6)
+                    for category, items in pairs(changes) do
+                        ImGui.Text(category .. ":")
+                        for _, item in ipairs(items) do
+                            for key, value in pairs(item) do
+                                ImGui.BulletText(value)
+                            end
+                            ImGui.Dummy(0, 8)
+                        end
+                    end
+                    ImGui.Separator()
+                end
             end
         end
         ImGui.EndChild()
         ImGui.PopStyleColor()
 
         ImGui.Dummy(0, 50)
-        ImGui.SetCursorPosY(windowHeight - 60) -- Position the button at the bottom
-        ImGui.SetCursorPosX((windowWidth - 100) / 2) -- Center the button horizontally
-        if ImGui.Button("Dismiss", buttonWidth, buttonHeight * 1.5) then
+        
+		ImGui.SetCursorPosY(windowHeight - 60)
+        ImGui.SetCursorPosX((windowWidth - 100) / 3)
+		showPastVersions, changed = ImGui.Checkbox("Show All    ", showPastVersions)
+		ImGui.SameLine()
+        if ImGui.Button("Dismiss", buttonWidth, buttonHeight * 1.4) then
             updateWindowDismissed = true
         end
+
+		ImGui.SetWindowFontScale(1)
+
         ImGui.End()
     end
 end
@@ -1481,7 +1517,7 @@ function DrawButtons()
 					end
 
 					----------------------------------------
-					------------- DEBUG TOGGLES ------------
+					--------- EXPERIMENTAL TOGGLES ---------
 					----------------------------------------
 					
 					ImGui.Dummy(0, dummySpacingYValue)
@@ -1489,14 +1525,50 @@ function DrawButtons()
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue / 4)
 
-					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles",
-						settings.Current.advancedToggles)
+					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles", settings.Current.advancedToggles)
 					if changed then
-						print(IconGlyphs.CityVariant ..
-						" Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
 						SaveSettings()
 					end
 					ui.tooltip("Enables toggles for RR, NRD, and adds a rest GUI button.", true)
+
+					----------------------------------------
+					------------- RANDOMIZATION ------------
+					----------------------------------------
+
+					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Text("Randomization:")
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue)
+
+					if ImGui.Button("Weather", resetButtonWidth / 2.17, buttonHeight) then
+						local randomWeather = getRandomWeatherState()
+						Game.GetWeatherSystem():SetWeather(randomWeather, 0, 0)
+						debugPrint("Random weather state applied: " .. randomWeather)
+					end
+					ui.tooltip("Set random weather state")
+					ImGui.SameLine()
+					if ImGui.Button("Time", resetButtonWidth / 2, buttonHeight) then
+						local randomTime = getRandomTime()
+						local hours = math.floor(randomTime / 60)
+						local mins = randomTime % 60
+						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, 0)
+						debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
+					end
+					ui.tooltip("Set random time")
+
+					if ImGui.Button("Mix my shit up!", resetButtonWidth, buttonHeight) then
+						local randomWeather = getRandomWeatherState()
+						Game.GetWeatherSystem():SetWeather(randomWeather, 0, 0)
+						debugPrint("Random weather state applied: " .. randomWeather)
+
+						local randomTime = getRandomTime()
+						local hours = math.floor(randomTime / 60)
+						local mins = randomTime % 60
+						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, 0)
+						debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
+					end
+					ui.tooltip("Randomize both weather and time!")
 
 					----------------------------------------
 					--------------- RESET GUI --------------
