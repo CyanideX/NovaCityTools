@@ -275,7 +275,7 @@ end)
 registerForEvent("onOverlayClose", function()
 	cetOpen = false
 	SaveSettings()
-	Game.GetSystemRequestsHandler():UnpauseGame()
+	--Game.GetSystemRequestsHandler():UnpauseGame()
 end)
 
 registerForEvent("onUpdate", function(delta)
