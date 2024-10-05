@@ -656,6 +656,26 @@ function DrawWeatherControl()
     ImGui.PopStyleColor(3)
 	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.", true)
 
+	    -- Auto Apply button
+		local isActive = settings.Current.autoApplyWeather
+		if isActive then
+			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+			ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+			ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+		else
+			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+			ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+			ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
+		end
+		if ImGui.Button("Auto Apply", resetButtonWidth, buttonHeight) then
+			settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
+			debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
+		end
+		ImGui.PopStyleColor(4)
+		ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
+		
     local selectedWeatherState = settings.Current.weatherState
     if selectedWeatherState == "None" then
         selectedWeatherState = "Default Cycles"
@@ -677,25 +697,25 @@ function DrawWeatherControl()
     end
     ImGui.Text(currentWeatherState)
 
-    -- Auto Apply button
-    local isActive = settings.Current.autoApplyWeather
-    if isActive then
-        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
-        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-    else
-        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
-        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
-    end
-    if ImGui.Button("Auto Apply", resetButtonWidth, buttonHeight) then
-        settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
-        debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
-    end
-	ImGui.PopStyleColor(4)
-	ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
+	if not Game.GetSystemRequestsHandler():IsPreGame() and not Game.GetSystemRequestsHandler():IsGamePaused() then
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+		if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
+			ExportDebugFile()
+			print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
+		end
+		ImGui.PopStyleColor()
+		ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
+	else
+		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
+		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0.6, 0.6, 0.6, 1))
+		if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
+			print(IconGlyphs.CityVariant .. " Nova City Tools: Cannot export debug file while in menu")
+		end
+		ImGui.PopStyleColor(4)
+		ui.tooltip("DISABLED: Cannot export debug file while in menu!\n\nExport debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
+	end
 end
 
 ----------------------------------------
@@ -838,7 +858,7 @@ function DrawButtons()
 
 				end
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 185, false, guiFlags) then
 
 					for _, category in ipairs(categories) do
 						local isCollapsed = collapsedCategories[category.name] or false
@@ -922,7 +942,7 @@ function DrawButtons()
 				ImGui.PopStyleColor()
 
 				--Floating weather control panel
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
 				DrawWeatherControl()
 
 				ImGui.EndTabItem()
@@ -943,7 +963,7 @@ function DrawButtons()
 				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
 				ImGui.Dummy(0, dummySpacingYValue)
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Toggles", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
+				if ImGui.BeginChild("Toggles", ImGui.GetContentRegionAvail(), - 185, false, guiFlags) then
 
 					ImGui.Text("Grouped Toggles:")
 					ImGui.Separator()
@@ -1354,7 +1374,7 @@ function DrawButtons()
 				ImGui.EndChild()
 
 				--Floating weather control panel
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
 				DrawWeatherControl()
 
 				ImGui.EndTabItem()
@@ -1381,7 +1401,7 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Misc", ImGui.GetContentRegionAvail(), - 150, false, guiFlags) then
+				if ImGui.BeginChild("Misc", ImGui.GetContentRegionAvail(), - 185, false, guiFlags) then
 
 					-- Convert the current game time to minutes past midnight
 					local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -1639,7 +1659,7 @@ function DrawButtons()
 				ImGui.PopStyleColor()
 
 				--Floating weather control panel
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 150)
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
 				DrawWeatherControl()
 
 				ImGui.PopStyleVar(2)
