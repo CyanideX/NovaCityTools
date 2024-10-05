@@ -589,34 +589,48 @@ function DrawUpdateWindow()
         ImGui.Begin("Nova City Changelog", ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
         ImGui.Dummy(0, dummySpacingYValue)
 
-
         ImGui.Text("Nova City has been updated to version " .. modVersion .. ".")
         ImGui.Dummy(0, dummySpacingYValue)
 
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045))
 
+		-- Child window for important notices
+        
+		-- Set background for notice window
+		ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045))
+
+		-- Set scrollbar styling if enabled
         if settings.Current.scrollbarEnabled then
             ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
             ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
             ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
         end
 
-        -- New child window for important notices
+        -- Begin child window
         if ImGui.BeginChild("Important Notices", ImGui.GetContentRegionAvail(), windowHeight / 30, false, guiFlags) then
 			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 0.1, 0.1, 1))
             ImGui.Text("IMPORTANT: Please use the new 'Export Debug File' button found at the bottom of the GUI when reporting issues!")
+			ImGui.PopStyleColor()
         end
-        ImGui.EndChild()
+        ImGui.EndChild() -- End child window
+
+		-- Pop scrollbar styling if enabled
+        if settings.Current.scrollbarEnabled then
+            ImGui.PopStyleVar()
+            ImGui.PopStyleColor(2)
+        end
+
+		-- Pop background for notice window
         ImGui.PopStyleColor()
 
+
         ImGui.Dummy(0, dummySpacingYValue)
-
-		
-
 		ImGui.Text("Changelogs:")
         ImGui.Dummy(0, dummySpacingYValue)
 
 		ImGui.SetWindowFontScale(customFontScale)
+
+		-- Set background for changelog window
+		ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045))
 
         if ImGui.BeginChild("Changelog", ImGui.GetContentRegionAvail(), - 65, false, guiFlags) then
 
@@ -670,7 +684,9 @@ function DrawUpdateWindow()
             end
         end
         ImGui.EndChild()
-        ImGui.PopStyleColor()
+
+		-- Pop background for notice window
+		ImGui.PopStyleColor()
 
         ImGui.Dummy(0, 50)
         
@@ -700,7 +716,7 @@ function DrawWeatherControl()
     -- Make the reset button fit the width of the GUI
     local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 
-    -- Change button color, hover color, and text color
+    -- REST BUTTON PUSH: Change button color, hover color, and text color
     ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
     ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
     ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
@@ -715,12 +731,14 @@ function DrawWeatherControl()
         weatherReset = true
 		settings.Current.autoApplyWeather = false
     end
-    -- Revert to original color
+    -- RESET BUTTON POP: Revert to original color
     ImGui.PopStyleColor(3)
+
 	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.", true)
 
 	    -- Auto Apply button
 		local isActive = settings.Current.autoApplyWeather
+		-- APPLY BUTTON PUSH: Set active color to teal
 		if isActive then
 			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
 			ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
@@ -736,6 +754,7 @@ function DrawWeatherControl()
 			settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
 			debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
 		end
+		-- APPLY BUTTON POP
 		ImGui.PopStyleColor(4)
 		ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
 		
@@ -761,14 +780,17 @@ function DrawWeatherControl()
     ImGui.Text(currentWeatherState)
 
 	if not Game.GetSystemRequestsHandler():IsPreGame() and not Game.GetSystemRequestsHandler():IsGamePaused() then
+		-- DEBUG EXPORT BUTTON PUSH
 		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
 		if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
 			ExportDebugFile()
 			print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
 		end
+		-- DEBUG EXPORT BUTTON POP
 		ImGui.PopStyleColor()
 		ui.tooltip("Export debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
 	else
+		-- DEBUG EXPORT BUTTON DISABLED PUSH
 		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
 		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
 		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.35, 0.35, 0.35, 1))
@@ -776,6 +798,7 @@ function DrawWeatherControl()
 		if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
 			print(IconGlyphs.CityVariant .. " Nova City Tools: Cannot export debug file while in menu")
 		end
+		-- DEBUG EXPORT BUTTON DISABLED POP
 		ImGui.PopStyleColor(4)
 		ui.tooltip("DISABLED: Cannot export debug file while in menu!\n\nExport debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
 	end
@@ -801,7 +824,7 @@ function DrawButtons()
 	end
 
 	if settings.Current.scrollbarEnabled then
-		-- Change scrollbar color and size
+		-- SCROLLBAR STYLE PUSH: Change scrollbar color and size
 		ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
 		ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
 		ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
@@ -821,8 +844,10 @@ function DrawButtons()
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, 5)
 		resetWindow = false
 	end
+	
+	-- Begin main window
 	if ImGui.Begin("Nova City Tools - v" .. modVersion, true, ImGuiWindowFlags.NoScrollbar) then
-		-- Reset padding
+		-- FRAME PADDING PUSH
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
@@ -833,7 +858,7 @@ function DrawButtons()
 			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
 
 			-- TIME SLIDER TOGGLE ------------------------
-			-- Set button text alignment and frame padding
+			-- TIME SLIDER STYLE PUSH: Set button text alignment and frame padding
 			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
 
@@ -862,9 +887,9 @@ function DrawButtons()
 				-- Reset style variables
 				ImGui.PopStyleColor(2)
 			end
-
 			ui.tooltip("Toggles the time slider window.")
 
+			-- TIME SLIDER STYLE POP
 			ImGui.PopStyleVar(2)
 
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
@@ -873,7 +898,7 @@ function DrawButtons()
 
 				ImGui.Dummy(0, dummySpacingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
-
+				
 				if searchIcon == IconGlyphs.MagnifyClose then
 					ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1) -- Set color to red
 				end
@@ -883,7 +908,9 @@ function DrawButtons()
 					searchIcon = IconGlyphs.Magnify
 				end
 				if ImGui.IsItemHovered() then
-					ImGui.PopStyleColor()
+					if searchIcon == IconGlyphs.MagnifyClose then
+						ImGui.PopStyleColor()
+					end
 					ui.tooltip("Click to clear search.")
 				end
 				if searchIcon == IconGlyphs.MagnifyClose then
@@ -891,7 +918,9 @@ function DrawButtons()
 				end
 				ImGui.SameLine()
 				ImGui.SetNextItemWidth(availableWidth)
-
+				
+				ImGui.PopStyleVar()
+				
 				-- Push text within the search bar
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, searchPaddingYValue)
 				searchText = ImGui.InputText(" ", searchText, 100)
@@ -903,6 +932,10 @@ function DrawButtons()
 				end
 				ImGui.PopStyleVar()
 
+
+
+
+				
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
 
@@ -917,12 +950,9 @@ function DrawButtons()
 					ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 2)
 					ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, ImGui.GetColorU32(0, 0, 0, 0))
 					ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
-				else
-
 				end
-				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 185, false, guiFlags) then
 
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), -185, false, guiFlags) then
 					for _, category in ipairs(categories) do
 						local isCollapsed = collapsedCategories[category.name] or false
 						ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
@@ -999,15 +1029,16 @@ function DrawButtons()
 						ImGui.PopStyleColor(3)
 						ImGui.Separator()
 					end
-
 				end
 				ImGui.EndChild()
-				ImGui.PopStyleColor()
+
 
 				--Floating weather control panel
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
 				DrawWeatherControl()
 
+				ImGui.PopStyleColor()
+				ImGui.PopStyleVar(2)
 				ImGui.EndTabItem()
 			end
 
@@ -1453,6 +1484,8 @@ function DrawButtons()
 				end
 				ImGui.EndChild()
 
+				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
+
 				--Floating weather control panel
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
 				DrawWeatherControl()
@@ -1460,8 +1493,10 @@ function DrawButtons()
 				ImGui.EndTabItem()
 
 				ImGui.PopStyleColor()
-				ImGui.PopStyleVar(2)
+				ImGui.PopStyleVar(3)
 			end
+			
+			--Maybe not needed!
 			ImGui.PopStyleVar(2)
 
 			-- Reset padding
@@ -1498,13 +1533,15 @@ function DrawButtons()
 					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 4) -- Slider height
 					ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel) + 5)
 					ImGui.Text(timeLabel)
+
+					ImGui.PopStyleVar()
+
 					ImGui.Separator()
 					ImGui.Dummy(0, 1)
 
 					-- Set the width of the slider to the width of the window minus the padding
 					local windowWidth = ImGui.GetWindowWidth()
 					ImGui.PushItemWidth(windowWidth - timeSliderPadding - 2)
-					-- ImGui.PushItemWidth(windowWidth - timeSliderPadding - 10) -- 4K
 
 					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
 
@@ -1516,11 +1553,15 @@ function DrawButtons()
 						Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, secs)
 					end
 
+					ImGui.PopStyleVar()
+
 					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue) -- Reset padding
 
 					-- Add a new section for weather transition duration presets
 					ImGui.Dummy(0, dummySpacingYValue + 10)
 					ImGui.Text("Weather Transition Duration:")
+
+					ImGui.PopStyleVar()
 
 					ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - 10)
 					ImGui.Text(tostring(settings.Current.transitionDuration) .. "s")
@@ -1666,11 +1707,11 @@ function DrawButtons()
 					ImGui.Separator()
 					ImGui.Dummy(0, dummySpacingYValue)
 
+					-- RANDOMIZATION STYLE PUSH
 					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
 					ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 12, glyphItemSpacingYValue)
 					ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 0, 0)
 					ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.55, glyphAlignYValue)
-
 
 					if ImGui.Button(IconGlyphs.WeatherPartlyCloudy, resetButtonWidth / 4 - 7, buttonHeight + 5) then
 						local randomWeather = getRandomWeatherState()
@@ -1700,6 +1741,8 @@ function DrawButtons()
 						debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
 					end
 					ui.tooltip("Randomize both weather and time!")
+
+					-- RANDOMIZATION STYLE POP
 					ImGui.PopStyleVar(4)
 
 					----------------------------------------
@@ -1736,28 +1779,36 @@ function DrawButtons()
 
 				end
 				ImGui.EndChild()
-				ImGui.PopStyleColor()
+				
 
 				--Floating weather control panel
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
 				DrawWeatherControl()
 
+				ImGui.PopStyleColor()
 				ImGui.PopStyleVar(2)
+				
 				ImGui.EndTabItem()
 			end
+
 			ImGui.PopStyleVar(2)
 
-			ImGui.EndTabBar()
+		ImGui.EndTabBar()
 		end
 
+		-- Reset font scale
 		ImGui.SetWindowFontScale(defaultFontScale)
+
+		-- FRAME PADDING POP
+		ImGui.PopStyleVar(2)
 
 		ImGui.End()
 	end
 
+	-- SCROLLBAR STYLE POP: Revert scrollbar color and size
 	if settings.Current.scrollbarEnabled then
-		ImGui.PopStyleColor(2)
 		ImGui.PopStyleVar()
+		ImGui.PopStyleColor(2)
 	end
 end
 
