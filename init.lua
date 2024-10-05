@@ -498,6 +498,66 @@ registerHotkey("NCTHDRToggle", "Toggle HDR Mode", function()
 	end
 end)
 
+-- Register hotkey to randomize weather
+registerHotkey("NCTRandomizeWeather", "Randomize Weather", function()
+	local randomWeather = getRandomWeatherState()
+	Game.GetWeatherSystem():SetWeather(randomWeather, 0, 0)
+	debugPrint("Random weather state applied: " .. randomWeather)
+
+	local timer = Cron.After(0.1, function()
+		local localizedState = weatherStateNames[currentWeatherState]
+		
+		if settings.Current.warningMessages then
+			ShowWarningMessage("Randomization:\nWeather set to " .. localizedState )
+		end
+		if settings.Current.notificationMessages then
+			ShowNotificationMessage("Randomization:\nWeather set to " .. localizedState)
+		end
+	end)
+end)
+
+-- Register hotkey to randomize weather
+registerHotkey("NCTRandomizeTime", "Randomize Time", function()
+	local randomTime = getRandomTime()
+	local hours = math.floor(randomTime / 60)
+	local mins = randomTime % 60
+	Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, 0)
+	debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
+
+
+	if settings.Current.warningMessages then
+		ShowWarningMessage("Randomization:\nTime set to " .. string.format("%02d:%02d", hours, mins))
+	end
+	if settings.Current.notificationMessages then
+		ShowNotificationMessage("Randomization:\nTime set to " .. string.format("%02d:%02d", hours, mins))
+	end
+end)
+
+-- Register hotkey to randomize weather
+registerHotkey("NCTRandomizeWeatherTime", "Randomize Weather & Time", function()
+	local randomWeather = getRandomWeatherState()
+	Game.GetWeatherSystem():SetWeather(randomWeather, 0, 0)
+	debugPrint("Random weather state applied: " .. randomWeather)
+
+	local randomTime = getRandomTime()
+	local hours = math.floor(randomTime / 60)
+	local mins = randomTime % 60
+	Game.GetTimeSystem():SetGameTimeByHMS(hours, mins, 0)
+	debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
+
+	local timer = Cron.After(0.1, function()
+		local localizedState = weatherStateNames[currentWeatherState]
+		
+		if settings.Current.warningMessages then
+			ShowWarningMessage("Randomization:\nWeather set to " .. localizedState .. "\nTime set to " .. string.format("%02d:%02d", hours, mins))
+		end
+		if settings.Current.notificationMessages then
+			ShowNotificationMessage("Randomization:\nWeather set to " .. localizedState .. "\nTime set to " .. string.format("%02d:%02d", hours, mins))
+		end
+	end)
+	
+end)
+
 ----------------------------------------
 ------------- UPDATE MODAL -------------
 ----------------------------------------
