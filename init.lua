@@ -9,7 +9,7 @@ local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 
 local modName = "Nova City"
-local modVersion = "1.8.1"
+local modVersion = "1.8.2"
 local changelog = {}
 
 local isNewVersion = false
@@ -750,7 +750,7 @@ function DrawButtons()
 
 	-- Set window size constraints
 	--ImGui.SetNextWindowSizeConstraints(uiMinWidth, 896, width / 100 * 50, 896) -- Locked vertical height to accommodate weather control
-	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 286, width / 100 * 47, height / 100 * 94)
+	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 324, width / 100 * 47, height / 100 * 94)
 	if resetWindow then
 		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
 		ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
