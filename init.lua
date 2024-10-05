@@ -37,6 +37,7 @@ local filmGrain = true
 local dof = true
 local motionBlur = true
 local motionBlurIndex = 2
+
 local RIS = false
 local toggleNRD = false
 
@@ -78,6 +79,7 @@ local settings =
 		scrollbarEnabled = false,
 		tooltipsEnabled = true,
 		advancedToggles = false,
+		motionBlurScale = 0.5,
 	},
 	Default = {
 		weatherState = "None",
@@ -90,6 +92,7 @@ local settings =
 		scrollbarEnabled = false,
 		tooltipsEnabled = true,
 		advancedToggles = false,
+		motionBlurScale = 0.5,
 	}
 }
 
@@ -1261,13 +1264,30 @@ function DrawButtons()
 					end
 					ui.tooltip("Toggles motion blur.")
 
+					if motionBlurIndex ~= 0 then
+						ImGui.Dummy(0, dummySpacingYValue)
+						ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.7))
+						ImGui.Text("Motion Blur Scale:")
+						ImGui.PopStyleColor()
+
+						-- Set the width of the slider to the width of the window minus the padding
+						local windowWidth = ImGui.GetWindowWidth()
+						ImGui.PushItemWidth(windowWidth - timeSliderPadding - 2)
+						ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
+						settings.Current.motionBlurScale, changed = ImGui.SliderFloat("Blur Scale", settings.Current.motionBlurScale, 0.05, 10.0, "%.2f")
+						if changed then
+							GameOptions.SetFloat("Visuals", "MotionBlurScale", settings.Current.motionBlurScale)
+							SaveSettings()
+						end
+						ImGui.PopStyleVar()
+					end
+
 					if settings.Current.advancedToggles and tostring(GameOptions.GetBool("Developer/FeatureToggles", "PathTracing")) == "true" then
 						ImGui.Dummy(0, dummySpacingYValue)
 						ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 0.7))
 						ImGui.Text("Advanced:")
 						ImGui.PopStyleColor()
 						ui.tooltip("May cause CTDs on lower end systems.")
-						ImGui.Dummy(0, 4)
 
 						-- RR Checkbox
 						rayReconstruction, changed = ImGui.Checkbox("RR", rayReconstruction)
@@ -2057,6 +2077,7 @@ function SaveSettings()
 		scrollbarEnabled = settings.Current.scrollbarEnabled,
 		tooltipsEnabled = settings.Current.tooltipsEnabled,
 		advancedToggles = settings.Current.advancedToggles,
+		motionBlurScale = settings.Current.motionBlurScale,
 		collapsedCategories = {}
 	}
 
