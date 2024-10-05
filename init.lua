@@ -329,7 +329,7 @@ function SetResolutionPresets(width, height)
 	local presets = {
 	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34 },
 		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 34, 6,  650, 250, 336, 7.5, 9,  8,  5,  34, 34, 30, 140, 36, 36 },
-		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 29, 34, 4,  500, 219, 298, 7.5, 8,  8,  3,  32, 32, 18, 130, 34, 36 },
+		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 29, 34, 4,  500, 222, 298, 7.5, 8,  8,  3,  32, 32, 18, 130, 34, 36 },
 		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 },
 		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 }
 	}
@@ -1886,7 +1886,7 @@ function DrawTimeSliderWindow()
 		local timeLabel = string.format("%02d:%02d %s", hours12, mins, amPm)
 
 		ImGui.Text("Adjust Game Time:")
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 6)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
 		ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
 		ImGui.Text(timeLabel)
 		ImGui.SetNextItemWidth(-1)
@@ -1905,7 +1905,7 @@ function DrawTimeSliderWindow()
 		ImGui.PopStyleVar(1)
 
 		-- Add hour buttons
-		ImGui.Dummy(0, dummySpacingYValue)
+		ImGui.Dummy(0, 0)
 		ImGui.Separator()
 		ImGui.Text("Set Hour:")
 
@@ -1919,7 +1919,7 @@ function DrawTimeSliderWindow()
 			end
 		end
 
-		ImGui.Dummy(0, 4)
+		ImGui.Dummy(0, 0)
 		-- Add time scale slider
 		ImGui.Separator()
 		ImGui.Text("Time Scale:")
