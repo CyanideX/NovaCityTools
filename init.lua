@@ -1911,8 +1911,16 @@ function DrawTimeSliderWindow()
 
 		local hourButtonWidth = ImGui.GetWindowContentRegionWidth() / 12 - uiTimeHourRightPadding
 		for i = 1, 24 do
+			local buttonHour = i % 24
+			if totalMinutes >= buttonHour * 60 and totalMinutes < (buttonHour + 1) * 60 then
+				ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+			end
 			if ImGui.Button(tostring(i), hourButtonWidth, buttonHeight) then
 				Game.GetTimeSystem():SetGameTimeByHMS(i, 0, secs)
+			end
+			if totalMinutes >= buttonHour * 60 and totalMinutes < (buttonHour + 1) * 60 then
+				ImGui.PopStyleColor(2)
 			end
 			if i % 12 ~= 0 then
 				ImGui.SameLine()
