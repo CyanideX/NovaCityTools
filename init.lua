@@ -9,7 +9,7 @@ local GameUI = require("GameUI")
 local GameSettings = require("GameSettings")
 
 local modName = "Nova City"
-local modVersion = "1.8.2"
+local modVersion = "1.8.3"
 local changelog = {}
 
 local isNewVersion = false
@@ -998,7 +998,7 @@ function DrawButtons()
 					searchIcon = IconGlyphs.Magnify
 					ui.tooltip("Search for a weather state by typing in this field.\nUse keywords like 'wet', 'hot', 'bright', to search by properties.", true)
 				end
-				ImGui.Dummy(0, dummySpacingYValue / 6)
+				ImGui.Dummy(0, dummySpacingYValue / 4)
 				ImGui.PopStyleVar()
 
 
