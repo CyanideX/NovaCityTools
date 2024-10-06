@@ -1,15 +1,53 @@
 {
+    "1.8.2-beta": {
+        "1": {
+            "category": "GLOBAL",
+            "items": [
+                "Updated the global base exposure areaParameters"
+            ]
+        },
+        "2": {
+            "category": "FOG",
+            "items": [
+                "Increase skylight alpha to fit new base exposure",
+                "Transitions from other weather states should no longer result in 'flashbangs'"
+            ]
+        },
+        "3": {
+            "category": "SANDSTORM",
+            "items": [
+                "Reduced intensity of state particles",
+                "Increased volumetric fog absorption",
+                "Reduced cloud shadows at night",
+                "Increased skylight brightness at night"
+            ]
+        },
+        "4": {
+            "category": "UTIL",
+            "items": [
+                "New important notice banner added to changelog window",
+                "Moved debug export button to botton of main GUI (please use it!)",
+                "Moved exported debug files to debug folder",
+                "New debug description popup window to attach additional info",
+                "Added motion blur scale slider (only visible when blur enabled)",
+                "Highlight current hour in time slider window",
+                "Add CET hotkey bindings for weather/time randomization",
+                "Resolution preset styling updates",
+                "Fixed missing popstyles"
+            ]
+        }
+    },
     "1.8.1-beta": {
         "1": {
             "category": "GENERAL",
             "items": [
-                "Adjusted general weather probabilties",
-                "Reduced clear weather state probabilties",
+                "Adjusted general weather probabilities",
+                "Reduced clear weather state probabilities",
                 "Increased rain/fog state probabilities"
             ]
         },
         "2": {
-            "category": "FEATURES",
+            "category": "UTIL",
             "items": [
                 "Track previous weather state and export in debug",
                 "Added weather state history to debug export (up to 10)",
