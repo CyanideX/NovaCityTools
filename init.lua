@@ -808,45 +808,56 @@ function DrawWeatherControl()
 end
 
 function ExportDescriptionWindow()
-	if showExportWindow then
-		local windowWidth, windowHeight = GetDisplayResolution()
-		local posX, posY = GetCenteredPosition(windowWidth / 3, windowHeight / 8)
-		local buttonPosX = (windowWidth / 3 - buttonWidth * 2) / 2
-        local buttonPosY = windowHeight / 8 - 45
+    if showExportWindow then
+        local windowWidth, windowHeight = GetDisplayResolution()
+        local posX, posY = GetCenteredPosition(windowWidth / 3, windowHeight / 5.3)
+        local buttonPosX = (windowWidth / 3 - buttonWidth * 2) / 2
+        local buttonPosY = windowHeight / 5.3 - 45
 
-		ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
-		ImGui.SetNextWindowSize(windowWidth / 3, windowHeight / 8, ImGuiCond.Always)
+        ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
+        ImGui.SetNextWindowSize(windowWidth / 3, windowHeight / 5.3, ImGuiCond.Always)
 
-		ImGui.Begin("Export Debug File", true, ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
+        ImGui.Begin("Export Debug File", true, ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
 
-		ImGui.SetWindowFontScale(0.95)
+        ImGui.SetWindowFontScale(0.95)
 
-		ImGui.Text("Enter issue description:")
-		ImGui.Dummy(0, 0)
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * 3.5)
-		ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Change text box background color
-		issueDescription = ImGui.InputTextMultiline("##issueDescription", issueDescription or "", 500, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
-		ImGui.PopStyleColor()
-		ImGui.PopStyleVar()
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Change text box background color
+        ImGui.Text("Enter username:")
+		ImGui.Dummy(0, 0)
+		username = ImGui.InputTextMultiline("##username", username or "", 100, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
+		ImGui.Dummy(0, 0)
+        ImGui.PopStyleColor()
+        ImGui.PopStyleVar()
 
-		ImGui.SetWindowFontScale(customFontScale)
+        ImGui.Text("Enter issue description:")
+        ImGui.Dummy(0, 0)
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * 3.5)
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Change text box background color
+        issueDescription = ImGui.InputTextMultiline("##issueDescription", issueDescription or "", 500, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
+        ImGui.PopStyleColor()
+        ImGui.PopStyleVar()
 
-		ImGui.SetCursorPos(buttonPosX, buttonPosY)
-		if ImGui.Button("Save", buttonWidth, buttonHeight) then
-			ExportDebugFile(issueDescription)
-			showExportWindow = false
-			issueDescription = nil
-		end
-		ImGui.SameLine()
-		if ImGui.Button("Cancel", buttonWidth, buttonHeight) then
-			showExportWindow = false
-			issueDescription = nil
-		end
+        ImGui.SetWindowFontScale(customFontScale)
 
-		ImGui.SetWindowFontScale(defaultFontScale)
+        ImGui.SetCursorPos(buttonPosX, buttonPosY)
+        if ImGui.Button("Save", buttonWidth, buttonHeight) then
+            ExportDebugFile(username, issueDescription)
+            showExportWindow = false
+            username = nil
+            issueDescription = nil
+        end
+        ImGui.SameLine()
+        if ImGui.Button("Cancel", buttonWidth, buttonHeight) then
+            showExportWindow = false
+            username = nil
+            issueDescription = nil
+        end
 
-		ImGui.End()
-	end
+        ImGui.SetWindowFontScale(defaultFontScale)
+
+        ImGui.End()
+    end
 end
 
 ----------------------------------------
@@ -1861,7 +1872,7 @@ end
 ------------- EXPORT DEBUG -------------
 ----------------------------------------
 
-function ExportDebugFile(description)
+function ExportDebugFile(username, description)
     -- Check if the player is in menu or game is paused
     if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
         return
@@ -1917,6 +1928,7 @@ function ExportDebugFile(description)
                 return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
             end
         end)(),
+        username = username or "No username provided",
         issueDescription = description or "No description provided"
     }
 
@@ -1942,6 +1954,7 @@ function ExportDebugFile(description)
         inVehicle = data.inVehicle,
         playerDirection = data.playerDirection,
         playerPosition = data.playerPosition,
+        username = data.username,
         issueDescription = data.issueDescription
     })
 
