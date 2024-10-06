@@ -82,6 +82,7 @@ local settings =
 		tooltipsEnabled = true,
 		advancedToggles = false,
 		motionBlurScale = 0.5,
+		savedUsername = nil,
 	},
 	Default = {
 		weatherState = "None",
@@ -95,6 +96,7 @@ local settings =
 		tooltipsEnabled = true,
 		advancedToggles = false,
 		motionBlurScale = 0.5,
+		savedUsername = nil,
 	}
 }
 
@@ -329,11 +331,11 @@ end
 
 function SetResolutionPresets(width, height)
 	local presets = {
-	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19, 20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34 },
-		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  320, 33, 34, 6,  650, 250, 336, 7.5, 9,  8,  5,  34, 34, 30, 140, 36, 36 },
-		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 29, 34, 4,  500, 222, 298, 7.5, 8,  8,  3,  32, 32, 18, 130, 34, 36 },
-		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 },
-		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  221, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22 }
+	 -- { 1,    2,    3, 4, 5, 6, 7, 8, 9, 10, 11,   12,  13, 14, 15,   16, 17, 18,  19,  20, 21, 22,  23,  24,  25,  26, 27, 28, 29, 30, 31, 32,  33, 34, 35, 36, 37, 38, 39, 40 },
+		{ 3840, 2160, 8, 6, 5, 5, 6, 7, 1, 1,  0.7,  140, 34, 36, 0.62, 1,  6,  352, 396, 33, 34, 6,  650, 263, 346, 7.5, 9,  8,  5,  34, 34, 30, 140, 36, 36, 215, 10, 1, 3, 65 },
+		{ 2560, 1440, 8, 6, 1, 3, 6, 7, 1, 1,  0.45, 122, 28, 28, 0.85, 1,  8,  292, 324, 29, 34, 4,  500, 222, 298, 7.5, 8,  8,  3,  32, 32, 18, 130, 34, 36, 185, 10, 1, 3.5, 45 },
+		{ 1920, 1080, 5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  237, 258, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22, 147, 6,  1, 1.75, 35 },
+		{ 0,    0,    5, 4, 1, 4, 6, 6, 1, 1,  0.5,  100, 24, 24, 0.85, 1,  0,  237, 258, 21, 30, 4,  400, 169, 230, 4.8, 9,  8,  6,  27, 27, 16, 100, 30, 22, 147, 6,  1, 3.5, 1 },
 	}
 
 	for _, preset in ipairs(presets) do
@@ -354,22 +356,28 @@ function SetResolutionPresets(width, height)
 			defaultFontScale = preset[16]
 			dummySpacingYValue = preset[17]
 			uiMinWidth = preset[18]
-			buttonPaddingRight = preset[19]
-			searchPaddingXValue = preset[20]
-			searchPaddingYValue = preset[21]
-			uiTimeMinWidth = preset[22]
-			uiTimeMinHeight = preset[23]
-			uiTimeMaxHeight = preset[24]
-			uiTimeHourRightPadding = preset[25]
-			frameTabPaddingXValue = preset[26]
-			frameTabPaddingYValue = preset[27]
-			itemTabSpacingYValue = preset[28]
-			glyphButtonWidth = preset[29]
-			glyphButtonHeight = preset[30]
-			timeSliderPadding = preset[31]
-			toggleSpacingXValue = preset[32]
-			invisibleButtonWidth = preset[33]
-            invisibleButtonHeight = preset[34]
+			uiMinHeight = preset[19]
+			buttonPaddingRight = preset[20]
+			searchPaddingXValue = preset[21]
+			searchPaddingYValue = preset[22]
+			uiTimeMinWidth = preset[23]
+			uiTimeMinHeight = preset[24]
+			uiTimeMaxHeight = preset[25]
+			uiTimeHourRightPadding = preset[26]
+			frameTabPaddingXValue = preset[27]
+			frameTabPaddingYValue = preset[28]
+			itemTabSpacingYValue = preset[29]
+			glyphButtonWidth = preset[30]
+			glyphButtonHeight = preset[31]
+			timeSliderXPadding = preset[32]
+			toggleSpacingXValue = preset[33]
+			invisibleButtonWidth = preset[34]
+            invisibleButtonHeight = preset[35]
+			weatherControlYOffset = preset[36]
+			sliderHeight = preset[37]
+			exportDebugValue1 = preset[38]
+			exportDebugFrameYMulti = preset[39]
+			exportDebugButtonYOffset = preset[40]
 			break
 		end
 	end
@@ -812,7 +820,7 @@ function ExportDescriptionWindow()
         local windowWidth, windowHeight = GetDisplayResolution()
         local posX, posY = GetCenteredPosition(windowWidth / 3, windowHeight / 5.3)
         local buttonPosX = (windowWidth / 3 - buttonWidth * 2) / 2
-        local buttonPosY = windowHeight / 5.3 - 45
+        local buttonPosY = windowHeight / 5.3 - exportDebugButtonYOffset
 
         ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
         ImGui.SetNextWindowSize(windowWidth / 3, windowHeight / 5.3, ImGuiCond.Always)
@@ -821,18 +829,21 @@ function ExportDescriptionWindow()
 
         ImGui.SetWindowFontScale(0.95)
 
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * 3.5)
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * exportDebugFrameYMulti)
         ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Change text box background color
         ImGui.Text("Enter username:")
-		ImGui.Dummy(0, 0)
-		username = ImGui.InputTextMultiline("##username", username or "", 100, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
-		ImGui.Dummy(0, 0)
+        ImGui.Dummy(0, 0)
+        local inputUsername = ImGui.InputTextMultiline("##username", settings.Current.savedUsername or "", 100, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
+        if inputUsername ~= settings.Current.savedUsername then
+            settings.Current.savedUsername = inputUsername
+        end
+        ImGui.Dummy(0, 0)
         ImGui.PopStyleColor()
         ImGui.PopStyleVar()
 
         ImGui.Text("Enter issue description:")
         ImGui.Dummy(0, 0)
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * 3.5)
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * exportDebugFrameYMulti)
         ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Change text box background color
         issueDescription = ImGui.InputTextMultiline("##issueDescription", issueDescription or "", 500, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
         ImGui.PopStyleColor()
@@ -842,10 +853,11 @@ function ExportDescriptionWindow()
 
         ImGui.SetCursorPos(buttonPosX, buttonPosY)
         if ImGui.Button("Save", buttonWidth, buttonHeight) then
-            ExportDebugFile(username, issueDescription)
+            ExportDebugFile(settings.Current.savedUsername, issueDescription)
             showExportWindow = false
-            username = nil
+            username = settings.Current.savedUsername -- Save the username
             issueDescription = nil
+			SaveSettings()
         end
         ImGui.SameLine()
         if ImGui.Button("Cancel", buttonWidth, buttonHeight) then
@@ -892,7 +904,7 @@ function DrawButtons()
 
 	-- Set window size constraints
 	--ImGui.SetNextWindowSizeConstraints(uiMinWidth, 896, width / 100 * 50, 896) -- Locked vertical height to accommodate weather control
-	ImGui.SetNextWindowSizeConstraints(uiMinWidth, 324, width / 100 * 47, height / 100 * 94)
+	ImGui.SetNextWindowSizeConstraints(uiMinWidth, uiMinHeight, width / 100 * 47, height / 100 * 94)
 	if resetWindow then
 		ImGui.SetNextWindowPos(6, 160, ImGuiCond.Always)
 		ImGui.SetNextWindowSize(312, 1168, ImGuiCond.Always)
@@ -986,6 +998,7 @@ function DrawButtons()
 					searchIcon = IconGlyphs.Magnify
 					ui.tooltip("Search for a weather state by typing in this field.\nUse keywords like 'wet', 'hot', 'bright', to search by properties.", true)
 				end
+				ImGui.Dummy(0, dummySpacingYValue / 6)
 				ImGui.PopStyleVar()
 
 
@@ -1008,7 +1021,7 @@ function DrawButtons()
 					ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, ImGui.GetColorU32(0.8, 0.8, 1, 0.1))
 				end
 
-				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), -185, false, guiFlags) then
+				if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - weatherControlYOffset, false, guiFlags) then
 					for _, category in ipairs(categories) do
 						local isCollapsed = collapsedCategories[category.name] or false
 						ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetColorU32(0, 0, 0, 0))
@@ -1090,7 +1103,7 @@ function DrawButtons()
 
 
 				--Floating weather control panel
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - weatherControlYOffset)
 				DrawWeatherControl()
 
 				ImGui.PopStyleColor()
@@ -1113,7 +1126,7 @@ function DrawButtons()
 				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
 				ImGui.Dummy(0, dummySpacingYValue)
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Toggles", ImGui.GetContentRegionAvail(), - 185, false, guiFlags) then
+				if ImGui.BeginChild("Toggles", ImGui.GetContentRegionAvail(), - weatherControlYOffset, false, guiFlags) then
 
 					ImGui.Text("Grouped Toggles:")
 					ImGui.Separator()
@@ -1359,7 +1372,7 @@ function DrawButtons()
 
 						-- Set the width of the slider to the width of the window minus the padding
 						local windowWidth = ImGui.GetWindowWidth()
-						ImGui.PushItemWidth(windowWidth - timeSliderPadding - 2)
+						ImGui.PushItemWidth(windowWidth - timeSliderXPadding - 2)
 						ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
 						settings.Current.motionBlurScale, changed = ImGui.SliderFloat("Blur Scale", settings.Current.motionBlurScale, 0.05, 10.0, "%.2f")
 						if changed then
@@ -1543,7 +1556,7 @@ function DrawButtons()
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 
 				--Floating weather control panel
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - weatherControlYOffset)
 				DrawWeatherControl()
 
 				ImGui.EndTabItem()
@@ -1572,7 +1585,7 @@ function DrawButtons()
 				ImGui.Dummy(0, dummySpacingYValue)
 
 				--if ImGui.BeginChild("Weather", ImGui.GetContentRegionAvail(), - 150, false, ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding) then
-				if ImGui.BeginChild("Misc", ImGui.GetContentRegionAvail(), - 185, false, guiFlags) then
+				if ImGui.BeginChild("Misc", ImGui.GetContentRegionAvail(), - weatherControlYOffset, false, guiFlags) then
 
 					-- Convert the current game time to minutes past midnight
 					local currentTime = Game.GetTimeSystem():GetGameTime()
@@ -1597,9 +1610,9 @@ function DrawButtons()
 
 					-- Set the width of the slider to the width of the window minus the padding
 					local windowWidth = ImGui.GetWindowWidth()
-					ImGui.PushItemWidth(windowWidth - timeSliderPadding - 2)
+					ImGui.PushItemWidth(windowWidth - timeSliderXPadding - 2)
 
-					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
+					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, sliderHeight)
 
 					-- Create a slider for the total minutes
 					totalMinutes, changed = ImGui.SliderInt("##", totalMinutes, 0, 24 * 60 - 1)
@@ -1614,7 +1627,7 @@ function DrawButtons()
 					ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue) -- Reset padding
 
 					-- Add a new section for weather transition duration presets
-					ImGui.Dummy(0, dummySpacingYValue + 10)
+					ImGui.Dummy(0, dummySpacingYValue/4)
 					ImGui.Text("Weather Transition Duration:")
 
 					ImGui.PopStyleVar()
@@ -1838,7 +1851,7 @@ function DrawButtons()
 				
 
 				--Floating weather control panel
-				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 185)
+				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - weatherControlYOffset)
 				DrawWeatherControl()
 
 				ImGui.PopStyleColor()
@@ -1880,7 +1893,7 @@ function ExportDebugFile(username, description)
 
     local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
     local inVehicle = false
-    local fileName = "debug/novaCityDebug_" .. modVersion .. (username and "_" .. username or "") .. ".json"
+	local fileName = "debug/novaCityDebug_" .. modVersion .. (settings.Current.savedUsername and settings.Current.savedUsername ~= "" and "_" .. settings.Current.savedUsername or "") .. ".json"
     local file = io.open(fileName, "r")
     local debugData = {}
     local selectedWeatherState = settings.Current.weatherState
@@ -1964,6 +1977,9 @@ function ExportDebugFile(username, description)
         file:write(json.encode(debugData))
         file:close()
         print(IconGlyphs.CityVariant .. " Nova City Tools: Successfully exported debug file: " .. fileName )
+
+		Game.GetPlayer():SetWarningMessage("Debug file saved to debug folder!\n" .. tostring(fileName))
+
     else
         print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open " .. fileName .. " for writing")
     end
@@ -1999,7 +2015,7 @@ function DrawTimeSliderWindow()
 		local timeLabel = string.format("%02d:%02d %s", hours12, mins, amPm)
 
 		ImGui.Text("Adjust Game Time:")
-		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, sliderHeight)
 		ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize(timeLabel))
 		ImGui.Text(timeLabel)
 		ImGui.SetNextItemWidth(-1)
@@ -2199,6 +2215,7 @@ function SaveSettings()
 		tooltipsEnabled = settings.Current.tooltipsEnabled,
 		advancedToggles = settings.Current.advancedToggles,
 		motionBlurScale = settings.Current.motionBlurScale,
+		savedUsername = settings.Current.savedUsername,
 		collapsedCategories = {}
 	}
 
