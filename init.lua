@@ -18,6 +18,8 @@ local showPastVersions = false
 
 local cetOpen = false
 local guiFlags
+local showExportWindow = false
+local issueDescription = ""
 
 local toggleFog = true
 local toggleFogClouds = true
@@ -711,80 +713,79 @@ end
 ----------------------------------------
 
 function DrawWeatherControl()
-    ImGui.Text("Weather Control:")
+	ImGui.Text("Weather Control:")
 
-    -- Make the reset button fit the width of the GUI
-    local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
+	-- Make the reset button fit the width of the GUI
+	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
 
-    -- REST BUTTON PUSH: Change button color, hover color, and text color
-    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
-    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
-    if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
-        Game.GetWeatherSystem():ResetWeather(true)
-        settings.Current.weatherState = "None"
-        Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
-        GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
-        toggleDLSSDPT = true
-        debugPrint("Weather reset")
-        SaveSettings()
-        weatherReset = true
+	-- REST BUTTON PUSH: Change button color, hover color, and text color
+	ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(1, 0.3, 0.3, 1))          -- Custom button color
+	ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(1, 0.45, 0.45, 1)) -- Custom hover color
+	ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))                -- Custom text color
+	if ImGui.Button("Reset Weather", resetButtonWidth, buttonHeight) then
+		Game.GetWeatherSystem():ResetWeather(true)
+		settings.Current.weatherState = "None"
+		Game.GetPlayer():SetWarningMessage("Weather reset to default cycles! \nWeather states will progress automatically.")
+		GameOptions.SetBool("Rendering", "DLSSDSeparateParticleColor", true)
+		toggleDLSSDPT = true
+		debugPrint("Weather reset")
+		SaveSettings()
+		weatherReset = true
 		settings.Current.autoApplyWeather = false
-    end
-    -- RESET BUTTON POP: Revert to original color
-    ImGui.PopStyleColor(3)
+	end
+	-- RESET BUTTON POP: Revert to original color
+	ImGui.PopStyleColor(3)
 
 	ui.tooltip("Reset any manually selected states and returns the weather to \nits default weather cycles, starting with the sunny weather state. \nWeather will continue to advance naturally.", true)
 
-	    -- Auto Apply button
-		local isActive = settings.Current.autoApplyWeather
-		-- APPLY BUTTON PUSH: Set active color to teal
-		if isActive then
-			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-			ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
-			ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
-			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-		else
-			ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
-			ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
-			ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
-			ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
-		end
-		if ImGui.Button("Auto Apply", resetButtonWidth, buttonHeight) then
-			settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
-			debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
-		end
-		-- APPLY BUTTON POP
-		ImGui.PopStyleColor(4)
-		ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
-		
-    local selectedWeatherState = settings.Current.weatherState
-    if selectedWeatherState == "None" then
-        selectedWeatherState = "Default Cycles"
-    else
-        selectedWeatherState = "Locked State"
-    end
-    ImGui.Text("Mode:  " .. selectedWeatherState)
-    ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
+	-- Auto Apply button
+	local isActive = settings.Current.autoApplyWeather
+	-- APPLY BUTTON PUSH: Set active color to teal
+	if isActive then
+		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+	else
+		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
+	end
+	if ImGui.Button("Auto Apply", resetButtonWidth, buttonHeight) then
+		settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
+		debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
+	end
+	-- APPLY BUTTON POP
+	ImGui.PopStyleColor(4)
+	ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
 
-    ImGui.Text("State:")
-    ImGui.SameLine()
+	local selectedWeatherState = settings.Current.weatherState
+	if selectedWeatherState == "None" then
+		selectedWeatherState = "Default Cycles"
+	else
+		selectedWeatherState = "Locked State"
+	end
+	ImGui.Text("Mode:  " .. selectedWeatherState)
+	ui.tooltip("Default Cycles: Weather states will transition automatically. \nLocked State: User selected weather state.")
 
-    local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
-    for _, state in ipairs(weatherStates) do
-        if state[1] == currentWeatherState then
-            currentWeatherState = state[2]
-            break
-        end
-    end
-    ImGui.Text(currentWeatherState)
+	ImGui.Text("State:")
+	ImGui.SameLine()
+
+	local currentWeatherState = Game.GetWeatherSystem():GetWeatherState().name.value
+	for _, state in ipairs(weatherStates) do
+		if state[1] == currentWeatherState then
+			currentWeatherState = state[2]
+			break
+		end
+	end
+	ImGui.Text(currentWeatherState)
 
 	if not Game.GetSystemRequestsHandler():IsPreGame() and not Game.GetSystemRequestsHandler():IsGamePaused() then
 		-- DEBUG EXPORT BUTTON PUSH
 		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
 		if ImGui.Button("Export Debug File", resetButtonWidth, buttonHeight) then
-			ExportDebugFile()
-			print(IconGlyphs.CityVariant .. " Nova City Tools: Exported debug file ")
+			showExportWindow = true
 		end
 		-- DEBUG EXPORT BUTTON POP
 		ImGui.PopStyleColor()
@@ -801,6 +802,50 @@ function DrawWeatherControl()
 		-- DEBUG EXPORT BUTTON DISABLED POP
 		ImGui.PopStyleColor(4)
 		ui.tooltip("DISABLED: Cannot export debug file while in menu!\n\nExport debug information to novaCityDebug.json file in the NovaCityTools CET mod folder.\nShare this file with the author when submitting a bug report.", true)
+	end
+
+	ExportDescriptionWindow()
+end
+
+function ExportDescriptionWindow()
+	if showExportWindow then
+		local windowWidth, windowHeight = GetDisplayResolution()
+		local posX, posY = GetCenteredPosition(windowWidth / 3, windowHeight / 8)
+		local buttonPosX = (windowWidth / 3 - buttonWidth * 2) / 2
+        local buttonPosY = windowHeight / 8 - 45
+
+		ImGui.SetNextWindowPos(posX, posY, ImGuiCond.Always)
+		ImGui.SetNextWindowSize(windowWidth / 3, windowHeight / 8, ImGuiCond.Always)
+
+		ImGui.Begin("Export Debug File", true, ImGuiWindowFlags.NoResize + ImGuiWindowFlags.NoScrollbar + ImGuiWindowFlags.AlwaysUseWindowPadding)
+
+		ImGui.SetWindowFontScale(0.95)
+
+		ImGui.Text("Enter issue description:")
+		ImGui.Dummy(0, 0)
+		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue * 10, framePaddingYValue * 3.5)
+		ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Change text box background color
+		issueDescription = ImGui.InputTextMultiline("##issueDescription", issueDescription or "", 500, ImGui.GetWindowContentRegionWidth(), windowHeight / 32)
+		ImGui.PopStyleColor()
+		ImGui.PopStyleVar()
+
+		ImGui.SetWindowFontScale(customFontScale)
+
+		ImGui.SetCursorPos(buttonPosX, buttonPosY)
+		if ImGui.Button("Save", buttonWidth, buttonHeight) then
+			ExportDebugFile(issueDescription)
+			showExportWindow = false
+			issueDescription = nil
+		end
+		ImGui.SameLine()
+		if ImGui.Button("Cancel", buttonWidth, buttonHeight) then
+			showExportWindow = false
+			issueDescription = nil
+		end
+
+		ImGui.SetWindowFontScale(defaultFontScale)
+
+		ImGui.End()
 	end
 end
 
@@ -1816,15 +1861,15 @@ end
 ------------- EXPORT DEBUG -------------
 ----------------------------------------
 
-function ExportDebugFile()
+function ExportDebugFile(description)
     -- Check if the player is in menu or game is paused
     if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
         return
     end
-	
+
     local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
     local inVehicle = false
-    local fileName = "novaCityDebug_" .. modVersion .. ".json"
+    local fileName = "debug/novaCityDebug_" .. modVersion .. ".json"
     local file = io.open(fileName, "r")
     local debugData = {}
     local selectedWeatherState = settings.Current.weatherState
@@ -1871,7 +1916,8 @@ function ExportDebugFile()
             else
                 return {x = 0.0, y = 0.0, z = 0.0, w = 1.0}
             end
-        end)()
+        end)(),
+        issueDescription = description or "No description provided"
     }
 
     -- Read existing data from Debug.json
@@ -1895,7 +1941,8 @@ function ExportDebugFile()
         gameTime = data.gameTime,
         inVehicle = data.inVehicle,
         playerDirection = data.playerDirection,
-        playerPosition = data.playerPosition
+        playerPosition = data.playerPosition,
+        issueDescription = data.issueDescription
     })
 
     -- Write updated data to Debug.json
@@ -1903,6 +1950,7 @@ function ExportDebugFile()
     if file then
         file:write(json.encode(debugData))
         file:close()
+        print(IconGlyphs.CityVariant .. " Nova City Tools: Successfully exported debug file: " .. fileName )
     else
         print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open " .. fileName .. " for writing")
     end
