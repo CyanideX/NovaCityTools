@@ -1816,6 +1816,17 @@ end
 ------------- EXPORT DEBUG -------------
 ----------------------------------------
 
+-- Function to generate a random 8-digit alphanumeric key
+local function generateRandomKey()
+    local chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    local key = ''
+    for i = 1, 8 do
+        local rand = math.random(#chars)
+        key = key .. chars:sub(rand, rand)
+    end
+    return key
+end
+
 function ExportDebugFile()
     -- Check if the player is in menu or game is paused
     if Game.GetSystemRequestsHandler():IsPreGame() or Game.GetSystemRequestsHandler():IsGamePaused() then
@@ -1824,7 +1835,6 @@ function ExportDebugFile()
 	
     local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
     local inVehicle = false
-    local file = io.open("novaCityDebug.json", "r")
     local debugData = {}
     local selectedWeatherState = settings.Current.weatherState
     if selectedWeatherState == "None" then
@@ -1873,15 +1883,26 @@ function ExportDebugFile()
         end)()
     }
 
-    -- Read existing data from Debug.json
+    -- Determine the debug file name
+    local debugFileName = "novaCityDebug_" .. (settings.Current.userKey or generateRandomKey()) .. ".json"
+
+    -- Read existing data from the debug file
+    local file = io.open(debugFileName, "r")
     if file then
         local content = file:read("*a")
         debugData = json.decode(content)
         file:close()
     end
 
+    -- Check if modVersion has changed
+    if debugData.modVersion ~= data.modVersion then
+        settings.Current.userKey = generateRandomKey()
+        debugFileName = "novaCityDebug_" .. settings.Current.userKey .. ".json"
+        debugData = {modVersion = data.modVersion, entries = {}}
+    end
+
     -- Insert new data in the same order as defined in 'data'
-    table.insert(debugData, {
+    table.insert(debugData.entries, {
         modName = data.modName,
         modVersion = data.modVersion,
         gameVersion = data.gameVersion,
@@ -1897,13 +1918,13 @@ function ExportDebugFile()
         playerPosition = data.playerPosition
     })
 
-    -- Write updated data to Debug.json
-    file = io.open("novaCityDebug.json", "w")
+    -- Write updated data to the debug file
+    file = io.open(debugFileName, "w")
     if file then
         file:write(json.encode(debugData))
         file:close()
     else
-        print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open Debug.json for writing")
+        print(IconGlyphs.CityVariant .. " Nova City Tools: Error - Could not open " .. debugFileName .. " for writing")
     end
 end
 
@@ -2137,7 +2158,8 @@ function SaveSettings()
 		tooltipsEnabled = settings.Current.tooltipsEnabled,
 		advancedToggles = settings.Current.advancedToggles,
 		motionBlurScale = settings.Current.motionBlurScale,
-		collapsedCategories = {}
+		collapsedCategories = {},
+		userKey = settings.Current.userKey or generateRandomKey()
 	}
 
 	for k, v in pairs(collapsedCategories) do
