@@ -4,9 +4,10 @@
 -- https://next.nexusmods.com/profile/theCyanideX/mods
 ------------------------------------------------------
 
-local Cron = require("Cron")
-local GameUI = require("GameUI")
-local GameSettings = require("GameSettings")
+local Cron = require("Modules/Cron")
+local GameUI = require("Modules/GameUI")
+local GameSettings = require("Modules/GameSettings")
+local GameSession = require("Modules/GameSession")
 
 local modName = "Nova City"
 local modVersion = "1.8.3"
@@ -1942,7 +1943,10 @@ function ExportDebugFile(username, description)
             end
         end)(),
         username = username or "No username provided",
-        issueDescription = description or "No description provided"
+        issueDescription = description or "No description provided",
+        userSettingsFOV = tostring(Game.GetSettingsSystem():GetVar("/graphics/basic", "FieldOfView"):GetValue()),
+        userVehicleFOV = tostring(Game.GetPlayer():GetFPPCameraComponent():GetFOV()),
+        userVehicle = Game.GetPlayer().mountedVehicle and tostring(Game.GetPlayer().mountedVehicle:GetRecordID().value) or "None"
     }
 
     -- Read existing data from Debug.json
@@ -1968,7 +1972,10 @@ function ExportDebugFile(username, description)
         playerDirection = data.playerDirection,
         playerPosition = data.playerPosition,
         username = data.username,
-        issueDescription = data.issueDescription
+        issueDescription = data.issueDescription,
+        userSettingsFOV = data.userSettingsFOV,
+        userVehicleFOV = data.userVehicleFOV,
+        userVehicle = data.userVehicle
     })
 
     -- Write updated data to Debug.json

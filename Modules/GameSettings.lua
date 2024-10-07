@@ -234,18 +234,6 @@ function GameSettings.ToggleGroup(path)
 	end
 end
 
--- set all booleans in the group to val
-function GameSettings.SetGroupBool(path, val)
-	local group = Game.GetSettingsSystem():GetGroup(path)
-	local vars = group:GetVars(false)
-
-	for _, var in ipairs(vars) do
-		if module.isBoolType(var:GetType()) then
-			var:SetValue(val)
-		end
-	end
-end
-
 function GameSettings.Options(setting)
 	local path, name = module.parsePath(setting)
 
@@ -292,10 +280,6 @@ end
 
 function GameSettings.Save()
 	GetSingleton('inkMenuScenario'):GetSystemRequestsHandler():RequestSaveUserSettings()
-end
-
-function GameSettings.ExportVars(isPreGame, group, output)
-        return module.exportVars(isPreGame, group, output)
 end
 
 function GameSettings.Export(isPreGame)
@@ -371,13 +355,6 @@ function GameSettings.ImportFrom(importPath)
 
 	if importChunk then
 		GameSettings.Import(importChunk())
-	end
-end
-
--- For importing the result of ExportVars directly
-function GameSettings.ImportVars(settings)
-	for _, var in ipairs(settings) do
-		GameSettings.Set(var.path, var.value)
 	end
 end
 
