@@ -138,7 +138,7 @@ local function loadWeatherStates()
         end
     end
     -- Load weather states from weatherStates.json
-    processFile("weatherStates.json")
+    processFile("Resources/weatherStates.json")
 end
 
 local function loadChangelog()
@@ -159,7 +159,7 @@ local function loadChangelog()
         end
     end
     -- Load changelog from changelog.json
-    processFile("changelog.json")
+    processFile("Resources/changelog.json")
 end
 
 local function sortWeatherStates()
