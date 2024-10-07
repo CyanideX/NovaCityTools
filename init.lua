@@ -1894,7 +1894,7 @@ function ExportDebugFile(username, description)
 
     local pos = ToVector4(Game.GetPlayer():GetWorldPosition())
     local inVehicle = false
-	local fileName = "debug/novaCityDebug_" .. modVersion .. (settings.Current.savedUsername and settings.Current.savedUsername ~= "" and "_" .. settings.Current.savedUsername or "") .. ".json"
+	local fileName = "Debug/novaCityDebug_" .. modVersion .. (settings.Current.savedUsername and settings.Current.savedUsername ~= "" and "_" .. settings.Current.savedUsername or "") .. ".json"
     local file = io.open(fileName, "r")
     local debugData = {}
     local selectedWeatherState = settings.Current.weatherState
