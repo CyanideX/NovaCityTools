@@ -8,6 +8,9 @@ local Cron = require("Modules/Cron")
 local GameUI = require("Modules/GameUI")
 local GameSettings = require("Modules/GameSettings")
 local GameSession = require("Modules/GameSession")
+local CloudCustomizer = require("cloudCustomizer")
+
+local devToggles = false
 
 local modName = "Nova City"
 local modVersion = "1.8.3"
@@ -207,6 +210,8 @@ registerForEvent("onInit", function()
 	print(IconGlyphs.CityVariant .. " Nova City Tools: Initialized")
 
 	LoadSettings()
+	CloudCustomizer.LoadSettings()
+	CloudCustomizer.ApplySettings()
 
 	loadWeatherStates()
 	sortWeatherStates()
@@ -253,12 +258,17 @@ registerForEvent("onInit", function()
 end)
 
 registerForEvent("onDraw", function()
-	if timeSliderWindowOpen == true then
-		DrawTimeSliderWindow()
-	end
 	UpdateUserSettings()
 	DrawButtons()
 	DrawUpdateWindow()
+
+	if timeSliderWindowOpen then
+		DrawTimeSliderWindow()
+	end
+
+	if devToggles then
+		CloudCustomizer.DrawCloudCustomizer(cetOpen)
+	end
 end)
 
 registerForEvent("onOverlayOpen", function()
@@ -1682,18 +1692,6 @@ function DrawButtons()
 					end
 					ui.tooltip("Show side notification when naturally progressing to a new weather state. \nNotifications only occur with default cycles during natural transitions. \nManually selected states will always show a warning notification.")
 
-					ImGui.Dummy(0, dummySpacingYValue)
-					ImGui.Text("Features:")
-					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue/4)
-
-					settings.Current.autoApplyWeather, changed = ImGui.Checkbox("Auto-Apply Weather", settings.Current.autoApplyWeather)
-					if changed then
-						debugPrint("Weather auto-apply on start set to " .. tostring(settings.Current.autoApplyWeather))
-						SaveSettings()
-					end
-					ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
-
 					----------------------------------------
 					-------------- GUI TOGGLES -------------
 					----------------------------------------
@@ -1753,22 +1751,6 @@ function DrawButtons()
 					end
 
 					----------------------------------------
-					--------- EXPERIMENTAL TOGGLES ---------
-					----------------------------------------
-					
-					ImGui.Dummy(0, dummySpacingYValue)
-					ImGui.Text("Experimental:")
-					ImGui.Separator()
-					ImGui.Dummy(0, dummySpacingYValue / 4)
-
-					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles", settings.Current.advancedToggles)
-					if changed then
-						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
-						SaveSettings()
-					end
-					ui.tooltip("Enables toggles for RR, NRD, and adds a rest GUI button.", true)
-
-					----------------------------------------
 					------------- RANDOMIZATION ------------
 					----------------------------------------
 
@@ -1811,10 +1793,68 @@ function DrawButtons()
 						debugPrint("Random time set: " .. string.format("%02d:%02d", hours, mins))
 					end
 					ui.tooltip("Randomize both weather and time!")
+					ImGui.Dummy(0, dummySpacingYValue)
+					if ImGui.Button(IconGlyphs.WeatherCloudy .. " " .. IconGlyphs.CloudQuestion .. " " .. IconGlyphs.Clouds .. " ", resetButtonWidth / 1.38, buttonHeight + 5) then
+						CloudCustomizer.RandomizeClouds()
+						debugPrint("Randomized cloud scales")
+					end
+					ui.tooltip("Randomize clouds!\nWill be saved automatically.")
+					ImGui.SameLine()
+					if ImGui.Button(IconGlyphs.CloudRefresh, resetButtonWidth / 4 - 7, buttonHeight + 5) then
+						CloudCustomizer.DefaultClouds()
+						debugPrint("Reset cloud scales to default")
+					end
+					ui.tooltip("Reset cloud scales")
 
 					-- RANDOMIZATION STYLE POP
 					ImGui.PopStyleVar(4)
 
+					----------------------------------------
+					--------- EXPERIMENTAL TOGGLES ---------
+					----------------------------------------
+					
+					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Text("Experimental:")
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue / 4)
+
+					settings.Current.advancedToggles, changed = ImGui.Checkbox("Advanced Toggles", settings.Current.advancedToggles)
+					if changed then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled advanced settings to " .. tostring(settings.Current.advancedToggles))
+						SaveSettings()
+					end
+					ui.tooltip("Enables toggles for RR, NRD, and adds a rest GUI button.", true)
+
+					----------------------------------------
+					-------------- DEV TOGGLES -------------
+					----------------------------------------
+					
+					ImGui.Dummy(0, dummySpacingYValue)
+					ImGui.Text("Development:")
+					ImGui.Separator()
+					ImGui.Dummy(0, dummySpacingYValue / 4)
+
+					devToggles, changed = ImGui.Checkbox("Dev Tools", devToggles)
+					if changed then
+						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled dev settings to " .. tostring(devToggles))
+						SaveSettings()
+					end
+					ui.tooltip("Enables toggles for various development tools.", true)
+
+					--[[if devToggles then
+						ImGui.Dummy(0, dummySpacingYValue)
+						ImGui.Text("Features:")
+						ImGui.Separator()
+						ImGui.Dummy(0, dummySpacingYValue/4)
+
+						settings.Current.autoApplyWeather, changed = ImGui.Checkbox("Auto-Apply Weather", settings.Current.autoApplyWeather)
+						if changed then
+							debugPrint("Weather auto-apply on start set to " .. tostring(settings.Current.autoApplyWeather))
+							SaveSettings()
+						end
+						ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
+					end]]
+					
 					----------------------------------------
 					--------------- RESET GUI --------------
 					----------------------------------------
