@@ -11,6 +11,7 @@ local GameSession = require("Modules/GameSession")
 local CloudCustomizer = require("cloudCustomizer")
 
 local devToggles = false
+local cloudCustomizerOpen = false
 
 local modName = "Nova City"
 local modVersion = "1.8.3"
@@ -266,7 +267,7 @@ registerForEvent("onDraw", function()
 		DrawTimeSliderWindow()
 	end
 
-	if devToggles then
+	if cloudCustomizerOpen then
 		CloudCustomizer.DrawCloudCustomizer(cetOpen)
 	end
 end)
@@ -1837,9 +1838,35 @@ function DrawButtons()
 					devToggles, changed = ImGui.Checkbox("Dev Tools", devToggles)
 					if changed then
 						print(IconGlyphs.CityVariant .. " Nova City Tools: Toggled dev settings to " .. tostring(devToggles))
+						if cloudCustomizerOpen then
+							cloudCustomizerOpen = false
+						end
 						SaveSettings()
 					end
 					ui.tooltip("Enables toggles for various development tools.", true)
+
+					if devToggles then
+						ImGui.Dummy(0, dummySpacingYValue / 4)
+						if cloudCustomizerOpen then
+							ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+							ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+							ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+							ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+						else
+							ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.14, 0.27, 0.43, 1))
+							ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.26, 0.59, 0.98, 1))
+							ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+							ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
+						end
+						if ImGui.Button("Cloud Customizer", resetButtonWidth, buttonHeight) then
+							cloudCustomizerOpen = not cloudCustomizerOpen
+							debugPrint("Cloud Customizer: " .. tostring(cloudCustomizerOpen))
+						end
+						-- APPLY BUTTON POP
+						ImGui.PopStyleColor(4)
+						ui.tooltip("Open cloud customizer window.")
+					end
+
 
 					--[[if devToggles then
 						ImGui.Dummy(0, dummySpacingYValue)
