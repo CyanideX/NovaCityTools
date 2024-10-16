@@ -1,4 +1,4 @@
--- CloudCustomizer.lua
+-- cloudCustomizer.lua
 local M = {}
 
 local settings = {
