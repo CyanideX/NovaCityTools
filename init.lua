@@ -2151,6 +2151,7 @@ function DrawTimeSliderWindow()
 		end
 		ui.tooltip("Reset time scale to 1")
 		ImGui.SameLine()
+		ImGui.PopStyleVar(2)
 
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 6)
 
