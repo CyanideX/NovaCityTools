@@ -257,6 +257,18 @@
                 "location": "24h_weather_muggy",
                 "DLSSDSeparateParticleColor": false,
                 "weatherType": ["muggy", "humid", "sticky", "hot"]
+            },
+            {
+                "name": "Hazy Smog",
+                "location": "24h_weather_haze_smog",
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["muggy", "humid", "sticky", "hot"]
+            },
+            {
+                "name": "Hazy Fog",
+                "location": "24h_weather_fog_haze",
+                "DLSSDSeparateParticleColor": false,
+                "weatherType": ["muggy", "humid", "sticky", "hot"]
             }
         ]
     },
