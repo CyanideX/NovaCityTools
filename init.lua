@@ -1043,7 +1043,7 @@ function DrawButtons()
 				------------- CHILD GUI ----------------
 				----------------------------------------
 
-				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045)) -- Set your desired color here
+				ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(0.65, 0.7, 1, 0.045))
 
 				if settings.Current.scrollbarEnabled then
 					-- Change scrollbar color and size
@@ -1063,16 +1063,20 @@ function DrawButtons()
 								collapsedCategories[category.name] = false
 								SaveSettings()
 							end
+				
 							ImGui.Dummy(0, dummySpacingYValue)
 							local windowWidth = ImGui.GetWindowWidth()
 							local buttonsPerRow = math.floor(windowWidth / buttonWidth)
+							local buttonWidthAdjusted = (windowWidth / buttonsPerRow) * 0.9
 							local buttonCount = 0
+				
 							for _, state in ipairs(weatherStates) do
 								local weatherState = state[1]
 								local localization = state[2]
 								local stateCategory = state[3]
 								local enableDLSSDPT = state[4]
 								local weatherType = state[5]
+				
 								if stateCategory == category.name and (searchText == "" or string.find(localization:lower(), searchText:lower()) or (weatherType and AnyKeywordMatches(weatherType, searchText))) then
 									local isActive = settings.Current.weatherState == weatherState
 									if isActive then
@@ -1086,7 +1090,8 @@ function DrawButtons()
 										ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
 										ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
 									end
-									if ImGui.Button(localization, buttonWidth, buttonHeight) then
+				
+									if ImGui.Button(localization, buttonWidthAdjusted, buttonHeight) then
 										if isActive then
 											Game.GetWeatherSystem():ResetWeather(true)
 											settings.Current.weatherState = "None"
@@ -1105,34 +1110,32 @@ function DrawButtons()
 										end
 										SaveSettings()
 									end
-
+				
 									if isActive then
 										ImGui.PopStyleColor(4)
 									end
-
+				
 									buttonCount = buttonCount + 1
 									if buttonCount % buttonsPerRow ~= 0 then
 										ImGui.SameLine()
 									end
 								end
 							end
+				
 							if buttonCount % buttonsPerRow ~= 0 then
 								ImGui.NewLine()
 							end
-							ImGui.Dummy(0, dummySpacingYValue) -- Added here
-						else
-							if not collapsedCategories[category.name] then
-								collapsedCategories[category.name] = true
-								SaveSettings()
-							end
+							ImGui.Dummy(0, dummySpacingYValue)
+						elseif not collapsedCategories[category.name] then
+							collapsedCategories[category.name] = true
+							SaveSettings()
 						end
-						ImGui.PopStyleColor(3)
-						ImGui.Separator()
 					end
+					ImGui.PopStyleColor(3)
+					ImGui.Separator()
 				end
 				ImGui.EndChild()
-
-
+				
 				--Floating weather control panel
 				ImGui.SetCursorPosY(ImGui.GetWindowHeight() - weatherControlYOffset)
 				DrawWeatherControl()
