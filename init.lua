@@ -733,7 +733,7 @@ end
 ----------------------------------------
 
 function DrawWeatherControl()
-	ImGui.Text("Weather Control:")
+	ImGui.Text("Control Panel:")
 
 	-- Make the reset button fit the width of the GUI
 	local resetButtonWidth = ImGui.GetWindowContentRegionWidth()
@@ -1606,7 +1606,7 @@ function DrawButtons()
 			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
 			ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0, itemTabSpacingYValue)
 
-			if ImGui.BeginTabItem("Misc") then
+			if ImGui.BeginTabItem("Settings") then
 				-- Push style variables for frame padding and item spacing INSIDE the tabs
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
 				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, itemSpacingXValue, itemSpacingYValue)
