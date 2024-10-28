@@ -203,6 +203,11 @@ local function getRandomTime()
     return math.random(0, 1440) -- Random minute in a 24-hour period
 end
 
+function ApplySettings()
+    GameOptions.SetFloat("Visuals", "MotionBlurScale", settings.Current.motionBlurScale)
+    -- Add more commands here to apply other settings as needed
+end
+
 ----------------------------------------
 ----------------- MAIN -----------------
 ----------------------------------------
@@ -218,7 +223,10 @@ registerForEvent("onInit", function()
 	sortWeatherStates()
 	sortCategories()
 	loadChangelog()
-	
+
+	--local motionBlur = GameOptions.GetFloat("Visuals", "MotionBlurScale")
+	--debugPrint("Current motions BLUR SET TO: " .. motionBlur)
+
 	ObserveAfter("inkISystemRequestsHandler", "RequestSaveUserSettings", function(this)
 		if changedAnySetting then
 			local timer = Cron.After(0.1, function()
@@ -1410,10 +1418,9 @@ function DrawButtons()
 						local windowWidth = ImGui.GetWindowWidth()
 						ImGui.PushItemWidth(windowWidth - timeSliderXPadding - 2)
 						ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 10, 10)
-						settings.Current.motionBlurScale, changed = ImGui.SliderFloat("Blur Scale", settings.Current.motionBlurScale, 0.05, 10.0, "%.2f")
+						settings.Current.motionBlurScale, changed = ImGui.SliderFloat("Blur Scale", settings.Current.motionBlurScale, 0.01, 1.0, "%.2f")
 						if changed then
 							GameOptions.SetFloat("Visuals", "MotionBlurScale", settings.Current.motionBlurScale)
-							SaveSettings()
 						end
 						ImGui.PopStyleVar()
 					end
@@ -2394,7 +2401,7 @@ function LoadSettings()
 		settings.Current = loadedSettings
 		timeSliderWindowOpen = settings.Current.timeSliderWindowOpen
 		collapsedCategories = loadedSettings.collapsedCategories or {}
-
+		ApplySettings() -- Apply settings immediately after loading
 		if saveNeeded then
 			-- Erase and rewrite settings.json with updated values
 			SaveSettings()
