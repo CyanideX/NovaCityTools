@@ -760,7 +760,8 @@ function DrawWeatherControl()
 
 	-- Auto Apply button
 	local isActive = settings.Current.autoApplyWeather
-	-- APPLY BUTTON PUSH: Set active color to teal
+	local buttonWidth = ImGui.GetWindowContentRegionWidth() / 2 - ImGui.GetStyle().ItemSpacing.x
+
 	if isActive then
 		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
 		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
@@ -772,14 +773,71 @@ function DrawWeatherControl()
 		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
 		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(1, 1, 1, 1))
 	end
-	if ImGui.Button("Auto Apply", resetButtonWidth, buttonHeight) then
+	if ImGui.Button("Auto Apply", buttonWidth, buttonHeight) then
 		settings.Current.autoApplyWeather = not settings.Current.autoApplyWeather
 		debugPrint("Auto Apply Weather: " .. tostring(settings.Current.autoApplyWeather))
 	end
-	-- APPLY BUTTON POP
 	ImGui.PopStyleColor(4)
 	ui.tooltip("Auto apply selected weather when loading game or save files.\nWeather states will be locked when applying your selected weather.\nThis will override quest weather when loading a save file from a mission.")
 
+	-- Adjust widths for Time Slider and Cloud Customizer buttons
+	buttonWidth = ImGui.GetWindowContentRegionWidth() / 4 - ImGui.GetStyle().ItemSpacing.x / 2
+
+	-- TIME SLIDER TOGGLE
+	ImGui.SameLine()
+	ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.52, 1.5)
+	if timeSliderWindowOpen then
+		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+		if ImGui.Button(IconGlyphs.ClockOutline, buttonWidth, buttonHeight) then
+			debugPrint("Closing time slider window.")
+			timeSliderWindowOpen = false
+			settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+			SaveSettings()
+		end
+		ImGui.PopStyleColor(4)
+	else
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+		if ImGui.Button(IconGlyphs.ClockOutline, buttonWidth, buttonHeight) then
+			debugPrint("Opening time slider window.")
+			timeSliderWindowOpen = true
+			settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
+			SaveSettings()
+		end
+		ImGui.PopStyleColor(2)
+	end
+	ui.tooltip("Toggles the time slider window.")
+
+	-- Cloud Customizer Toggle
+	ImGui.SameLine()
+	if cloudCustomizerOpen then
+		ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
+		ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
+		if ImGui.Button(IconGlyphs.Cloud, buttonWidth, buttonHeight) then
+			debugPrint("Closing cloud customizer window.")
+			cloudCustomizerOpen = false
+			settings.Current.cloudCustomizerOpen = cloudCustomizerOpen
+			SaveSettings()
+		end
+		ImGui.PopStyleColor(4)
+	else
+		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
+		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
+		if ImGui.Button(IconGlyphs.Cloud, buttonWidth, buttonHeight) then
+			debugPrint("Opening cloud customizer window.")
+			cloudCustomizerOpen = true
+			settings.Current.cloudCustomizerOpen = cloudCustomizerOpen
+			SaveSettings()
+		end
+		ImGui.PopStyleColor(2)
+	end
+	ui.tooltip("Toggles the cloud customizer window.")
+	ImGui.PopStyleVar()
 	local selectedWeatherState = settings.Current.weatherState
 	if selectedWeatherState == "None" then
 		selectedWeatherState = "Default Cycles"
@@ -935,43 +993,7 @@ function DrawButtons()
 		ImGui.SetWindowFontScale(customFontScale)
 
 		if ImGui.BeginTabBar("Nova Tabs") then
-			ImGui.SameLine(ImGui.GetWindowContentRegionWidth() - ImGui.CalcTextSize("XXX"))
-
-			-- TIME SLIDER TOGGLE ------------------------
-			-- TIME SLIDER STYLE PUSH: Set button text alignment and frame padding
-			ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0.5, 0.5)
-			ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, glyphFramePaddingXValue, glyphFramePaddingYValue)
-
-			-- Create the button and toggle the time slider window
-			if timeSliderWindowOpen then
-				ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(0.0, 1, 0.7, 1))
-				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0, 0.8, 0.56, 1))
-				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.1, 0.8, 0.6, 1))
-				ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(0, 0, 0, 1))
-				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					debugPrint("Closing time slider window.")
-					timeSliderWindowOpen = false
-					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-					SaveSettings()
-				end
-				ImGui.PopStyleColor(4)
-			else
-				ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.GetColorU32(0.4, 1, 0.8, 1))
-				ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.GetColorU32(0.3, 0.3, 0.3, 1))
-				if ImGui.Button(IconGlyphs.ClockOutline, glyphButtonWidth, glyphButtonHeight) then
-					debugPrint("Opening time slider window.")
-					timeSliderWindowOpen = true
-					settings.Current.timeSliderWindowOpen = timeSliderWindowOpen
-					SaveSettings()
-				end
-				-- Reset style variables
-				ImGui.PopStyleColor(2)
-			end
-			ui.tooltip("Toggles the time slider window.")
-
-			-- TIME SLIDER STYLE POP
-			ImGui.PopStyleVar(2)
-
+			
 			--if ImGui.BeginTabItem(IconGlyphs.WeatherPartlyCloudy) then
 			if ImGui.BeginTabItem("Weather") then
 				local availableWidth = ImGui.GetContentRegionAvail() - searchPaddingXValue
@@ -1012,9 +1034,6 @@ function DrawButtons()
 				end
 				ImGui.Dummy(0, dummySpacingYValue / 4)
 				ImGui.PopStyleVar()
-
-
-
 
 				
 				ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, framePaddingXValue, framePaddingYValue)
@@ -2239,7 +2258,7 @@ function DrawTimeSliderWindow()
 
 		ui.tooltip("Freeze time (toggle)")
 
-		ImGui.PopStyleVar(3)
+		ImGui.PopStyleVar(2)
 		ImGui.SetWindowFontScale(defaultFontScale)
 
 		ImGui.End()
