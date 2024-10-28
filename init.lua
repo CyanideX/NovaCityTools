@@ -984,6 +984,8 @@ function DrawButtons()
 	end
 	
 	-- Begin main window
+	ImGui.SetNextWindowPos(50, 200, ImGuiCond.FirstUseEver)
+	ImGui.SetNextWindowSize(250, 870, ImGuiCond.FirstUseEver)
 	if ImGui.Begin("Nova City Tools - v" .. modVersion, true, ImGuiWindowFlags.NoScrollbar) then
 		-- FRAME PADDING PUSH
 		ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, frameTabPaddingXValue, frameTabPaddingYValue)
