@@ -88,6 +88,7 @@ local settings =
 		advancedToggles = false,
 		motionBlurScale = 0.5,
 		savedUsername = nil,
+		forcedInstantAutoExposure = false,
 	},
 	Default = {
 		weatherState = "None",
@@ -102,6 +103,7 @@ local settings =
 		advancedToggles = false,
 		motionBlurScale = 0.5,
 		savedUsername = nil,
+		forcedInstantAutoExposure = false,
 	}
 }
 
@@ -1517,6 +1519,13 @@ function DrawButtons()
 					end
 					ui.tooltip("Toggles vehicle spawning.")
 
+					settings.Current.forcedInstantAutoExposure, changed = ImGui.Checkbox("Instant Auto Exposure", settings.Current.forcedInstantAutoExposure)
+					if changed then
+						GameOptions.SetBool("Rendering", "ForcedInstantAutoExposure", settings.Current.forcedInstantAutoExposure)
+						SaveSettings()
+					end
+					ui.tooltip("Toggles instant auto exposure.")
+
 					----------------------------------------
 					------------ OTHER TOGGLES -------------
 					----------------------------------------
@@ -2322,6 +2331,7 @@ function SaveSettings()
 		advancedToggles = settings.Current.advancedToggles,
 		motionBlurScale = settings.Current.motionBlurScale,
 		savedUsername = settings.Current.savedUsername,
+		forcedInstantAutoExposure = settings.Current.forcedInstantAutoExposure,
 		collapsedCategories = {}
 	}
 
