@@ -1065,9 +1065,9 @@ function DrawButtons()
 							end
 				
 							ImGui.Dummy(0, dummySpacingYValue)
-							local windowWidth = ImGui.GetWindowWidth()
+							local windowWidth = ImGui.GetWindowWidth() - 12
 							local buttonsPerRow = math.floor(windowWidth / buttonWidth)
-							local buttonWidthAdjusted = (windowWidth / buttonsPerRow) * 0.9
+							local buttonWidthAdjusted = (windowWidth / buttonsPerRow) * 0.938
 							local buttonCount = 0
 				
 							for _, state in ipairs(weatherStates) do
