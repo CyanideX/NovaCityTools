@@ -42,7 +42,8 @@ jobs:
       
       # Zip the directories maintaining the structure
       - name: Zip files maintaining structure
-        run: zip -r nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }} bin
+        run: |
+          zip -r nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }} bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
       
       # Upload a Build Artifact
       - name: Upload a Build Artifact
