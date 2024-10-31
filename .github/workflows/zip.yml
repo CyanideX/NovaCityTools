@@ -34,24 +34,14 @@ jobs:
         run: echo "ish=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
         id: extract_ish
 
-      # Create directories and copy files
-      - name: Prepare directory structure
-        run: |
-          mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-          cp -r Debug bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-          cp -r Modules bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-          cp -r Resources bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-          cp cloudCustomizer.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-          cp init.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-      
-      # Zip the directories maintaining the structure
-      - name: Zip files maintaining structure
-        run: |
-          zip -r nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }} bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-        
       # Upload a Build Artifact
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with: 
           name: nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }}
-          path: nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }}.zip
+          path: |          
+            Debug/**          
+            Modules/**          
+            Resources/**          
+            cloudCustomizer.lua          
+            init.lua
