@@ -1,42 +1,47 @@
+# This is a basic workflow to help you get started with Actions
 name: CI
 
-on: 
-  push: 
-    branches: [ "main" ]
-  pull_request: 
-    branches: [ "main" ]
+# Controls when the workflow will run
+on:  
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:    
+    branches: [ "main" ]  
+  pull_request:    
+    branches: [ "main" ]  
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-jobs:
-  build: 
-    runs-on: ubuntu-latest
-    
-    steps:
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:  
+  # This workflow contains a single job called "build"
+  build:    
+    # The type of runner that the job will run on    
+    runs-on: ubuntu-latest    
+    # Steps represent a sequence of tasks that will be executed as part of the job    
+    steps:      
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it      
       - uses: actions/checkout@v4
       
+      # Extract branch name
       - name: Extract branch name
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: extract_branch
-        
+
+      # Extract commit ish
       - name: Extract commit ish
         shell: bash
         run: echo "ish=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
         id: extract_ish
-        
-      - name: Create the desired folder structure
-        run: mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-        
-      - name: Copy files to new folder structure
-        run: |
-          cp -r Debug bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/
-          cp -r Modules bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/
-          cp -r Resources bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/
-          cp cloudCustomizer.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/
-          cp init.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/
-        
+
+      # Upload a Build Artifact
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
-        with:
+        with: 
           name: nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }}
-          path: bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/
+          path: |          
+            Debug/**          
+            Modules/**          
+            Resources/**          
+            cloudCustomizer.lua          
+            init.lua
