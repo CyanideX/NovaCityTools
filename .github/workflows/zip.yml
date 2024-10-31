@@ -34,14 +34,15 @@ jobs:
         run: echo "ish=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
         id: extract_ish
 
+      # Zips selected files or directories into the specified directory
+      - name: Zip files
+        run: |
+          mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
+          zip -r bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/my_files.zip Debug Modules Resources cloudCustomizer.lua init.lua
+      
       # Upload a Build Artifact
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with: 
           name: nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }}
-          path: |          
-            Debug/**          
-            Modules/**          
-            Resources/**          
-            cloudCustomizer.lua          
-            init.lua
+          path: bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools/my_files.zip
