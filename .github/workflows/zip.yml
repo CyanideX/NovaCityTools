@@ -38,13 +38,16 @@ jobs:
       - name: Prepare directory structure
         run: |
           mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
-          cp -r Debug Modules Resources cloudCustomizer.lua init.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
+          cp -r Debug bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
+          cp -r Modules bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
+          cp -r Resources bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
+          cp cloudCustomizer.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
+          cp init.lua bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
       
-      # Zip the files directly into the structure
+      # Zip the directories maintaining the structure
       - name: Zip files maintaining structure
         run: |
-          cd bin/x64
-          zip -r ../../../nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }} plugins
+          zip -r nova-city-tools-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_ish.outputs.ish }}.${{ github.run_id }} bin/x64/plugins/cyber_engine_tweaks/mods/NovaCityTools
         
       # Upload a Build Artifact
       - name: Upload a Build Artifact
