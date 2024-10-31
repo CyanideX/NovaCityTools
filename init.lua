@@ -308,37 +308,38 @@ registerForEvent("onOverlayClose", function()
 end)
 
 registerForEvent("onUpdate", function(delta)
-    Cron.Update(delta)
-    if hasResetOrForced == true then
-        local resetorforcedtimer = Cron.After(0.5, function()
-            hasResetOrForced = false
-        end)
-    end
-    if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
-    local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
-    if newWeatherState ~= currentWeatherState then
-        previousWeatherState = currentWeatherState
-        currentWeatherState = newWeatherState
-        updateWeatherStateHistory(currentWeatherState)
-        local localizedState = weatherStateNames[currentWeatherState]
-        local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
-        -- Only send weather change notifications if the weather has not been reset
-        if hasResetOrForced == false and not weatherReset then
-            if resetorforcedtimer then
-                Cron.Halt(resetorforcedtimer)
-                resetorforcedtimer = nil
-            end
-            if settings.Current.warningMessages then
-                ShowWarningMessage(messageText)
-            end
-            if settings.Current.notificationMessages then
-                ShowNotificationMessage(messageText)
-            end
-            debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
-        end
-        -- Reset the weather reset flag after the weather change notification has been skipped
-        weatherReset = false
-    end
+	Cron.Update(delta)
+	CloudCustomizer.UpdateTransition(delta)
+	if hasResetOrForced == true then
+		local resetorforcedtimer = Cron.After(0.5, function()
+			hasResetOrForced = false
+		end)
+	end
+	if not Game.GetPlayer() or Game.GetSystemRequestsHandler():IsGamePaused() then return end
+	local newWeatherState = tostring(Game.GetWeatherSystem():GetWeatherState().name.value)
+	if newWeatherState ~= currentWeatherState then
+		previousWeatherState = currentWeatherState
+		currentWeatherState = newWeatherState
+		updateWeatherStateHistory(currentWeatherState)
+		local localizedState = weatherStateNames[currentWeatherState]
+		local messageText = "Weather changed to " .. (localizedState or currentWeatherState)
+		-- Only send weather change notifications if the weather has not been reset
+		if hasResetOrForced == false and not weatherReset then
+			if resetorforcedtimer then
+				Cron.Halt(resetorforcedtimer)
+				resetorforcedtimer = nil
+			end
+			if settings.Current.warningMessages then
+				ShowWarningMessage(messageText)
+			end
+			if settings.Current.notificationMessages then
+				ShowNotificationMessage(messageText)
+			end
+			debugPrint("Weather changed to " .. (tostring(currentWeatherState)))
+		end
+		-- Reset the weather reset flag after the weather change notification has been skipped
+		weatherReset = false
+	end
 end)
 
 function debugPrint(message)
@@ -590,7 +591,16 @@ registerHotkey("NCTRandomizeWeatherTime", "Randomize Weather & Time", function()
 			ShowNotificationMessage("Randomization:\nWeather set to " .. localizedState .. "\nTime set to " .. string.format("%02d:%02d", hours, mins))
 		end
 	end)
-	
+end)
+
+-- Register hotkey to randomize clouds
+registerHotkey("NCTRandomizeClouds", "Randomize Clouds", function()
+	CloudCustomizer.RandomizeClouds()
+end)
+
+-- Register hotkey to reset clouds
+registerHotkey("NCTResetClouds", "Reset Clouds", function()
+	CloudCustomizer.DefaultClouds()
 end)
 
 ----------------------------------------
@@ -653,7 +663,6 @@ function DrawUpdateWindow()
 
 		-- Pop background for notice window
         ImGui.PopStyleColor()
-
 
         ImGui.Dummy(0, dummySpacingYValue)
 		ImGui.Text("Changelogs:")
@@ -1281,6 +1290,30 @@ function DrawButtons()
 					----------------------------------------
 					---------- REQUIRED TOGGLES ------------
 					----------------------------------------
+					--[[ local function trim_multiline_string(s)
+						local lines = {}
+						local indent = nil
+						for line in s:gmatch("[^\r\n]+") do
+							local current_indent = line:match("^%s*")
+							if indent == nil or #current_indent < #indent then
+								indent = current_indent
+							end
+							table.insert(lines, line)
+						end
+						for i, line in ipairs(lines) do
+							lines[i] = line:gsub("^" .. indent, "")
+						end
+						return table.concat(lines, "\n")
+					end ]]
+
+					-----------code
+					--ui.tooltip(trim_multiline_string([[
+					--DLSSD Separate Particle Color - Disabling will reduce
+					--distant shimmering but also makes other paricles invisible
+					--like rain and debris particles. Disabling is not recommended.
+					--Manually selecting a weather state will enable or disable
+					--this as needed.
+					--]]))
 					
 					ImGui.Dummy(0, dummySpacingYValue)
 					ImGui.Text("Required:")
