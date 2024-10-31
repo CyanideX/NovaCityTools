@@ -395,7 +395,7 @@ function SetResolutionPresets(width, height)
 			timeSliderXPadding = preset[32]
 			toggleSpacingXValue = preset[33]
 			invisibleButtonWidth = preset[34]
-            invisibleButtonHeight = preset[35]
+      invisibleButtonHeight = preset[35]
 			weatherControlYOffset = preset[36]
 			sliderHeight = preset[37]
 			exportDebugValue1 = preset[38]
@@ -1869,9 +1869,9 @@ function DrawButtons()
 					ui.tooltip("Randomize both weather and time!")
 					ImGui.Dummy(0, dummySpacingYValue)
 					if ImGui.Button(IconGlyphs.WeatherCloudy .. " " .. IconGlyphs.CloudQuestion .. " " .. IconGlyphs.Clouds .. " ", resetButtonWidth / 1.38, buttonHeight + 5) then
-						CloudCustomizer.RandomizeClouds()
+						CloudCustomizer.RandomizeClouds(0)
 						debugPrint("Randomized cloud scales")
-					end
+					end				
 					ui.tooltip("Randomize clouds!\nWill be saved automatically.")
 					ImGui.SameLine()
 					if ImGui.Button(IconGlyphs.CloudRefresh, resetButtonWidth / 4 - 7, buttonHeight + 5) then
